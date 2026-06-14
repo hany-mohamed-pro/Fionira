@@ -562,7 +562,7 @@ app.post('/api/erp/dev/rapid-s1/reset', wrap(async (req, res) => {
   return res.json({ success: true, message: "RAPID-S1 DB RESET" });
 }));
 
-app.post('/api/erp/dev/sync', express.json({limit: '50mb'}), (req, res) => {
+app.post('/api/erp/dev/sync', express.json({limit: '50mb'}), async (req, res) => {
   if (ENV_MODE !== 'dev') return res.status(403).json({success: false, error: "Not in dev mode"});
   
   const { journalEntries, uploadedFiles, records, skippedRows, rejectedRecords, customers, vendors, items, auditLogs, settings } = req.body;
@@ -581,9 +581,12 @@ app.post('/api/erp/dev/sync', express.json({limit: '50mb'}), (req, res) => {
        tenantId = 'test-user';
     } else {
        try {
-         const decoded = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());
-         tenantId = decoded.user_id || decoded.uid;
-       } catch(e) {}
+         const decoded = await admin.auth().verifyIdToken(token);
+         if (!decoded.uid) return res.status(401).json({success: false, error: "Unauthorized"});
+         tenantId = decoded.tenantId || decoded.uid;
+       } catch(e) {
+         return res.status(401).json({success: false, error: "Unauthorized"});
+       }
     }
   }
   
@@ -710,26 +713,9 @@ app.post('/api/erp/dev/sync', express.json({limit: '50mb'}), (req, res) => {
   return res.json({ success: true });
 });
 
-// Debug Endpoints
-app.get('/api/debug/journalEntries', (req, res) => {
-  res.json({
-    count: devMemoryDb.journalEntries.length,
-    sample: devMemoryDb.journalEntries.slice(0, 5)
-  });
-});
-
-app.get('/api/debug/records', (req, res) => {
-  res.json({
-    count: devMemoryDb.records.length,
-    sample: devMemoryDb.records.slice(0, 2)
-  });
-});
-
-app.get('/api/debug/settings', (req, res) => {
-  res.json({
-    settings: devMemoryDb.settings
-  });
-});
+// Debug Endpoints are registered after the `authenticate` middleware is defined
+// (see below, after requireAdmin) so they can be auth-gated. Registering them
+// here would reference `authenticate` in its temporal dead zone and crash boot.
 
 // getDb functionality removed to bypass unauthenticated Firestore checks
 
@@ -769,21 +755,29 @@ app.get('/api/debug/settings', (req, res) => {
          const [, encodedTenantId, encodedUid] = token.split(':');
          const tenantId = encodedTenantId ? decodeURIComponent(encodedTenantId) : (process.env.VITE_DEV_AUTH_TENANT_ID || 'test-user');
          const uid = encodedUid ? decodeURIComponent(encodedUid) : (process.env.VITE_DEV_AUTH_UID || tenantId);
-         decodedToken = { uid, email: process.env.VITE_DEV_AUTH_EMAIL || 'dev-admin@local.test', tenantId };
+         // Dev-auth path: synthesize an admin identity so local login keeps working.
+         // This branch is gated above by devAuthEnabled (non-prod) + isLocalhost.
+         decodedToken = { uid, email: process.env.VITE_DEV_AUTH_EMAIL || 'dev-admin@local.test', tenantId, role: 'admin' };
       } else {
          decodedToken = await admin.auth().verifyIdToken(token);
       }
       (req as any).user = decodedToken;
-      
+
+      // Derive role and tenant from verified claims. Fail closed: a token without
+      // a role/tenantId claim is not granted any access (no universal admin).
+      if (!decodedToken.tenantId || !decodedToken.role) {
+        return res.status(403).json(sendError("Forbidden: token missing tenantId/role claims"));
+      }
+
       (req as any).userProfile = {
         uid: decodedToken.uid,
         email: decodedToken.email || '',
-        role: 'admin',
-        tenantId: decodedToken.tenantId || decodedToken.uid, // isolate in dev mode
-        permissions: ['expenses', 'revenues', 'payroll', 'banks', 'reports', 'smart_invoice', 'quotations']
+        role: decodedToken.role,
+        tenantId: decodedToken.tenantId,
+        permissions: Array.isArray(decodedToken.permissions) ? decodedToken.permissions : []
       };
-      
-      console.log(`AUTH MIDDLEWARE SUCCESS: Validated UID ${decodedToken.uid} as ADMIN (DEV)`);
+
+      console.log(`AUTH MIDDLEWARE SUCCESS: Validated UID ${decodedToken.uid} as ${String(decodedToken.role).toUpperCase()}`);
       next();
     } catch (e: any) {
       console.error("AUTH MIDDLEWARE CRITICAL FAILURE:", e);
@@ -792,8 +786,36 @@ app.get('/api/debug/settings', (req, res) => {
   };
 
   const requireAdmin = (req: Request, res: Response, next: NextFunction) => {
-    next(); // DEV MODE is strictly Admin
+    const profile = (req as any).userProfile;
+    if (!profile || profile.role !== 'admin') {
+      return res.status(403).json(sendError("Forbidden: Admin role required"));
+    }
+    next();
   };
+
+  // --- DEBUG ENDPOINTS (404 in production, authenticated in dev) ---
+  app.get('/api/debug/journalEntries', authenticate, (req, res) => {
+    if (ENV_MODE === 'production') return res.status(404).end();
+    res.json({
+      count: devMemoryDb.journalEntries.length,
+      sample: devMemoryDb.journalEntries.slice(0, 5)
+    });
+  });
+
+  app.get('/api/debug/records', authenticate, (req, res) => {
+    if (ENV_MODE === 'production') return res.status(404).end();
+    res.json({
+      count: devMemoryDb.records.length,
+      sample: devMemoryDb.records.slice(0, 2)
+    });
+  });
+
+  app.get('/api/debug/settings', authenticate, (req, res) => {
+    if (ENV_MODE === 'production') return res.status(404).end();
+    res.json({
+      settings: devMemoryDb.settings
+    });
+  });
 
   // --- USER & ROLE ENDPOINTS ---
   app.post("/api/erp/users/init", authenticate, async (req: Request, res: Response) => {
@@ -801,10 +823,10 @@ app.get('/api/debug/settings', (req, res) => {
       const user = (req as any).user;
       const userProfileFromToken = (req as any).userProfile;
       
-      console.log(`[DEV MODE] Bypass init - Returning Admin role for UID: ${user.uid}`);
+      console.log(`[INIT] Returning role '${userProfileFromToken?.role}' for UID: ${user.uid}`);
       return res.json({
         success: true,
-        role: 'admin',
+        role: userProfileFromToken?.role,
         data: userProfileFromToken
       });
     } catch (e: any) {
@@ -3272,24 +3294,6 @@ app.get('/api/debug/settings', (req, res) => {
     });
   }));
 
-  app.post("/api/erp/audit/tamper", authenticate, wrap(async (req, res) => {
-     if (isConnected()) {
-        const lastLogRes = await query("SELECT * FROM audit_logs ORDER BY timestamp DESC, id DESC LIMIT 1");
-        if (lastLogRes.rows.length > 0) {
-           const lastLog = lastLogRes.rows[0];
-           await query("UPDATE audit_logs SET action = 'TAMPERED_ACTION' WHERE id = $1", [lastLog.id]);
-           return res.json({ success: true, message: "Last log tampered successfully" });
-        }
-     } else {
-        if (devMemoryDb.auditLogs.length > 0) {
-           const lastIndex = devMemoryDb.auditLogs.length - 1;
-           devMemoryDb.auditLogs[lastIndex].action = "TAMPERED_ACTION";
-           return res.json({ success: true, message: "Last log tampered successfully" });
-        }
-     }
-     return res.json({ success: false, error: "No logs to tamper" });
-  }));
-
   app.get("/api/erp/governance/rejected", authenticate, wrap(async (req, res) => {
     const userProfile = (req as any).userProfile;
     const tenantId = userProfile?.tenantId || (req as any).user.uid;
@@ -3845,7 +3849,7 @@ app.get('/api/debug/settings', (req, res) => {
   }));
 
   // PDF Generation
-  app.post("/api/pdf/generate", async (req, res, next) => {
+  app.post("/api/pdf/generate", authenticate, async (req, res, next) => {
     try {
       const { docDefinition, filename } = req.body;
       const buffer = await PDFService.generatePDFBuffer(docDefinition);
@@ -3857,7 +3861,7 @@ app.get('/api/debug/settings', (req, res) => {
     }
   });
 
-  app.post("/api/pdf/invoice", async (req, res, next) => {
+  app.post("/api/pdf/invoice", authenticate, async (req, res, next) => {
     try {
       const { data, filename } = req.body;
       const docDefinition = PDFService.buildInvoiceTemplate(data);

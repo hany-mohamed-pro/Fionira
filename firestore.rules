@@ -56,9 +56,9 @@ service cloud.firestore {
     }
 
     function isAccountant() {
-      return isAuthenticated() && 
+      return isAuthenticated() &&
         (
-          isAdmin() || 
+          isAdmin() ||
           (("role" in request.auth.token) && request.auth.token.role == 'accountant')
         );
     }
@@ -184,26 +184,26 @@ service cloud.firestore {
                        isValidUploadedFile(request.resource.data) &&
                        areImmutableFieldsUnchanged(['id', 'fileName', 'uploadDate', 'uploadedBy', 'fileType', 'recordCount', 'tenantId']));
                        
-      allow delete: if isAdmin() && (isTenantData(resource.data) || true);
+      allow delete: if isAdmin() && isTenantData(resource.data);
 
       match /records/{recordId} {
-         allow read: if isAdmin() || isAuthenticated();
-         allow write: if isAdmin() || (isAccountant() && isAuthenticated());
+         allow read: if isAdmin() || (isAccountant() && isTenantData(resource.data));
+         allow write: if isAdmin() || (isAccountant() && isTenantData(request.resource.data));
       }
 
       match /skippedRows/{rowId} {
-         allow read: if isAdmin() || isAuthenticated();
-         allow write: if isAdmin() || (isAccountant() && isAuthenticated());
+         allow read: if isAdmin() || (isAccountant() && isTenantData(resource.data));
+         allow write: if isAdmin() || (isAccountant() && isTenantData(request.resource.data));
       }
 
       match /chunks/{chunkId} {
-         allow read: if isAdmin() || isAuthenticated();
-         allow write: if isAdmin() || (isAccountant() && isAuthenticated());
+         allow read: if isAdmin() || (isAccountant() && isTenantData(resource.data));
+         allow write: if isAdmin() || (isAccountant() && isTenantData(request.resource.data));
       }
 
       match /skippedChunks/{chunkId} {
-         allow read: if isAdmin() || isAuthenticated();
-         allow write: if isAdmin() || (isAccountant() && isAuthenticated());
+         allow read: if isAdmin() || (isAccountant() && isTenantData(resource.data));
+         allow write: if isAdmin() || (isAccountant() && isTenantData(request.resource.data));
       }
     }
 
@@ -211,11 +211,11 @@ service cloud.firestore {
       allow read: if isAdmin() || isTenantData(resource.data);
       allow create: if isAdmin() || (isAccountant() && isValidSmartInvoiceCatalogItem(request.resource.data));
       allow update: if isAdmin() || (isAccountant() && isTenantData(resource.data) && isValidSmartInvoiceCatalogItem(request.resource.data) && areImmutableFieldsUnchanged(['id', 'tenantId']));
-      allow delete: if isAdmin() && (isTenantData(resource.data) || true);
+      allow delete: if isAdmin() && isTenantData(resource.data);
     }
 
     match /quotations/{quoteId} {
-      allow read: if isAdmin() || isTenantData(resource.data) || true; // In case they lack tenantId during dev
+      allow read: if isAdmin() || isTenantData(resource.data);
       allow create: if isAdmin() || isAccountant(); 
       allow update: if isAdmin() || isAccountant();
       allow delete: if isAdmin();
@@ -225,14 +225,14 @@ service cloud.firestore {
       allow read: if isAdmin() || isTenantData(resource.data);
       allow create: if isAdmin() || (isAccountant() && (request.resource.data.tenantId == getTenantId() || request.resource.data.tenantId == request.auth.uid));
       allow update: if isAdmin() || (isAccountant() && isTenantData(resource.data));
-      allow delete: if isAdmin() && (isTenantData(resource.data) || true);
+      allow delete: if isAdmin() && isTenantData(resource.data);
     }
 
     match /journalEntries/{entryId} {
       allow read: if isAdmin() || isTenantData(resource.data);
       allow create: if isAdmin() || (isAccountant() && (request.resource.data.tenantId == getTenantId() || request.resource.data.tenantId == request.auth.uid));
       allow update: if isAdmin() || (isAccountant() && isTenantData(resource.data));
-      allow delete: if isAdmin() && (isTenantData(resource.data) || true);
+      allow delete: if isAdmin() && isTenantData(resource.data);
     }
 
     match /customers/{customerId} {
