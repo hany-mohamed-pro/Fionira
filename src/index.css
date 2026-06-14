@@ -1,0 +1,156 @@
+@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&family=Inter:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Inter', 'Tajawal', sans-serif;
+  --font-arabic: 'Tajawal', sans-serif;
+  
+  /* Brand Tokens */
+  --color-brand-primary: #4F46E5; /* indigo-600 */
+  --color-brand-primary-hover: #4338CA; /* indigo-700 */
+  --color-brand-secondary: #0F172A; /* slate-900 */
+  --color-brand-accent: #38BDF8; /* sky-400 */
+
+  /* Financial Tokens */
+  --color-financial-revenue: #10B981; /* emerald-500 */
+  --color-financial-expense: #F43F5E; /* rose-500 */
+  --color-financial-profit: #4F46E5; /* indigo-600 */
+  --color-financial-vat: #64748B; /* slate-500 */
+  --color-financial-neutral: #94A3B8; /* slate-400 */
+
+  /* Status Tokens */
+  --color-status-success: #10B981; /* emerald-500 */
+  --color-status-warning: #F59E0B; /* amber-500 */
+  --color-status-danger: #EF4444; /* red-500 */
+  --color-status-info: #3B82F6; /* blue-500 */
+  --color-status-muted: #64748B; /* slate-500 */
+
+  /* Surface Tokens */
+  --color-surface-page: #F8FAFC; /* slate-50 */
+  --color-surface-card: #FFFFFF;
+  --color-surface-panel: #F1F5F9; /* slate-100 */
+  --color-surface-header: #FFFFFF;
+  --color-surface-sidebar: #FFFFFF;
+  --color-surface-hover: #F8FAFC;
+  --color-surface-active: #EEF2FF; /* indigo-50 */
+
+  /* Text Tokens */
+  --color-text-primary: #0F172A; /* slate-900 */
+  --color-text-secondary: #475569; /* slate-600 */
+  --color-text-muted: #94A3B8; /* slate-400 */
+  --color-text-on-dark: #FFFFFF;
+  --color-text-link: #4F46E5; /* indigo-600 */
+
+  /* Border Tokens */
+  --color-border-subtle: #F1F5F9; /* slate-100 */
+  --color-border-default: #E2E8F0; /* slate-200 */
+  --color-border-strong: #CBD5E1; /* slate-300 */
+}
+
+body {
+  font-family: 'Inter', 'Tajawal', sans-serif;
+  background-color: var(--color-surface-page);
+  color: var(--color-text-primary);
+}
+
+[dir="rtl"] body {
+  font-family: 'Tajawal', 'Inter', sans-serif;
+}
+
+@media print {
+  @page {
+    size: A4 landscape;
+    margin: 1cm;
+  }
+  body * {
+    visibility: hidden;
+  }
+  #export-content, #export-content *, .dashboard-print-container, .dashboard-print-container * {
+    visibility: visible;
+  }
+  #export-content, .dashboard-print-container {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: visible !important;
+    max-height: none !important;
+    height: auto !important;
+  }
+  .page-break {
+    page-break-before: always;
+  }
+  .print-hidden {
+    display: none !important;
+  }
+  .print-visible {
+    display: block !important;
+  }
+  .sticky {
+    position: static !important;
+  }
+  .overflow-auto, .overflow-y-auto, .custom-scrollbar {
+    overflow: visible !important;
+    max-height: none !important;
+  }
+  .shadow-sm, .shadow-md, .shadow-lg {
+    box-shadow: none !important;
+  }
+  body {
+    background-color: white !important;
+  }
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-surface-panel);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border-strong);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-financial-neutral);
+}
+
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border-strong) var(--color-surface-panel);
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  height: 10px;
+  width: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: var(--color-surface-page);
+  border-radius: 6px;
+  border: 1px solid var(--color-border-default);
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--color-financial-neutral);
+  border-radius: 6px;
+  border: 2px solid var(--color-surface-page);
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-secondary);
+}
+
+.recharts-tooltip-wrapper {
+  font-family: inherit;
+}
+[dir="rtl"] .recharts-tooltip-wrapper {
+  direction: rtl;
+}

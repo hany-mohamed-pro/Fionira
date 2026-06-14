@@ -1,0 +1,64 @@
+100:  const [appMode, setAppMode] = useState<'expenses' | 'revenues' | 'payroll' | 'banks' | 'reports' | 'users' | 'quotations'>('expenses'); 
+104:  const [activeFileId, setActiveFileId] = useState<Record<string, string | null>>({ expenses: null, revenues: null, payroll: null, banks: null, reports: null, quotations: null });
+105:  const [availableFiles, setAvailableFiles] = useState<Record<string, {id: string, name: string}[]>>({ expenses: [], revenues: [], payroll: [], banks: [], reports: [], quotations: [] });
+119:  const [expensesData, setExpensesData] = useState<any>({ fileId: null, records: [], entities: [], schema: null, skippedRows: [] });
+127:      expenses: expensesData.records.length,
+132:  }, [settings, expensesData, revenuesData, payrollData, banksData]);
+188:  const currentData = appMode === 'expenses' ? expensesData : (appMode === 'revenues' ? revenuesData : (appMode === 'payroll' ? payrollData : (appMode === 'banks' ? banksData : { records: [], entities: [], schema: null })));
+189:  const setCurrentData = appMode === 'expenses' ? setExpensesData : (appMode === 'revenues' ? setRevenuesData : (appMode === 'payroll' ? setPayrollData : setBanksData));
+218:        const grouped = { expenses: [], revenues: [], payroll: [], banks: [] };
+226:          if (!next.expenses && grouped.expenses.length > 0) next.expenses = 'ALL';
+258:    if (['expenses', 'revenues', 'payroll', 'banks', 'reports'].includes(pathMode) && pathMode !== appMode) {
+283:      if (expensesData.records.length === 0 && activeFileId['expenses']) p.push(fetchDataForMode('expenses'));
+291:       const cd = appMode === 'expenses' ? expensesData : (appMode === 'revenues' ? revenuesData : (appMode === 'payroll' ? payrollData : banksData));
+293:      fetchDataForMode(appMode as 'expenses' | 'revenues' | 'payroll' | 'banks').catch(err => console.warn("Expected API rejection caught:", err));
+313:  const fetchDataForMode = async (mode: 'expenses' | 'revenues' | 'payroll' | 'banks', fileIdToLoad?: string) => {
+330:           if (mode === 'expenses') setExpensesData(emptyData);
+351:      const prefix = mode === 'expenses' ? 'SUP' : (mode === 'revenues' ? 'CUS' : (mode === 'payroll' ? 'EMP' : 'BNK'));
+352:      const isVendor = mode === 'expenses' || mode === 'revenues';
+505:      if (mode === 'expenses') {
+539:  const entLabel = appMode === 'expenses' ? 'المورد' : (appMode === 'revenues' ? 'العميل' : (appMode === 'banks' ? 'الحساب' : 'الموظف'));
+540:  const entsLabel = appMode === 'expenses' ? 'الموردين' : (appMode === 'revenues' ? 'العملاء' : (appMode === 'banks' ? 'الحسابات' : 'الموظفين'));
+541:  const actLabel = appMode === 'expenses' ? 'المصروفات' : (appMode === 'revenues' ? 'الإيرادات' : (appMode === 'banks' ? 'الحركات البنكية' : 'الرواتب'));
+666:      const shouldApply = !dateFilter.sourceMode || dateFilter.sourceMode === 'reports' || dateFilter.sourceMode === 'expenses';
+667:      let records = expensesData.records;
+672:  }, [expensesData, dateFilter, searchQuery]);
+704:  const expensesAnomalies = useMemo(() => plFilteredExpenses.filter(r => r.Anomalies && r.Anomalies.length > 0), [plFilteredExpenses]);
+791:          } else if (appMode === 'expenses') {
+793:              // Keep ALL OPEX including payroll if they uploaded payroll in the expenses module
+824:      } else if (appMode === 'expenses') {
+887:      const filteredExpenses = (activeTab === 'dashboard' && appMode !== 'expenses' && appMode !== 'reports') ? [] : plFilteredExpenses;
+923:        appMode === 'expenses' ? plFilteredExpenses :
+1047:          if (appMode === 'expenses' && r.moduleType !== 'expenses') return false;
+1116:    if (appMode === 'expenses') rawList = topSuppliers;
+1253:          { label: 'المصروفات', records: plFilteredExpenses, mode: 'expenses' },
+1429:        addSheet(`ملخص ${appMode === 'expenses' ? 'الموردين' : (appMode === 'revenues' ? 'العملاء' : (appMode === 'banks' ? 'الحسابات' : 'الموظفين'))}`, entsColumns, entsData);
+1490:        addSheet(`ملخص ${appMode === 'expenses' ? 'الموردين' : (appMode === 'revenues' ? 'العملاء' : (appMode === 'banks' ? 'الحسابات' : 'الموظفين'))}`, entsColumns, entsData);
+1879:            {(profile?.role === 'admin' || profile?.permissions?.includes('expenses')) && (
+1887:                        <NavItem mode="expenses" tab="upload" icon={UploadIcon} label="رفع ملف المشتريات" currentMode={appMode} currentTab={activeTab} onClick={handleNavClick} />
+1888:                        <NavItem mode="expenses" tab="raw_data" icon={Database} label="مستكشف البيانات الخام" currentMode={appMode} currentTab={activeTab} onClick={handleNavClick} />
+1891:                    <NavItem mode="expenses" tab="dashboard" icon={BarChart3} label="الاحصائيات والتحليل المالي" currentMode={appMode} currentTab={activeTab} onClick={handleNavClick} />
+1892:                    <NavItem mode="expenses" tab="categories_summary" icon={PieChartIcon} label="ملخص المصروفات" currentMode={appMode} currentTab={activeTab} onClick={handleNavClick} />
+1893:                    <NavItem mode="expenses" tab="monthly_summary" icon={CalendarIcon} label="الملخص الشهري" currentMode={appMode} currentTab={activeTab} onClick={handleNavClick} />
+1894:                    <NavItem mode="expenses" tab="yearly_comparison" icon={CalendarIcon} label="مقارنة السنوات" currentMode={appMode} currentTab={activeTab} onClick={handleNavClick} />
+1895:                    <NavItem mode="expenses" tab="grouped_purchases" icon={Layers} label="سجل الموردين" currentMode={appMode} currentTab={activeTab} onClick={handleNavClick} />
+1896:                    <NavItem mode="expenses" tab="items_directory" icon={Box} label="سجل المشتريات (الأصناف)" currentMode={appMode} currentTab={activeTab} onClick={handleNavClick} />
+1897:                    <NavItem mode="expenses" tab="statement_of_account" icon={FileText} label="كشف حساب الموردين" currentMode={appMode} currentTab={activeTab} onClick={handleNavClick} />
+1898:                    <NavItem mode="expenses" tab="audit" icon={ShieldAlert} label="التناقضات والأخطاء" currentMode={appMode} currentTab={activeTab} onClick={handleNavClick} badge={appMode==='expenses' ? totalAnomaliesCount : 0} />
+2112:                     <FileSpreadsheet className={`w-4 h-4 ml-2 ${appMode === 'expenses' ? 'text-indigo-600' : (appMode === 'revenues' ? 'text-emerald-600' : 'text-blue-600')}`} />
+2211:                appMode={appMode as 'expenses' | 'revenues' | 'payroll' | 'banks'} 
+2239:                    if (appMode === 'expenses') setExpensesData(emptyData);
+2259:                appMode={appMode as 'expenses' | 'revenues'} 
+2260:                records={appMode === 'expenses' ? plFilteredExpenses : plFilteredRevenues} 
+2271:              <YearlyComparison records={baseFilteredRecords} appMode={appMode as 'expenses' | 'revenues' | 'payroll' | 'banks'} dateFilter={dateFilter} />
+2297:          {activeTab === 'smart_invoice' && (appMode === 'expenses' || appMode === 'revenues') && (
+2300:                suppliers={expensesData.entities} 
+2318:                  appMode={appMode as 'expenses' | 'revenues' | 'payroll' | 'banks' | 'reports'}
+2339:                appMode={appMode as 'expenses' | 'revenues' | 'payroll' | 'banks' | 'reports'}
+2362:                appMode={appMode as 'expenses' | 'revenues' | 'payroll' | 'banks' | 'reports'}
+2369:            <MonthlySummary records={filteredRecords} appMode={appMode as 'expenses' | 'revenues' | 'payroll' | 'banks'} />
+2384:              appMode={appMode as 'expenses' | 'revenues' | 'payroll' | 'banks'} 
+2403:                expenses: incomeStatement.totalOPEX + incomeStatement.totalCOGS,
+2414:                expenses: (incomeStatement.totalOPEX || 0) + (incomeStatement.totalCOGS || 0),
+2430:              expensesRecords={plFilteredExpenses}
+2486:              expensesAnomalies={expensesAnomalies}

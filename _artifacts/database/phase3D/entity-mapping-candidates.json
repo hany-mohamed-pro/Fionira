@@ -1,0 +1,1327 @@
+[
+  {
+    "id": "24f4f544-26cb-462e-9330-62faafd890be",
+    "name": "العالمية للفواكة",
+    "occurrences": 5
+  },
+  {
+    "id": "c2679754-9189-4410-a371-37145cc3e7a8",
+    "name": "الوادي للدواجن",
+    "occurrences": 2
+  },
+  {
+    "id": "8c6aaa77-29e4-452b-bc1e-630ed27f4adc",
+    "name": "موسسة منارة البلاد",
+    "occurrences": 1
+  },
+  {
+    "id": "547d7386-fa95-43a0-9b8d-3af852f6e11e",
+    "name": "sfaqat",
+    "occurrences": 8
+  },
+  {
+    "id": "e7f0b9fa-1226-42f9-86d2-87148988c93e",
+    "name": "اسواق الحمود المركزية",
+    "occurrences": 1
+  },
+  {
+    "id": "0b1ec3ed-ce83-4edc-bbf9-b8dc2175815f",
+    "name": "othaim",
+    "occurrences": 33
+  },
+  {
+    "id": "f336b222-58b4-4f46-bd5f-1f50b38ea12d",
+    "name": "المعيذر",
+    "occurrences": 3
+  },
+  {
+    "id": "272bc1b7-a21b-4fa1-bc64-22b8564bdf4d",
+    "name": "صدقة المحل",
+    "occurrences": 1
+  },
+  {
+    "id": "ee843b2c-42f3-4dbc-a65d-20f8153d75ed",
+    "name": "SLAM INTERNET",
+    "occurrences": 1
+  },
+  {
+    "id": "0af0115f-c3fe-44ce-b511-77e4acf83834",
+    "name": "شركة الكيف الشرقي للتجاره",
+    "occurrences": 2
+  },
+  {
+    "id": "12c93b6d-dddd-4672-b079-0ea68758c2fe",
+    "name": "al wadi",
+    "occurrences": 2
+  },
+  {
+    "id": "1d8e44d1-3a9e-41b6-b164-d764431ed942",
+    "name": "nada",
+    "occurrences": 3
+  },
+  {
+    "id": "3ac2ef2a-967a-4df8-8706-646b680328bc",
+    "name": "danub",
+    "occurrences": 17
+  },
+  {
+    "id": "c09c1334-1bdc-44d6-9814-980dbf4f9a33",
+    "name": "قصر البلاستيك",
+    "occurrences": 13
+  },
+  {
+    "id": "0a925e4d-653c-469d-8637-365d499ca81b",
+    "name": "CDC",
+    "occurrences": 9
+  },
+  {
+    "id": "8c46580b-7732-4ed5-94f7-e653017220f3",
+    "name": "GULF CENTRAL",
+    "occurrences": 7
+  },
+  {
+    "id": "20b7b495-de63-4bbe-9d5f-c2e0459373e2",
+    "name": "فهد المعيذر",
+    "occurrences": 12
+  },
+  {
+    "id": "a46abf9f-ffd5-4bab-bb86-ba909cc4d7f4",
+    "name": "NADA",
+    "occurrences": 11
+  },
+  {
+    "id": "ae7a2589-09da-44d2-baf5-cdd091c456f9",
+    "name": "TAXI",
+    "occurrences": 1
+  },
+  {
+    "id": "6d40a11f-3a9b-4f6e-8efc-4e30e9f7ec41",
+    "name": "مطبعة بصر",
+    "occurrences": 2
+  },
+  {
+    "id": "54f21422-4178-4b0f-b234-f46953fe68df",
+    "name": "شركة المهندسين المحترفين",
+    "occurrences": 1
+  },
+  {
+    "id": "e67cecb8-c34a-4a35-b5fd-1ed6ddc0ffdd",
+    "name": "شركة رالي اكسبرس لخدمات السيارات",
+    "occurrences": 2
+  },
+  {
+    "id": "f17fc5f4-c6cf-4dcd-b8e1-5d8a1d9679ed",
+    "name": "مشتل بيت الريحان الزراعية",
+    "occurrences": 5
+  },
+  {
+    "id": "e5a6917c-527d-4462-9256-fc5e7a6d1d81",
+    "name": "الوادي",
+    "occurrences": 2
+  },
+  {
+    "id": "1032885c-2fe2-4854-b040-42b74e29eff6",
+    "name": "العالمية",
+    "occurrences": 1
+  },
+  {
+    "id": "139562a0-0d00-43a3-8816-b9cd9765ae8e",
+    "name": "perfect chef",
+    "occurrences": 6
+  },
+  {
+    "id": "61fd7e38-42c6-4691-9ffa-7ad4d9ed43c6",
+    "name": "البابطين الغذائية",
+    "occurrences": 6
+  },
+  {
+    "id": "cc36ebb4-42f3-4cf4-92e8-93259edfbb0b",
+    "name": "مركز العبد القادر لبيع قطع غيار للسيارات",
+    "occurrences": 1
+  },
+  {
+    "id": "9935a3f2-01fb-456d-82c4-13e8e82955c1",
+    "name": "شركة منصة النمو للخدمات التجارية",
+    "occurrences": 2
+  },
+  {
+    "id": "5d008a56-1f0a-484f-bcd7-619808cc2d70",
+    "name": "عطارة العليا فرع العويس",
+    "occurrences": 1
+  },
+  {
+    "id": "a8b04a81-0ce4-4d57-9359-f47c6940f6fe",
+    "name": "شركة الوان الهدية",
+    "occurrences": 5
+  },
+  {
+    "id": "ff86cbf9-e8d4-443b-a9cf-7e775b625c85",
+    "name": "الياسمين سنتر",
+    "occurrences": 4
+  },
+  {
+    "id": "1b1a7df6-bba8-4acb-986f-92d2049adc18",
+    "name": "تموينات المعشوق",
+    "occurrences": 6
+  },
+  {
+    "id": "3de3006d-7a7d-49b2-ba27-13f2b85c1ba5",
+    "name": "اسواق النخبة",
+    "occurrences": 1
+  },
+  {
+    "id": "74b013d5-27c2-40cb-86bc-e01945103de4",
+    "name": "NAPCO",
+    "occurrences": 14
+  },
+  {
+    "id": "6042bd3c-9b2c-49fd-b8ac-00736403c1a7",
+    "name": "قصر البلاستك",
+    "occurrences": 5
+  },
+  {
+    "id": "4638c5b8-31ea-4b93-9d97-5c56ab20fa5c",
+    "name": "CGULF WEST",
+    "occurrences": 1
+  },
+  {
+    "id": "6af3c9c8-a496-4c2c-806b-fcd4437223dc",
+    "name": "المستقبل المشرق للطباعة",
+    "occurrences": 2
+  },
+  {
+    "id": "a3df3ecb-ef63-4f90-9da4-b3911662ba35",
+    "name": "شركة تاج الهدوء للكهرباء",
+    "occurrences": 1
+  },
+  {
+    "id": "7ffddd43-31a2-4d72-a231-88b502fa37c8",
+    "name": "ادريس",
+    "occurrences": 3
+  },
+  {
+    "id": "f132f3ec-4fa8-40e8-92fd-024b11ff31eb",
+    "name": "تموينات عامر نواف العنيزي",
+    "occurrences": 1
+  },
+  {
+    "id": "205a508f-08eb-4842-940a-7be912c8715c",
+    "name": "CITY MAX",
+    "occurrences": 1
+  },
+  {
+    "id": "908d628d-d7ca-4e98-88eb-0e70a8608e3f",
+    "name": "MOLTAQA ALKHABBAZEEN",
+    "occurrences": 2
+  },
+  {
+    "id": "7542a67e-a542-4c31-b744-270390273836",
+    "name": "GULFWEST CENTRAL",
+    "occurrences": 1
+  },
+  {
+    "id": "db0cce08-ff38-4c5c-a2f6-1597353872f5",
+    "name": "مطابع جوهرة الخليج للطباعة",
+    "occurrences": 2
+  },
+  {
+    "id": "63f23889-47c9-4daa-a8fa-957d0f9e9b0d",
+    "name": "GULF WEST",
+    "occurrences": 4
+  },
+  {
+    "id": "f9f8d2d8-602c-4c5d-b839-673148a92008",
+    "name": "TEMU",
+    "occurrences": 2
+  },
+  {
+    "id": "04c9840b-b85a-411c-9df4-7ff5d2b67765",
+    "name": "CROVER OIL",
+    "occurrences": 3
+  },
+  {
+    "id": "3c15b9f2-ae40-4822-9f70-eeec9addaccc",
+    "name": "GAS STASHION",
+    "occurrences": 3
+  },
+  {
+    "id": "0f4b5ad3-d372-455a-b3e7-f77e39c9d96c",
+    "name": "موسسة عيسي الجريسي للمقاولات",
+    "occurrences": 1
+  },
+  {
+    "id": "d4e29b2f-b01a-4bda-9053-e4a8d6375ba6",
+    "name": "مؤسسة عبد الله الحبس لتصليح السيارات",
+    "occurrences": 1
+  },
+  {
+    "id": "6c206455-c274-46ea-94c0-aed113d43e7f",
+    "name": "الكيف الشرقي",
+    "occurrences": 2
+  },
+  {
+    "id": "f41d51b5-934a-4085-b8ab-cc10810ab337",
+    "name": "ALWADI",
+    "occurrences": 5
+  },
+  {
+    "id": "016fb9e2-4533-4e5d-b7f9-a3165214430e",
+    "name": "مجموعة فهد المعيذر",
+    "occurrences": 4
+  },
+  {
+    "id": "4a287209-01c5-4b1b-a1a9-d32aa56e3089",
+    "name": "مؤسسة قدو للتجلره",
+    "occurrences": 1
+  },
+  {
+    "id": "f89fc450-8ee9-4226-a4fc-f44a7456ca6d",
+    "name": "مركز ابو عوض",
+    "occurrences": 1
+  },
+  {
+    "id": "8e6ff2ec-9cf8-4057-b137-f94a53212462",
+    "name": "شركة العثمان للأنتاج والتصنيع الزراعي (ندى)",
+    "occurrences": 1
+  },
+  {
+    "id": "fc445bf0-7be8-41cb-b750-b6c72720585d",
+    "name": "شركة الياسمين",
+    "occurrences": 1
+  },
+  {
+    "id": "04f02a42-76d0-4728-9b50-34998f4952dd",
+    "name": "موسسة قوي التبريد",
+    "occurrences": 1
+  },
+  {
+    "id": "a5ecdb2c-ddde-457b-b6c6-e86ac0b99c53",
+    "name": "شركة مراسي الخليج المحدودة",
+    "occurrences": 1
+  },
+  {
+    "id": "4c01c327-b7d2-4e8c-afc9-c92fb8c163c1",
+    "name": "فهد ناصر للتجارة",
+    "occurrences": 1
+  },
+  {
+    "id": "31aec20e-e0b3-4444-af31-bdcfd9e34d13",
+    "name": "شركة ايم للمعدات الصناعية",
+    "occurrences": 1
+  },
+  {
+    "id": "c2fd1deb-155f-48eb-b61f-ae97b5daed42",
+    "name": "شركة عبد العزيز العقيلي",
+    "occurrences": 1
+  },
+  {
+    "id": "64b817e2-f380-46a0-9a00-e13308ae7352",
+    "name": "بيت الريحان الزراعية",
+    "occurrences": 1
+  },
+  {
+    "id": "796bbe9c-f52f-4ca8-9771-3590358a2c19",
+    "name": "ملتقي الخبازين",
+    "occurrences": 4
+  },
+  {
+    "id": "90d29d6a-f2d7-4661-926d-ea43bac8f5d0",
+    "name": "sasco",
+    "occurrences": 2
+  },
+  {
+    "id": "94321824-9634-4422-9823-6a375687bb21",
+    "name": "العالمية للفواكة الطازجة",
+    "occurrences": 10
+  },
+  {
+    "id": "3091c501-151a-48ef-b05f-4d546fc8f970",
+    "name": "transmed",
+    "occurrences": 7
+  },
+  {
+    "id": "55f6b7aa-09df-4da6-98f4-13f377d05840",
+    "name": "PERFECT CHEF",
+    "occurrences": 16
+  },
+  {
+    "id": "1926be88-93bc-43bf-9576-ce224d550899",
+    "name": "عيسي الجريسي للمقاولات",
+    "occurrences": 2
+  },
+  {
+    "id": "0f215aae-52ef-4ab7-a5b9-45ea1fbdc85f",
+    "name": "عامل سباكة",
+    "occurrences": 1
+  },
+  {
+    "id": "ef03c408-97e7-4fc8-9a4e-c7b365e8c72b",
+    "name": "قريه صويلح",
+    "occurrences": 1
+  },
+  {
+    "id": "70220a49-fcb9-4b67-808e-aef417137116",
+    "name": "اناقة المطبخ",
+    "occurrences": 1
+  },
+  {
+    "id": "2529c9ad-3a31-473d-a03f-7d3a08ea6419",
+    "name": "SESCO",
+    "occurrences": 1
+  },
+  {
+    "id": "6e4c03aa-c03a-4909-aaf6-3d4d97535ce8",
+    "name": "الهزازي",
+    "occurrences": 1
+  },
+  {
+    "id": "c88ed0ae-fdcd-41fa-a2a2-3704057612b9",
+    "name": "BANDA",
+    "occurrences": 1
+  },
+  {
+    "id": "36abc8da-4cbe-41c7-9e4a-c109ccdcb69c",
+    "name": "LACE FLOWER",
+    "occurrences": 1
+  },
+  {
+    "id": "976afec1-364b-483f-9c22-a33623a8f903",
+    "name": "jarir",
+    "occurrences": 1
+  },
+  {
+    "id": "522175c7-fa6d-44fb-b230-737066b67037",
+    "name": "alsharq book store",
+    "occurrences": 1
+  },
+  {
+    "id": "a5f931d1-6588-4405-ae4a-328c8f43e4e8",
+    "name": "temu",
+    "occurrences": 2
+  },
+  {
+    "id": "a5d8b2da-c600-4999-8286-55445fa48129",
+    "name": "cdc",
+    "occurrences": 1
+  },
+  {
+    "id": "a056c9c2-198e-49a5-a73f-000c7453ebe0",
+    "name": "dalla",
+    "occurrences": 2
+  },
+  {
+    "id": "f5d02b3e-1a01-4ecd-a995-704f6cf43d5c",
+    "name": "neft",
+    "occurrences": 1
+  },
+  {
+    "id": "0c7f5ada-becf-4d12-a52e-06bf1ba2463c",
+    "name": "شركة ادريس",
+    "occurrences": 1
+  },
+  {
+    "id": "42240352-f498-48c3-a924-5d5c0c906224",
+    "name": "mawaduna",
+    "occurrences": 2
+  },
+  {
+    "id": "5b44bb9a-b3b9-4611-bd58-1dcb59656bae",
+    "name": "ALJAMEEL",
+    "occurrences": 1
+  },
+  {
+    "id": "f052f7dc-53ed-4fd2-b338-b5f186230450",
+    "name": "موسسة قدوح البيت للتجارة",
+    "occurrences": 2
+  },
+  {
+    "id": "c565245d-79ba-4f57-8b63-8d9b6696db97",
+    "name": "DALLA",
+    "occurrences": 1
+  },
+  {
+    "id": "6f24df24-40e2-4b7a-8134-79046eb6e782",
+    "name": "الادريس",
+    "occurrences": 6
+  },
+  {
+    "id": "8019a2fd-3157-4b5a-ab8c-f5e82c321d15",
+    "name": "al jameel",
+    "occurrences": 1
+  },
+  {
+    "id": "02ec32bc-a9dd-4003-9380-2fe0bff0d5f4",
+    "name": "HAZAZI",
+    "occurrences": 1
+  },
+  {
+    "id": "a3d36d7d-d0d0-4ff1-9976-ee3b19069e52",
+    "name": "شركة الكيف الشرقي",
+    "occurrences": 2
+  },
+  {
+    "id": "b5d6be0f-2c6e-403d-a9bd-684c418b1f52",
+    "name": "DANUB",
+    "occurrences": 12
+  },
+  {
+    "id": "2f1117dc-5d27-430a-9f01-cfcf0e474e99",
+    "name": "القصر للبلاستيك",
+    "occurrences": 1
+  },
+  {
+    "id": "99c5f18a-a9dc-457d-bc7a-af661029b855",
+    "name": "SFAQAT",
+    "occurrences": 4
+  },
+  {
+    "id": "f9ec67e6-1ac4-4a53-9ee9-49f1f0f3dae5",
+    "name": "مؤسسة الجريسي",
+    "occurrences": 2
+  },
+  {
+    "id": "7fb1ab53-859e-4c43-984a-812bd8e58ab5",
+    "name": "gulf central",
+    "occurrences": 4
+  },
+  {
+    "id": "5846eceb-7fd1-46c7-b45d-832918818ede",
+    "name": "مؤسسة قدوح البيت التجارة",
+    "occurrences": 2
+  },
+  {
+    "id": "228549a2-3713-4b6c-bf65-09ab4d95dd99",
+    "name": "CROVER",
+    "occurrences": 1
+  },
+  {
+    "id": "df1adcd6-c35e-443e-baeb-ade6873fdf1b",
+    "name": "breehant",
+    "occurrences": 1
+  },
+  {
+    "id": "57ffda98-d751-4fb0-b5bc-ac2200d71bd3",
+    "name": "قرية صويليح",
+    "occurrences": 1
+  },
+  {
+    "id": "b2f23b74-6338-4ca5-9a85-27c0a925eaa1",
+    "name": "hazizi",
+    "occurrences": 1
+  },
+  {
+    "id": "98868338-66c7-43f6-a6b0-7e7d5e187545",
+    "name": "نقل مبرد",
+    "occurrences": 2
+  },
+  {
+    "id": "b643eb2a-f53e-4336-b8a7-218de9e22ceb",
+    "name": "مؤسسة نايف موسي للمفارش",
+    "occurrences": 1
+  },
+  {
+    "id": "4d23e514-bc43-43fd-9b3c-f3646921426a",
+    "name": "moltaqa alkabbazeen",
+    "occurrences": 1
+  },
+  {
+    "id": "0d8ce0c0-bf22-4125-9d8a-df536ae22455",
+    "name": "الوان الهدية",
+    "occurrences": 1
+  },
+  {
+    "id": "b02f85bd-2155-437b-9d64-126565ab8276",
+    "name": "SAHEL",
+    "occurrences": 1
+  },
+  {
+    "id": "21f5c4d6-6222-4e56-b8f7-2b6d886033cf",
+    "name": "PETROMIN",
+    "occurrences": 1
+  },
+  {
+    "id": "74b19826-af87-46c3-8fa2-6fc7507fda94",
+    "name": "شركة قصر البلاستيك",
+    "occurrences": 1
+  },
+  {
+    "id": "ddbc4a07-2869-4650-b242-ec23e48a009c",
+    "name": "ملتقي الحلويات",
+    "occurrences": 1
+  },
+  {
+    "id": "7f182613-dd8f-4b93-9ca8-b68e2eb532fd",
+    "name": "حلويات الحمود",
+    "occurrences": 1
+  },
+  {
+    "id": "400f4501-af2d-4ae3-915a-3414373be2c2",
+    "name": "شركة العوبنانى للتجارة",
+    "occurrences": 1
+  },
+  {
+    "id": "63048ec0-2b11-45de-a76f-0238ab915449",
+    "name": "SWEET MIX",
+    "occurrences": 1
+  },
+  {
+    "id": "4174a25f-b1c6-4faf-9c1e-f03486cf25ec",
+    "name": "JAHAZ APP",
+    "occurrences": 1
+  },
+  {
+    "id": "1884eccd-74c1-4d1b-8a61-aaab032d36c4",
+    "name": "مركز سلامة للمركبات",
+    "occurrences": 1
+  },
+  {
+    "id": "dcabd365-08fe-4388-84b2-2e7c02b352c4",
+    "name": "aljameel",
+    "occurrences": 1
+  },
+  {
+    "id": "0cb80cf1-4fc1-4b01-8e1a-2eb999d89002",
+    "name": "MAWADUNA",
+    "occurrences": 1
+  },
+  {
+    "id": "bfaee12e-781a-4308-a996-f6a8b4e03084",
+    "name": "مؤسسة نقل العفش البري",
+    "occurrences": 1
+  },
+  {
+    "id": "6c38b850-8629-40c6-83f3-518c64cd9691",
+    "name": "foodics",
+    "occurrences": 3
+  },
+  {
+    "id": "fd1d317b-7d9b-4cef-b54f-0e95878fe423",
+    "name": "صفقات",
+    "occurrences": 1
+  },
+  {
+    "id": "0677dae8-5f73-45a9-aa78-be88a7bded66",
+    "name": "مؤسسة الجريسي للمقاولات",
+    "occurrences": 1
+  },
+  {
+    "id": "8128abe4-c59b-4d56-9618-b0241441e2cc",
+    "name": "private food",
+    "occurrences": 1
+  },
+  {
+    "id": "d1b494ca-0339-4292-8b95-a257dcdd8ab4",
+    "name": "شركة افكاركم الامحدودة للطباعة",
+    "occurrences": 1
+  },
+  {
+    "id": "cae6c1d5-82a9-4320-b511-da4e8976620d",
+    "name": "ALNUMUW",
+    "occurrences": 1
+  },
+  {
+    "id": "12d86445-9838-4cc1-8086-8b8e2ea6f999",
+    "name": "SAADEDDIN",
+    "occurrences": 1
+  },
+  {
+    "id": "5046e97c-9b38-4fa7-b223-062f92c8068b",
+    "name": "HARRY POTER",
+    "occurrences": 28
+  },
+  {
+    "id": "32ebdc2d-37ca-45f3-a4bd-ec5a3ae452a5",
+    "name": "JAHAZ",
+    "occurrences": 75
+  },
+  {
+    "id": "3981f144-d71b-4a1f-b368-2e91fd43acb5",
+    "name": "BLOSS",
+    "occurrences": 49
+  },
+  {
+    "id": "dbd5b4b1-67ea-4919-b8f2-f6113c485bec",
+    "name": "FLOWERD",
+    "occurrences": 90
+  },
+  {
+    "id": "4a94b53f-fb52-482c-a939-16112fd88f98",
+    "name": "HS",
+    "occurrences": 44
+  },
+  {
+    "id": "222de1ca-dff5-4e2a-b732-b9f2c934f5d7",
+    "name": "THE CHEFZ",
+    "occurrences": 86
+  },
+  {
+    "id": "2517a902-b5ac-45cf-956d-2e7a0bc7f476",
+    "name": "Mada",
+    "occurrences": 1
+  },
+  {
+    "id": "d9a0117d-285d-4371-a2af-39cb0d83ed79",
+    "name": "MADA",
+    "occurrences": 40
+  },
+  {
+    "id": "e01bd367-e53c-415d-b059-e3a46c00ddfd",
+    "name": "VISA",
+    "occurrences": 20
+  },
+  {
+    "id": "64b6f869-3c80-4e95-9d7e-1688aa60b127",
+    "name": "T0YOU",
+    "occurrences": 1
+  },
+  {
+    "id": "937df5d7-c087-48aa-b928-ae927d87595b",
+    "name": "MASTERCARD",
+    "occurrences": 4
+  },
+  {
+    "id": "3ff355e4-0c36-44c8-b5a7-675e1a84af0e",
+    "name": "THE X",
+    "occurrences": 1
+  },
+  {
+    "id": "4bae088b-ae7c-4186-8078-221d7cccf9f3",
+    "name": "TOYOU",
+    "occurrences": 5
+  },
+  {
+    "id": "de72aaed-6c48-4038-ab59-64f6a1a8c2e8",
+    "name": "BANK TRANSFER",
+    "occurrences": 3
+  },
+  {
+    "id": "3b58653a-0240-4904-a007-7f66ed1e10c1",
+    "name": "NOON",
+    "occurrences": 1
+  },
+  {
+    "id": "7cad404c-fd1d-4d1c-903b-0a3cbca53890",
+    "name": "KEETA",
+    "occurrences": 1
+  },
+  {
+    "id": "92469e24-f287-49e8-b481-9f51747e7f7f",
+    "name": "العالمية للفواكة",
+    "occurrences": 5
+  },
+  {
+    "id": "46c0b6c5-9c25-4a6f-b0cc-9e6b1bf74969",
+    "name": "الوادي للدواجن",
+    "occurrences": 2
+  },
+  {
+    "id": "368b9859-5287-4532-970f-3407897e6f3b",
+    "name": "موسسة منارة البلاد",
+    "occurrences": 1
+  },
+  {
+    "id": "33ae459b-0360-4867-8e18-2e4a44c31c30",
+    "name": "sfaqat",
+    "occurrences": 8
+  },
+  {
+    "id": "911d0841-5d8c-4bcb-9968-bc21c5fea5bc",
+    "name": "اسواق الحمود المركزية",
+    "occurrences": 1
+  },
+  {
+    "id": "79c980ba-8acd-44b7-99cc-9f9a9c9cd8ad",
+    "name": "othaim",
+    "occurrences": 31
+  },
+  {
+    "id": "8d4581b5-a8cb-424c-8499-291bf97728fd",
+    "name": "المعيذر",
+    "occurrences": 3
+  },
+  {
+    "id": "7eb5a535-99da-4ec8-8b65-54090858c1e8",
+    "name": "صدقة المحل",
+    "occurrences": 1
+  },
+  {
+    "id": "de5dbd05-1c00-4e77-b282-8bb92170adbf",
+    "name": "SLAM INTERNET",
+    "occurrences": 1
+  },
+  {
+    "id": "591a24d6-1247-41ed-a2ea-264bc2eaa436",
+    "name": "شركة الكيف الشرقي للتجاره",
+    "occurrences": 2
+  },
+  {
+    "id": "17cffc45-6f03-48f0-810a-240eb4e6c479",
+    "name": "al wadi",
+    "occurrences": 2
+  },
+  {
+    "id": "bc54bfdb-ce0d-4d89-97a8-148ef4108f4c",
+    "name": "nada",
+    "occurrences": 3
+  },
+  {
+    "id": "0de89d01-af65-4f30-9f9c-49be519ab1d0",
+    "name": "danub",
+    "occurrences": 17
+  },
+  {
+    "id": "1f38e5b3-8265-4e1f-8114-c375da9d39a1",
+    "name": "قصر البلاستيك",
+    "occurrences": 11
+  },
+  {
+    "id": "2c799ae6-3f8d-4819-abdc-8bcf374635bb",
+    "name": "CDC",
+    "occurrences": 9
+  },
+  {
+    "id": "3f5595ec-4973-4dc0-a785-912d60da0589",
+    "name": "GULF CENTRAL",
+    "occurrences": 7
+  },
+  {
+    "id": "3d745148-8ac6-4d4c-9b79-e85c5e4d98c4",
+    "name": "فهد المعيذر",
+    "occurrences": 12
+  },
+  {
+    "id": "a1d9bdc8-b49a-44f3-a100-b2972b443a09",
+    "name": "NADA",
+    "occurrences": 11
+  },
+  {
+    "id": "e56c86e8-56db-41d0-866b-beff78a9e16d",
+    "name": "TAXI",
+    "occurrences": 1
+  },
+  {
+    "id": "1f230fde-0020-4eff-b6bc-2b716d8f8805",
+    "name": "مطبعة بصر",
+    "occurrences": 2
+  },
+  {
+    "id": "5332213b-94ba-4a25-bbc7-00fe35f860c3",
+    "name": "شركة المهندسين المحترفين",
+    "occurrences": 1
+  },
+  {
+    "id": "de1e3844-92b5-48c9-9a6c-17ecd59785df",
+    "name": "شركة رالي اكسبرس لخدمات السيارات",
+    "occurrences": 1
+  },
+  {
+    "id": "eda75b1b-fa4a-450a-8b65-15ac74781062",
+    "name": "مشتل بيت الريحان الزراعية",
+    "occurrences": 5
+  },
+  {
+    "id": "ee206255-be2b-432d-a5eb-ff4ca0886739",
+    "name": "الوادي",
+    "occurrences": 2
+  },
+  {
+    "id": "cb3dbf57-5cf5-43e5-bf12-aa692507b4a7",
+    "name": "العالمية",
+    "occurrences": 1
+  },
+  {
+    "id": "3ff1eb11-a92f-4201-a5e5-b1d55c9479ee",
+    "name": "perfect chef",
+    "occurrences": 6
+  },
+  {
+    "id": "2728c39b-c3d6-4242-871e-d3292e0b4317",
+    "name": "البابطين الغذائية",
+    "occurrences": 6
+  },
+  {
+    "id": "89261b9c-6f75-4a59-a590-01da3821e769",
+    "name": "مركز العبد القادر لبيع قطع غيار للسيارات",
+    "occurrences": 1
+  },
+  {
+    "id": "229fa626-a019-445c-b514-6037b3326aa5",
+    "name": "شركة منصة النمو للخدمات التجارية",
+    "occurrences": 2
+  },
+  {
+    "id": "ec726ff2-3503-4edb-b5de-625fb72f768c",
+    "name": "عطارة العليا فرع العويس",
+    "occurrences": 1
+  },
+  {
+    "id": "cb2d1f4e-df17-42c2-b1b5-69ef6f0ce62a",
+    "name": "شركة الوان الهدية",
+    "occurrences": 5
+  },
+  {
+    "id": "b75fcf9e-8453-41fd-8e2c-dd0250c526a2",
+    "name": "الياسمين سنتر",
+    "occurrences": 4
+  },
+  {
+    "id": "2f502551-a949-413a-8b74-5712c779300a",
+    "name": "تموينات المعشوق",
+    "occurrences": 4
+  },
+  {
+    "id": "74043a39-1c8b-4989-b116-f644240ada53",
+    "name": "اسواق النخبة",
+    "occurrences": 1
+  },
+  {
+    "id": "80982b14-87e2-4ef0-8b1c-a5ff7e497b9b",
+    "name": "NAPCO",
+    "occurrences": 12
+  },
+  {
+    "id": "038b5d8a-cdb8-458b-b0e4-0ebd86331d0a",
+    "name": "قصر البلاستك",
+    "occurrences": 5
+  },
+  {
+    "id": "5e68cd09-1422-4c32-93b3-10cf76781c56",
+    "name": "CGULF WEST",
+    "occurrences": 1
+  },
+  {
+    "id": "81fc8826-32b8-4344-8754-38db0666c1e6",
+    "name": "المستقبل المشرق للطباعة",
+    "occurrences": 2
+  },
+  {
+    "id": "09dace50-089d-4a8c-9259-686ab8aad4fe",
+    "name": "شركة تاج الهدوء للكهرباء",
+    "occurrences": 1
+  },
+  {
+    "id": "36f9c6db-d4e4-4322-a64a-cfe4cd783936",
+    "name": "ادريس",
+    "occurrences": 3
+  },
+  {
+    "id": "87725b15-6eb6-4381-9b15-4cef7ccbb3c2",
+    "name": "تموينات عامر نواف العنيزي",
+    "occurrences": 1
+  },
+  {
+    "id": "310edfbe-14e0-4922-a14f-edca7bb840de",
+    "name": "CITY MAX",
+    "occurrences": 1
+  },
+  {
+    "id": "713f25ff-c220-47f7-8492-474c82a3545b",
+    "name": "MOLTAQA ALKHABBAZEEN",
+    "occurrences": 2
+  },
+  {
+    "id": "b114c370-547c-409b-87ac-09d73bb30018",
+    "name": "GULFWEST CENTRAL",
+    "occurrences": 1
+  },
+  {
+    "id": "e2eabc21-5f01-47c6-8693-82adb3419217",
+    "name": "مطابع جوهرة الخليج للطباعة",
+    "occurrences": 1
+  },
+  {
+    "id": "a76c014e-8a3e-427b-9fbe-b5f20273d9ab",
+    "name": "GULF WEST",
+    "occurrences": 4
+  },
+  {
+    "id": "bcea5cc6-7773-4450-a462-9c35df5feeeb",
+    "name": "TEMU",
+    "occurrences": 2
+  },
+  {
+    "id": "9c0a542c-7d84-4b72-8c1f-8c08386fa06f",
+    "name": "CROVER OIL",
+    "occurrences": 3
+  },
+  {
+    "id": "ae40948b-dc91-4727-a7b0-ae7bcf9f4474",
+    "name": "GAS STASHION",
+    "occurrences": 3
+  },
+  {
+    "id": "65637eac-ae21-4391-ab1b-d09a5215db64",
+    "name": "موسسة عيسي الجريسي للمقاولات",
+    "occurrences": 1
+  },
+  {
+    "id": "184c7f7a-133a-42fb-b1be-3a9d134f18fb",
+    "name": "مؤسسة عبد الله الحبس لتصليح السيارات",
+    "occurrences": 1
+  },
+  {
+    "id": "9cafbec8-0627-40a2-a2ad-d156edca2807",
+    "name": "الكيف الشرقي",
+    "occurrences": 2
+  },
+  {
+    "id": "6078017b-015e-4bcf-8944-bb09574e937e",
+    "name": "ALWADI",
+    "occurrences": 5
+  },
+  {
+    "id": "f199e149-f314-4adb-82af-da60f2f15031",
+    "name": "مجموعة فهد المعيذر",
+    "occurrences": 4
+  },
+  {
+    "id": "a4d6710b-34dc-47bb-be8d-ca969cb09c5a",
+    "name": "مؤسسة قدو للتجلره",
+    "occurrences": 1
+  },
+  {
+    "id": "8fe89565-f88c-47a3-86be-ac947f72c59a",
+    "name": "مركز ابو عوض",
+    "occurrences": 1
+  },
+  {
+    "id": "9529a73a-e81c-4c5d-98dd-0ac8e5b26070",
+    "name": "شركة العثمان للأنتاج والتصنيع الزراعي (ندى)",
+    "occurrences": 1
+  },
+  {
+    "id": "a57a54b0-5f8c-4158-bcee-53e7e516c545",
+    "name": "شركة الياسمين",
+    "occurrences": 1
+  },
+  {
+    "id": "5b637968-900d-46d2-8ae7-1d899defb310",
+    "name": "موسسة قوي التبريد",
+    "occurrences": 1
+  },
+  {
+    "id": "a1d6f772-82bd-4ffd-bb65-78f8e8b456aa",
+    "name": "شركة مراسي الخليج المحدودة",
+    "occurrences": 1
+  },
+  {
+    "id": "6e706d3d-a4c1-4520-86cb-7cc267c55147",
+    "name": "فهد ناصر للتجارة",
+    "occurrences": 1
+  },
+  {
+    "id": "4aa97a88-86ae-4a49-a379-f5d57c8a657a",
+    "name": "شركة ايم للمعدات الصناعية",
+    "occurrences": 1
+  },
+  {
+    "id": "b3a9e598-8a1e-4ba8-b567-fdf2c9d41f6f",
+    "name": "شركة عبد العزيز العقيلي",
+    "occurrences": 1
+  },
+  {
+    "id": "21b34dc8-b4df-4c2b-ba58-084f447d691d",
+    "name": "بيت الريحان الزراعية",
+    "occurrences": 1
+  },
+  {
+    "id": "8833b933-3422-40d6-ad6a-448008cb8cec",
+    "name": "ملتقي الخبازين",
+    "occurrences": 4
+  },
+  {
+    "id": "142d5956-e9e7-4c36-801e-2184a7abd5fe",
+    "name": "sasco",
+    "occurrences": 2
+  },
+  {
+    "id": "48b134a3-7e9b-4b55-9dba-e69de27fd62c",
+    "name": "العالمية للفواكة الطازجة",
+    "occurrences": 10
+  },
+  {
+    "id": "e668f526-cb40-48a3-8f38-d28985301f7f",
+    "name": "transmed",
+    "occurrences": 7
+  },
+  {
+    "id": "17babc9c-49e8-4e1b-92f0-d3f07cde0362",
+    "name": "PERFECT CHEF",
+    "occurrences": 16
+  },
+  {
+    "id": "54e8a54c-48c9-478a-9be3-bbffe0333e2f",
+    "name": "عيسي الجريسي للمقاولات",
+    "occurrences": 2
+  },
+  {
+    "id": "0e181fbe-8cdf-4d0f-a1a2-34ffc1d2289b",
+    "name": "عامل سباكة",
+    "occurrences": 1
+  },
+  {
+    "id": "4d2c855b-a151-4a59-824f-bd8d6b0ad52c",
+    "name": "قريه صويلح",
+    "occurrences": 1
+  },
+  {
+    "id": "1e7190e4-9eea-4ec0-8130-b96a54c8ca64",
+    "name": "اناقة المطبخ",
+    "occurrences": 1
+  },
+  {
+    "id": "76ac2b2d-edf8-4372-9959-80b210da104e",
+    "name": "SESCO",
+    "occurrences": 1
+  },
+  {
+    "id": "4670071e-0772-4998-8e1e-89e424139dc1",
+    "name": "الهزازي",
+    "occurrences": 1
+  },
+  {
+    "id": "68096b67-317e-46fd-9cec-325e6812067c",
+    "name": "BANDA",
+    "occurrences": 1
+  },
+  {
+    "id": "d8afbd5d-c7b9-4f27-b286-b00d4f8992d4",
+    "name": "LACE FLOWER",
+    "occurrences": 1
+  },
+  {
+    "id": "0bbfa7d5-4faa-4db0-a568-483272cafda9",
+    "name": "jarir",
+    "occurrences": 1
+  },
+  {
+    "id": "74288a8b-9db3-4550-8bf7-2b0e3cd6c785",
+    "name": "alsharq book store",
+    "occurrences": 1
+  },
+  {
+    "id": "4ff985f4-c75b-4821-82d3-3313223c31c0",
+    "name": "temu",
+    "occurrences": 2
+  },
+  {
+    "id": "ae6a13b8-2310-4458-94cf-2cc535b56df6",
+    "name": "cdc",
+    "occurrences": 1
+  },
+  {
+    "id": "0df2cc8e-fd54-40c4-b5b6-09910d38219e",
+    "name": "dalla",
+    "occurrences": 2
+  },
+  {
+    "id": "7fdee591-b41b-4bfe-9783-6319318a41cd",
+    "name": "neft",
+    "occurrences": 1
+  },
+  {
+    "id": "7561d21c-09c4-4301-8597-fdcac37a47b7",
+    "name": "شركة ادريس",
+    "occurrences": 1
+  },
+  {
+    "id": "ed42225d-f960-4f69-af32-e6bc97d465f7",
+    "name": "mawaduna",
+    "occurrences": 2
+  },
+  {
+    "id": "d208902a-3d1f-4787-9bcc-547b5fae9361",
+    "name": "ALJAMEEL",
+    "occurrences": 1
+  },
+  {
+    "id": "5151a72c-74cb-4a02-b3f2-7f46c2183783",
+    "name": "موسسة قدوح البيت للتجارة",
+    "occurrences": 2
+  },
+  {
+    "id": "59c97741-307c-45fc-9e7f-fbf1b056e4db",
+    "name": "DALLA",
+    "occurrences": 1
+  },
+  {
+    "id": "9a220b05-b3a0-43f9-a639-528d4c5a94e6",
+    "name": "الادريس",
+    "occurrences": 6
+  },
+  {
+    "id": "0a514a86-8b3c-4633-87d3-dd3df646987d",
+    "name": "al jameel",
+    "occurrences": 1
+  },
+  {
+    "id": "126e7108-17a5-4014-8d82-c84af03eff5b",
+    "name": "HAZAZI",
+    "occurrences": 1
+  },
+  {
+    "id": "8c00dd41-3abe-4ca6-a35e-170b926b5cda",
+    "name": "القصر للبلاستيك",
+    "occurrences": 1
+  },
+  {
+    "id": "861e767b-0ce7-4a18-a403-c741f9c4f6bd",
+    "name": "مؤسسة الجريسي",
+    "occurrences": 2
+  },
+  {
+    "id": "8e74e78f-11d7-4425-a274-f478d7872df6",
+    "name": "gulf central",
+    "occurrences": 4
+  },
+  {
+    "id": "474ae47e-4c1a-482c-b452-06627d74caa9",
+    "name": "مؤسسة قدوح البيت التجارة",
+    "occurrences": 2
+  },
+  {
+    "id": "2a32c142-f182-4b36-a463-802d89aa3615",
+    "name": "DANUB",
+    "occurrences": 10
+  },
+  {
+    "id": "fafedaf0-5203-4bd8-b53e-ca50137d3c1a",
+    "name": "CROVER",
+    "occurrences": 1
+  },
+  {
+    "id": "d13763fa-7e61-4b60-bd2a-ba7e97eb72d3",
+    "name": "SFAQAT",
+    "occurrences": 2
+  },
+  {
+    "id": "97938463-ed29-41fb-978b-ce08fc3d119b",
+    "name": "breehant",
+    "occurrences": 1
+  },
+  {
+    "id": "c33878b6-ce4c-45ca-801b-238cd6d61fd2",
+    "name": "قرية صويليح",
+    "occurrences": 1
+  },
+  {
+    "id": "626a1612-dece-42fd-b2a4-a1cf9e719791",
+    "name": "hazizi",
+    "occurrences": 1
+  },
+  {
+    "id": "58e447e7-ee35-4715-a63e-13bab73df7a0",
+    "name": "نقل مبرد",
+    "occurrences": 2
+  },
+  {
+    "id": "d4fccc2e-8596-4a73-b27f-b130d1d3cf2c",
+    "name": "مؤسسة نايف موسي للمفارش",
+    "occurrences": 1
+  },
+  {
+    "id": "71c788bf-affb-499a-aea3-8c43c5ca590b",
+    "name": "moltaqa alkabbazeen",
+    "occurrences": 1
+  },
+  {
+    "id": "6ed670c0-1ff8-41e6-aac5-3f4945b4faf9",
+    "name": "الوان الهدية",
+    "occurrences": 1
+  },
+  {
+    "id": "775e9dcc-b4b4-4698-b630-fe51fba31dc3",
+    "name": "SAHEL",
+    "occurrences": 1
+  },
+  {
+    "id": "668270e4-e4c9-42a7-a412-7ebb5cbc3553",
+    "name": "PETROMIN",
+    "occurrences": 1
+  },
+  {
+    "id": "6db1c333-f34d-4ac7-8e35-6625f9bdd28f",
+    "name": "شركة قصر البلاستيك",
+    "occurrences": 1
+  },
+  {
+    "id": "17e70818-58a1-4ff0-a8ac-459210c0f9c4",
+    "name": "ملتقي الحلويات",
+    "occurrences": 1
+  },
+  {
+    "id": "7c56770c-c282-415d-8ed6-6ea84b3c4831",
+    "name": "حلويات الحمود",
+    "occurrences": 1
+  },
+  {
+    "id": "759da56e-a386-42e5-9a35-3860d8cea812",
+    "name": "شركة العوبنانى للتجارة",
+    "occurrences": 1
+  },
+  {
+    "id": "ab8e4a4d-d937-4920-b609-bb90d9dd7226",
+    "name": "SWEET MIX",
+    "occurrences": 1
+  },
+  {
+    "id": "b6a37353-7825-415e-82fb-3a248524346a",
+    "name": "JAHAZ APP",
+    "occurrences": 1
+  },
+  {
+    "id": "f1945cc3-be41-46df-8096-5dacfa5537f8",
+    "name": "مركز سلامة للمركبات",
+    "occurrences": 1
+  },
+  {
+    "id": "ef6b4825-aaa6-43c3-b6b5-161b7df29e0a",
+    "name": "aljameel",
+    "occurrences": 1
+  },
+  {
+    "id": "80fa7d0a-72eb-42cb-a22a-73ea4528ad9d",
+    "name": "MAWADUNA",
+    "occurrences": 1
+  },
+  {
+    "id": "3c85e316-ad12-44cf-aca9-4c88d708077e",
+    "name": "مؤسسة نقل العفش البري",
+    "occurrences": 1
+  },
+  {
+    "id": "2bd4ce2c-36a1-493e-84d7-22393a720c8a",
+    "name": "foodics",
+    "occurrences": 3
+  },
+  {
+    "id": "8453bbdd-89ec-4794-9434-597ed6485e0d",
+    "name": "صفقات",
+    "occurrences": 1
+  },
+  {
+    "id": "9893e3b1-7267-465e-960d-7276c1d630fb",
+    "name": "مؤسسة الجريسي للمقاولات",
+    "occurrences": 1
+  },
+  {
+    "id": "ed7a940d-3f4a-4b20-bc50-b2a870631832",
+    "name": "private food",
+    "occurrences": 1
+  },
+  {
+    "id": "d0763703-ff6d-470b-a1ac-a5e76e2703f3",
+    "name": "شركة افكاركم الامحدودة للطباعة",
+    "occurrences": 1
+  },
+  {
+    "id": "7ffface4-758b-446e-acbe-53fb0e57f8ae",
+    "name": "ALNUMUW",
+    "occurrences": 1
+  },
+  {
+    "id": "05b84391-4ef6-4be0-8814-ddfad3e71fa7",
+    "name": "SAADEDDIN",
+    "occurrences": 1
+  }
+]

@@ -1,0 +1,42 @@
+[
+  {
+    "id": "56a2d574-01f1-4183-ba2a-49d1b2f11791",
+    "tenantId": "KWkguo4RS4ZmZQL4l5UMM6sC8DX2",
+    "fileId": "b5de7d369298aace8b768026f1db6e70af6e8749d9ddb7a3593d909f62990668",
+    "fileName": "مشتريات الفترة من يناير وحتى مارس 2025.xlsx",
+    "moduleType": "expenses",
+    "proposedAction": "PREVIEW_SOFT_DISABLE",
+    "status": "APPROVED_AWAITING_EXECUTION",
+    "justification": "طلب مراجعة استبعاد الملف بسبب وجود بيانات تاريخية متداخلة، مع ضرورة مراجعة السجلات الفريدة قبل اتخاذ أي إجراء لاحق.",
+    "requestedBy": "KWkguo4RS4ZmZQL4l5UMM6sC8DX2",
+    "timestamp": "2026-05-30T22:50:26.510Z",
+    "projectedImpact": {
+      "impactMode": "CURRENT_REPORT_DELTA",
+      "recordCountDelta": -358,
+      "standardizedSupplierCountDelta": null,
+      "taxableAmountDelta": -235007.7273913044,
+      "nonTaxableExemptAmountDelta": -10887.42,
+      "totalBeforeVatDelta": -245895.1473913044,
+      "inputVatAmountDelta": -35251.159108695654,
+      "totalIncludingVatDelta": -281146.3065000001,
+      "affectedAccountingPeriods": [
+        "2025-01"
+      ],
+      "affectedDashboardsReports": [
+        "ExpensesDashboard"
+      ],
+      "journalEntryImpact": {
+        "status": "REQUIRES_VERIFICATION",
+        "summaryArabic": "يلزم التحقق من قيود اليومية المرتبطة"
+      }
+    },
+    "decisionHistory": [
+      {
+        "decision": "APPROVED_AWAITING_EXECUTION",
+        "note": "يمكن",
+        "timestamp": "2026-05-30T23:37:14.249Z",
+        "reviewerId": "KWkguo4RS4ZmZQL4l5UMM6sC8DX2"
+      }
+    ]
+  }
+]

@@ -1,0 +1,290 @@
+import React, { useState } from 'react';
+import { Search, Bell, Settings as SettingsIcon, LogOut, Grid, ChevronRight, Home, Briefcase, FileText, ShieldAlert, Users, Layers, Activity, BookOpen, ChevronDown } from 'lucide-react';
+import { AppConfig } from '../config/appConfig';
+
+interface NewAppShellProps {
+  user: any;
+  profile: any;
+  settings: any;
+  logout: () => void;
+  appMode: string;
+  activeTab: string;
+  handleNavClick: (mode: string, tab: string) => void;
+  totalAnomaliesCount: number;
+  mainContent: React.ReactNode;
+  contentHeader: React.ReactNode;
+}
+
+export function NewAppShell({
+  user, profile, settings, logout, appMode, activeTab, handleNavClick, totalAnomaliesCount, mainContent, contentHeader
+}: NewAppShellProps) {
+  const [megaMenuOpen, setMegaMenuOpen] = useState<string | null>(null);
+  
+  const handleDomainClick = (domain: string) => {
+     if (megaMenuOpen === domain) setMegaMenuOpen(null);
+     else setMegaMenuOpen(domain);
+  };
+
+  const navDomain = (title: string, onSelect: () => void) => {
+     onSelect();
+     setMegaMenuOpen(null);
+  };
+
+  const TopNavItems = [
+    { name: 'Dashboard', id: 'dashboard' },
+    { name: 'Operations', id: 'operations' },
+    { name: 'Accounting', id: 'accounting' },
+    { name: 'Reports', id: 'reports' },
+    { name: 'Governance', id: 'governance' },
+    { name: 'Administration', id: 'administration' },
+  ];
+
+  return (
+    <div dir="rtl" className="h-screen bg-[#F8FAFC] font-sans text-slate-800 flex flex-col overflow-hidden">
+      {/* LEVEL 1: Top Primary Navigation */}
+      <header className="bg-slate-900 text-slate-200 border-b border-slate-800 shrink-0 z-[60] relative">
+         <div className="flex items-center justify-between px-6 h-14">
+            <div className="flex items-center gap-8 h-full">
+               <div className="flex items-center gap-3">
+                 <div className="bg-gradient-to-br from-indigo-500 to-blue-600 p-1.5 rounded-lg text-white shadow-sm">
+                    {settings?.logo || AppConfig.logo ? (
+                      <img src={settings?.logo || AppConfig.logo} alt="Logo" className="w-5 h-5 object-contain" />
+                    ) : (
+                      <Grid className="w-5 h-5" />
+                    )}
+                 </div>
+                 <div className="flex flex-col">
+                    <span className="text-base font-bold leading-none text-white">{AppConfig.appName}</span>
+                 </div>
+               </div>
+
+               <nav className="hidden xl:flex items-center h-full">
+                  {TopNavItems.map(item => (
+                    <button 
+                       key={item.id}
+                       onClick={() => handleDomainClick(item.id)}
+                       className={`h-full px-4 text-sm font-medium border-b-2 transition-colors flex items-center gap-1.5
+                          ${megaMenuOpen === item.id ? 'border-blue-500 text-white bg-slate-800/50' : 'border-transparent text-slate-300 hover:text-white hover:bg-slate-800/30'}
+                       `}
+                    >
+                       {item.name}
+                       <ChevronDown className={`w-3.5 h-3.5 transition-transform ${megaMenuOpen === item.id ? 'rotate-180' : ''}`} />
+                    </button>
+                  ))}
+               </nav>
+            </div>
+
+            <div className="flex items-center gap-3">
+               <div className="relative hidden md:block">
+                  <Search className="w-4 h-4 text-slate-400 absolute right-3 top-1/2 transform -translate-y-1/2" />
+                  <input 
+                     type="text" 
+                     placeholder="Global search..." 
+                     className="bg-slate-800 border border-slate-700 text-sm text-slate-200 px-4 py-1.5 pr-9 rounded-md w-64 focus:outline-none focus:border-blue-500 focus:bg-slate-900 transition-colors"
+                  />
+               </div>
+               <button className="p-2 text-slate-300 hover:text-white hover:bg-slate-800 rounded-md relative">
+                  <Bell className="w-4 h-4" />
+                  {totalAnomaliesCount > 0 && <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full animate-pulse"></span>}
+               </button>
+               <div className="w-px h-6 bg-slate-700 mx-1"></div>
+               <div className="flex items-center gap-2 cursor-pointer hover:bg-slate-800 p-1.5 rounded-md transition-colors">
+                  <div className="w-7 h-7 rounded-sm bg-indigo-500 flex items-center justify-center text-white text-xs font-bold">
+                     {user?.email?.[0]?.toUpperCase()}
+                  </div>
+               </div>
+            </div>
+         </div>
+
+         {/* Mega Menu Overlay */}
+         {megaMenuOpen && (
+            <div className="absolute top-14 left-0 w-full bg-white border-b border-slate-200 shadow-xl z-50 text-slate-800 p-6 flex justify-center animate-in fade-in slide-in-from-top-2 duration-200">
+               <div className="max-w-5xl w-full grid grid-cols-4 gap-8">
+                  {megaMenuOpen === 'operations' && (
+                     <>
+                        <div>
+                           <h3 className="text-sm font-bold text-slate-900 mb-3 border-b pb-2">Supply Chain & Procurement</h3>
+                           <ul className="space-y-1">
+                              <li><button onClick={() => navDomain('expenses', () => handleNavClick('expenses', 'dashboard'))} className="text-sm text-slate-600 hover:text-blue-600 w-full text-right py-1.5">Purchasing & Expenses</button></li>
+                              <li><button onClick={() => navDomain('expenses_vendors', () => handleNavClick('expenses', 'grouped_purchases'))} className="text-sm text-slate-600 hover:text-blue-600 w-full text-right py-1.5">Vendor Management</button></li>
+                              <li><button onClick={() => navDomain('items', () => handleNavClick('expenses', 'items_directory'))} className="text-sm text-slate-600 hover:text-blue-600 w-full text-right py-1.5">Inventory Items</button></li>
+                           </ul>
+                        </div>
+                        <div>
+                           <h3 className="text-sm font-bold text-slate-900 mb-3 border-b pb-2">Sales & Customers</h3>
+                           <ul className="space-y-1">
+                              <li><button onClick={() => navDomain('revenues', () => handleNavClick('revenues', 'dashboard'))} className="text-sm text-slate-600 hover:text-blue-600 w-full text-right py-1.5">Revenues Manager</button></li>
+                              <li><button onClick={() => navDomain('customers', () => handleNavClick('revenues', 'grouped_purchases'))} className="text-sm text-slate-600 hover:text-blue-600 w-full text-right py-1.5">Customer Profiles</button></li>
+                              <li><button onClick={() => navDomain('invoices', () => handleNavClick('revenues', 'smart_invoice'))} className="text-sm text-slate-600 hover:text-blue-600 w-full text-right py-1.5">Billing & Invoicing</button></li>
+                           </ul>
+                        </div>
+                        <div>
+                           <h3 className="text-sm font-bold text-slate-900 mb-3 border-b pb-2">Human Resources</h3>
+                           <ul className="space-y-1">
+                              <li><button onClick={() => navDomain('payroll', () => handleNavClick('payroll', 'dashboard'))} className="text-sm text-slate-600 hover:text-blue-600 w-full text-right py-1.5">Payroll Operations</button></li>
+                              <li><button onClick={() => navDomain('employees', () => handleNavClick('payroll', 'grouped_purchases'))} className="text-sm text-slate-600 hover:text-blue-600 w-full text-right py-1.5">Employee Directory</button></li>
+                           </ul>
+                        </div>
+                     </>
+                  )}
+                  {megaMenuOpen === 'accounting' && (
+                     <>
+                        <div>
+                           <h3 className="text-sm font-bold text-slate-900 mb-3 border-b pb-2">Financial Accounting</h3>
+                           <ul className="space-y-1">
+                              <li><button onClick={() => navDomain('banks', () => handleNavClick('banks', 'dashboard'))} className="text-sm text-slate-600 hover:text-blue-600 w-full text-right py-1.5">Bank Reconciliation</button></li>
+                              <li><button onClick={() => navDomain('gl', () => handleNavClick('reports', 'visual_dashboard'))} className="text-sm text-slate-600 hover:text-blue-600 w-full text-right py-1.5">General Ledger</button></li>
+                           </ul>
+                        </div>
+                        <div>
+                           <h3 className="text-sm font-bold text-slate-900 mb-3 border-b pb-2">Financial Statements</h3>
+                           <ul className="space-y-1">
+                              <li><button onClick={() => navDomain('income', () => handleNavClick('reports', 'income_statement'))} className="text-sm text-slate-600 hover:text-blue-600 w-full text-right py-1.5">Income Statement</button></li>
+                              <li><button onClick={() => navDomain('balance', () => handleNavClick('reports', 'balance_sheet'))} className="text-sm text-slate-600 hover:text-blue-600 w-full text-right py-1.5">Balance Sheet</button></li>
+                              <li><button onClick={() => navDomain('cashflow', () => handleNavClick('reports', 'cash_flow'))} className="text-sm text-slate-600 hover:text-blue-600 w-full text-right py-1.5">Cash Flow Statement</button></li>
+                           </ul>
+                        </div>
+                     </>
+                  )}
+                  {megaMenuOpen === 'reports' && (
+                     <>
+                        <div>
+                           <h3 className="text-sm font-bold text-slate-900 mb-3 border-b pb-2">Executive Reports</h3>
+                           <ul className="space-y-1">
+                              <li><button onClick={() => navDomain('exec', () => handleNavClick('reports', 'owners_summary'))} className="text-sm text-slate-600 hover:text-blue-600 w-full text-right py-1.5">Executive Dashboard</button></li>
+                              <li><button onClick={() => navDomain('visual', () => handleNavClick('reports', 'visual_dashboard'))} className="text-sm text-slate-600 hover:text-blue-600 w-full text-right py-1.5">Visual Analytics</button></li>
+                           </ul>
+                        </div>
+                     </>
+                  )}
+                  {megaMenuOpen === 'governance' && (
+                     <>
+                        <div>
+                           <h3 className="text-sm font-bold text-slate-900 mb-3 border-b pb-2">Risk & Governance</h3>
+                           <ul className="space-y-1">
+                              <li><button onClick={() => navDomain('alerts', () => handleNavClick('reports', 'alerts'))} className="text-sm text-slate-600 hover:text-blue-600 w-full text-right py-1.5">Master Alerts & Anomalies</button></li>
+                              <li><button onClick={() => navDomain('data', () => handleNavClick('reports', 'data_governance'))} className="text-sm text-slate-600 hover:text-blue-600 w-full text-right py-1.5">Data Integrity Audit</button></li>
+                              <li><button onClick={() => navDomain('audit_log', () => handleNavClick('reports', 'audit_log'))} className="text-sm text-slate-600 hover:text-blue-600 w-full text-right py-1.5">System Audit Log</button></li>
+                           </ul>
+                        </div>
+                     </>
+                  )}
+                  {megaMenuOpen === 'administration' && (
+                     <>
+                        <div>
+                           <h3 className="text-sm font-bold text-slate-900 mb-3 border-b pb-2">System Setup</h3>
+                           <ul className="space-y-1">
+                              <li><button onClick={() => navDomain('users', () => handleNavClick('users', 'user_management'))} className="text-sm text-slate-600 hover:text-blue-600 w-full text-right py-1.5">Users & Roles</button></li>
+                              <li><button onClick={() => navDomain('settings', () => handleNavClick('users', 'settings'))} className="text-sm text-slate-600 hover:text-blue-600 w-full text-right py-1.5">System Preferences</button></li>
+                           </ul>
+                        </div>
+                     </>
+                  )}
+               </div>
+            </div>
+         )}
+      </header>
+      
+      {/* Click outside MegaMenu to close */}
+      {megaMenuOpen && (
+         <div className="fixed inset-0 z-40 bg-slate-900/10 backdrop-blur-[1px]" onClick={() => setMegaMenuOpen(null)}></div>
+      )}
+
+      {/* Workspace Tabs + Breadcrumbs */}
+      <div className="bg-white border-b border-slate-200 px-4 py-1.5 flex flex-col gap-1 shrink-0 z-30 shadow-sm relative">
+         <div className="flex items-center text-xs text-slate-500 font-medium">
+             <span>ERP System</span>
+             <ChevronRight className="w-3 h-3 mx-1 opacity-50" />
+             <span className="capitalize">{appMode.replace('_', ' ')}</span>
+             <ChevronRight className="w-3 h-3 mx-1 opacity-50" />
+             <span className="text-blue-600 font-bold capitalize">{activeTab.replace('_', ' ')}</span>
+         </div>
+         <div className="flex items-center gap-1 mt-1 -mb-[7px]">
+            <div className="bg-[#F8FAFC] border-t-2 border-t-blue-500 border-x border-slate-200 text-blue-700 font-bold px-4 py-1.5 text-sm rounded-t-md shadow-sm relative z-10 font-sans tracking-wide">
+               {appMode === 'expenses' && 'Purchasing Workspace'}
+               {appMode === 'revenues' && 'Sales Workspace'}
+               {appMode === 'payroll' && 'Payroll Workspace'}
+               {appMode === 'banks' && 'Cash Flow Workspace'}
+               {appMode === 'reports' && 'Financial Reports Workspace'}
+               {appMode === 'users' && 'Administration Workspace'}
+            </div>
+         </div>
+      </div>
+
+      <div className="flex-1 flex flex-row overflow-hidden relative z-20">
+         {/* Small Contextual Panel (ONLY WHEN NEEDED) */}
+         {/* Condition: Show only if it's a module that has multiple tools like expenses, revenues, etc */}
+         {['expenses', 'revenues', 'payroll', 'banks'].includes(appMode) && (
+            <aside className="w-[220px] bg-white border-l border-slate-200 shrink-0 shadow-sm flex flex-col z-10">
+               <div className="p-4 border-b border-slate-100 bg-slate-50/50">
+                  <h4 className="text-xs font-black text-slate-800 uppercase tracking-wider">{appMode} Tools</h4>
+               </div>
+               <nav className="p-3 space-y-1 overflow-y-auto w-full">
+                  <button 
+                     onClick={() => handleNavClick(appMode, 'dashboard')}
+                     className={`w-full text-right px-3 py-2 rounded-md text-sm font-bold flex items-center transition-colors ${activeTab === 'dashboard' ? 'bg-blue-50 text-blue-700' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}
+                  >
+                     <Activity className="w-4 h-4 ml-2 opacity-70" /> Dashboard & Analytics
+                  </button>
+                  <button 
+                     onClick={() => handleNavClick(appMode, 'grouped_purchases')}
+                     className={`w-full text-right px-3 py-2 rounded-md text-sm font-bold flex items-center transition-colors ${activeTab === 'grouped_purchases' ? 'bg-blue-50 text-blue-700' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}
+                  >
+                     <Users className="w-4 h-4 ml-2 opacity-70" /> {appMode === 'revenues' ? 'Customers' : appMode === 'expenses' ? 'Vendors' : 'Entities'}
+                  </button>
+                  <button 
+                     onClick={() => handleNavClick(appMode, 'categories_summary')}
+                     className={`w-full text-right px-3 py-2 rounded-md text-sm font-bold flex items-center transition-colors ${activeTab === 'categories_summary' ? 'bg-blue-50 text-blue-700' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}
+                  >
+                     <Layers className="w-4 h-4 ml-2 opacity-70" /> Categories / CoA
+                  </button>
+                  {appMode === 'expenses' && (
+                     <button 
+                        onClick={() => handleNavClick(appMode, 'items_directory')}
+                        className={`w-full text-right px-3 py-2 rounded-md text-sm font-bold flex items-center transition-colors ${activeTab === 'items_directory' ? 'bg-blue-50 text-blue-700' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}
+                     >
+                        <BookOpen className="w-4 h-4 ml-2 opacity-70" /> Item Master
+                     </button>
+                  )}
+                  {appMode === 'revenues' && (
+                     <button 
+                        onClick={() => handleNavClick(appMode, 'smart_invoice')}
+                        className={`w-full text-right px-3 py-2 rounded-md text-sm font-bold flex items-center transition-colors ${activeTab === 'smart_invoice' ? 'bg-blue-50 text-blue-700' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}
+                     >
+                        <FileText className="w-4 h-4 ml-2 opacity-70" /> Smart Invoicing
+                     </button>
+                  )}
+                  <div className="h-px bg-slate-100 my-2 w-full"></div>
+                  <button 
+                     onClick={() => handleNavClick(appMode, 'upload')}
+                     className={`w-full text-right px-3 py-2 rounded-md text-sm font-bold flex items-center transition-colors ${activeTab === 'upload' ? 'bg-rose-50 text-rose-700' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}
+                  >
+                     <Briefcase className="w-4 h-4 ml-2 opacity-70" /> Import Data
+                  </button>
+                  <button 
+                     onClick={() => handleNavClick(appMode, 'audit')}
+                     className={`w-full text-right px-3 py-2 rounded-md text-sm font-bold flex items-center justify-between transition-colors ${activeTab === 'audit' ? 'bg-amber-50 text-amber-700' : 'text-slate-600 hover:bg-amber-50 hover:text-amber-800'}`}
+                  >
+                     <span className="flex items-center"><ShieldAlert className="w-4 h-4 ml-2 opacity-70" /> Diagnostics</span>
+                     {totalAnomaliesCount > 0 && <span className="text-[10px] bg-rose-500 text-white px-1.5 py-0.5 rounded-full">{totalAnomaliesCount}</span>}
+                  </button>
+               </nav>
+            </aside>
+         )}
+
+         {/* Main Workspace Content (reusing existing rendered elements) */}
+         <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden bg-[#F8FAFC]">
+            {/* The existing content header (filters, date pickers) */}
+            <div className="bg-white border-b border-slate-200 shadow-sm z-[5]">
+               {contentHeader}
+            </div>
+            
+            {/* The main workspace content */}
+            <div className="flex-1 overflow-auto p-4 md:p-6 lg:p-8">
+               {mainContent}
+            </div>
+         </div>
+      </div>
+    </div>
+  );
+}

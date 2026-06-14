@@ -1,0 +1,13 @@
+{
+  "sourceJournalEntries": 1179,
+  "sourceRecords": 1446,
+  "uploadedFiles": 3,
+  "mappedJournalHeaders": 1179,
+  "mappedJournalLines": 3634,
+  "mappedTaxDetails": 1179,
+  "mappingFailures": 0,
+  "roundingDifferences": 798,
+  "apAccountCollapseCandidates": 730,
+  "vatTaxMappingIssues": 0,
+  "tenantAnomalies": 0
+}

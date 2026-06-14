@@ -1,0 +1,352 @@
+[
+  {
+    "jeId": "je_1c77afb4-e1ca-4018-9c96-08a610768738",
+    "field": "taxAmount",
+    "raw": 59.472,
+    "normalized": 59.47,
+    "diff": 0.0020000000000024443
+  },
+  {
+    "jeId": "je_aefbc79f-a978-4083-ad01-74b6cf935e82",
+    "field": "taxAmount",
+    "raw": 6.521999999999999,
+    "normalized": 6.52,
+    "diff": 0.0019999999999997797
+  },
+  {
+    "jeId": "je_eccf4d51-fc51-494b-9f91-6793743d5aad",
+    "field": "taxAmount",
+    "raw": 31.435499999999998,
+    "normalized": 31.44,
+    "diff": -0.004500000000003723
+  },
+  {
+    "jeId": "je_7969e6f2-fdee-4b03-a3c7-3a9c5094ce44",
+    "field": "taxAmount",
+    "raw": 18.743478260869566,
+    "normalized": 18.74,
+    "diff": 0.0034782608695671513
+  },
+  {
+    "jeId": "je_7969e6f2-fdee-4b03-a3c7-3a9c5094ce44",
+    "field": "amount",
+    "raw": 124.95652173913044,
+    "normalized": 124.96,
+    "diff": -0.003478260869556493
+  },
+  {
+    "jeId": "je_0939fd37-eb8a-48d4-9197-8ed2530cec56",
+    "field": "taxAmount",
+    "raw": 7.552173913043478,
+    "normalized": 7.55,
+    "diff": 0.0021739130434781373
+  },
+  {
+    "jeId": "je_0939fd37-eb8a-48d4-9197-8ed2530cec56",
+    "field": "amount",
+    "raw": 50.34782608695652,
+    "normalized": 50.35,
+    "diff": -0.0021739130434781373
+  },
+  {
+    "jeId": "je_dbb852c7-9342-4ef0-a05b-3e8f83f10fe7",
+    "field": "taxAmount",
+    "raw": 46.64347826086957,
+    "normalized": 46.64,
+    "diff": 0.003478260869570704
+  },
+  {
+    "jeId": "je_dbb852c7-9342-4ef0-a05b-3e8f83f10fe7",
+    "field": "amount",
+    "raw": 310.9565217391305,
+    "normalized": 310.96,
+    "diff": -0.003478260869485439
+  },
+  {
+    "jeId": "je_4d00fed8-a73a-4ddc-a4cb-25a32cebd6c0",
+    "field": "taxAmount",
+    "raw": 62.60849999999999,
+    "normalized": 62.61,
+    "diff": -0.0015000000000071623
+  },
+  {
+    "jeId": "je_ae16caa4-1bd8-434e-8ab9-36157adf3408",
+    "field": "taxAmount",
+    "raw": 224.54999999999998,
+    "normalized": 224.55,
+    "diff": -2.842170943040401e-14
+  },
+  {
+    "jeId": "je_4fb08592-8276-4668-a85b-c51f41f427a8",
+    "field": "taxAmount",
+    "raw": 7.605,
+    "normalized": 7.61,
+    "diff": -0.004999999999999893
+  },
+  {
+    "jeId": "je_eec848c1-7fab-48ba-be0c-4b02a444b87b",
+    "field": "taxAmount",
+    "raw": 31.049999999999997,
+    "normalized": 31.05,
+    "diff": -3.552713678800501e-15
+  },
+  {
+    "jeId": "je_d9b13550-7dee-4abb-b823-a14e74c1d59e",
+    "field": "taxAmount",
+    "raw": 23.738999999999997,
+    "normalized": 23.74,
+    "diff": -0.0010000000000012221
+  },
+  {
+    "jeId": "je_555f966f-70f2-4853-b17d-2da346dd4d88",
+    "field": "taxAmount",
+    "raw": 10.799999999999999,
+    "normalized": 10.8,
+    "diff": -1.7763568394002505e-15
+  },
+  {
+    "jeId": "je_9a69ccfe-f707-42da-afc8-d5b0db6e101b",
+    "field": "taxAmount",
+    "raw": 388.1739130434783,
+    "normalized": 388.17,
+    "diff": 0.003913043478291911
+  },
+  {
+    "jeId": "je_9a69ccfe-f707-42da-afc8-d5b0db6e101b",
+    "field": "amount",
+    "raw": 2587.826086956522,
+    "normalized": 2587.83,
+    "diff": -0.0039130434779508505
+  },
+  {
+    "jeId": "je_743abeaf-7d80-4150-b11d-d5f0b0366613",
+    "field": "taxAmount",
+    "raw": 64.083,
+    "normalized": 64.08,
+    "diff": 0.0030000000000001137
+  },
+  {
+    "jeId": "je_1c134c3a-8aa2-42ff-a80b-9334f621207c",
+    "field": "taxAmount",
+    "raw": 39.675,
+    "normalized": 39.67,
+    "diff": 0.0049999999999954525
+  },
+  {
+    "jeId": "je_8836751a-110e-4e26-9873-0488faee1092",
+    "field": "taxAmount",
+    "raw": 16.305,
+    "normalized": 16.31,
+    "diff": -0.004999999999999005
+  },
+  {
+    "jeId": "je_2497965f-8d3a-4a03-962c-7de5340bd5d0",
+    "field": "taxAmount",
+    "raw": 61.44130434782609,
+    "normalized": 61.44,
+    "diff": 0.0013043478260925667
+  },
+  {
+    "jeId": "je_2497965f-8d3a-4a03-962c-7de5340bd5d0",
+    "field": "amount",
+    "raw": 409.60869565217394,
+    "normalized": 409.61,
+    "diff": -0.0013043478260783559
+  },
+  {
+    "jeId": "je_83fbea0a-8765-475d-acd7-e00df72df8df",
+    "field": "taxAmount",
+    "raw": 61.44130434782609,
+    "normalized": 61.44,
+    "diff": 0.0013043478260925667
+  },
+  {
+    "jeId": "je_83fbea0a-8765-475d-acd7-e00df72df8df",
+    "field": "amount",
+    "raw": 409.60869565217394,
+    "normalized": 409.61,
+    "diff": -0.0013043478260783559
+  },
+  {
+    "jeId": "je_25c6aef1-e520-4e75-9809-e7f01f12f170",
+    "field": "taxAmount",
+    "raw": 118.944,
+    "normalized": 118.94,
+    "diff": 0.0040000000000048885
+  },
+  {
+    "jeId": "je_d673621d-86fa-485f-a8c1-35c9a3c5d6df",
+    "field": "taxAmount",
+    "raw": 47.21699999999999,
+    "normalized": 47.22,
+    "diff": -0.003000000000007219
+  },
+  {
+    "jeId": "je_988cce85-c8ed-4f0c-b5bf-f0eebd02d5a0",
+    "field": "taxAmount",
+    "raw": 59.847,
+    "normalized": 59.85,
+    "diff": -0.0030000000000001137
+  },
+  {
+    "jeId": "je_103d4681-387c-4201-a770-f88a9c04d50c",
+    "field": "taxAmount",
+    "raw": 37.8255,
+    "normalized": 37.83,
+    "diff": -0.0045000000000001705
+  },
+  {
+    "jeId": "je_a8cabdcf-320a-4244-9881-b6ce22698ee8",
+    "field": "taxAmount",
+    "raw": 6.521999999999999,
+    "normalized": 6.52,
+    "diff": 0.0019999999999997797
+  },
+  {
+    "jeId": "je_6e17534a-c2d1-4881-9c61-b74f3c9ef8a6",
+    "field": "taxAmount",
+    "raw": 64.97608695652174,
+    "normalized": 64.98,
+    "diff": -0.003913043478263489
+  },
+  {
+    "jeId": "je_6e17534a-c2d1-4881-9c61-b74f3c9ef8a6",
+    "field": "amount",
+    "raw": 433.17391304347825,
+    "normalized": 433.17,
+    "diff": 0.003913043478235068
+  },
+  {
+    "jeId": "je_c2b529e2-bf05-4236-8fc9-80518fa2ca55",
+    "field": "taxAmount",
+    "raw": 152.95049999999998,
+    "normalized": 152.95,
+    "diff": 0.0004999999999881766
+  },
+  {
+    "jeId": "je_144d399f-7ddb-42df-ae77-b92faa212d8c",
+    "field": "taxAmount",
+    "raw": 14.625,
+    "normalized": 14.63,
+    "diff": -0.005000000000000782
+  },
+  {
+    "jeId": "je_2f3281c4-fe7f-4b06-a0f1-8cf0390d5937",
+    "field": "taxAmount",
+    "raw": 2.6999999999999997,
+    "normalized": 2.7,
+    "diff": -4.440892098500626e-16
+  },
+  {
+    "jeId": "je_5d025f24-07d2-4281-bc60-b3ed4a4bcb87",
+    "field": "taxAmount",
+    "raw": 3.654782608695652,
+    "normalized": 3.65,
+    "diff": 0.0047826086956521685
+  },
+  {
+    "jeId": "je_5d025f24-07d2-4281-bc60-b3ed4a4bcb87",
+    "field": "amount",
+    "raw": 24.36521739130435,
+    "normalized": 24.37,
+    "diff": -0.004782608695652613
+  },
+  {
+    "jeId": "je_e6d98054-250e-4e8b-a84d-3b6c111d90c1",
+    "field": "taxAmount",
+    "raw": 26.099999999999998,
+    "normalized": 26.1,
+    "diff": -3.552713678800501e-15
+  },
+  {
+    "jeId": "je_d4551792-6eaf-4b5d-a229-a59ff9bcd0d5",
+    "field": "taxAmount",
+    "raw": 27.639,
+    "normalized": 27.64,
+    "diff": -0.0010000000000012221
+  },
+  {
+    "jeId": "je_1327193b-6161-418c-b8c0-9d6a63d0b285",
+    "field": "taxAmount",
+    "raw": 185.1225,
+    "normalized": 185.12,
+    "diff": 0.0024999999999977263
+  },
+  {
+    "jeId": "je_1e91975f-d319-4861-a812-f1fdcec2d615",
+    "field": "taxAmount",
+    "raw": 15.051,
+    "normalized": 15.05,
+    "diff": 0.0009999999999994458
+  },
+  {
+    "jeId": "je_6f9351a2-53df-4d8a-92f8-3ddb0cdf7cb4",
+    "field": "taxAmount",
+    "raw": 62.60849999999999,
+    "normalized": 62.61,
+    "diff": -0.0015000000000071623
+  },
+  {
+    "jeId": "je_f8e23c8d-bc87-4a9d-a088-767da4ae7a62",
+    "field": "taxAmount",
+    "raw": 37.199999999999996,
+    "normalized": 37.2,
+    "diff": -7.105427357601002e-15
+  },
+  {
+    "jeId": "je_fd3cc922-3efa-4ac4-989a-86803d873893",
+    "field": "taxAmount",
+    "raw": 46.199999999999996,
+    "normalized": 46.2,
+    "diff": -7.105427357601002e-15
+  },
+  {
+    "jeId": "je_c9a1314e-8cfe-4893-850e-c269fcd8b9e1",
+    "field": "taxAmount",
+    "raw": 78.261,
+    "normalized": 78.26,
+    "diff": 0.000999999999990564
+  },
+  {
+    "jeId": "je_172ba02a-f386-41ea-9cf1-eeb9b3c5284f",
+    "field": "taxAmount",
+    "raw": 6.520499999999999,
+    "normalized": 6.52,
+    "diff": 0.0004999999999997229
+  },
+  {
+    "jeId": "je_9911cccc-f442-4e54-ae5c-43cd81384e47",
+    "field": "taxAmount",
+    "raw": 27.3915,
+    "normalized": 27.39,
+    "diff": 0.0015000000000000568
+  },
+  {
+    "jeId": "je_4d8c1898-6d25-457d-a928-4b16f7dd772d",
+    "field": "taxAmount",
+    "raw": 19.155,
+    "normalized": 19.16,
+    "diff": -0.004999999999999005
+  },
+  {
+    "jeId": "je_fff7919a-12d7-4b39-987d-12203ccbbe9f",
+    "field": "taxAmount",
+    "raw": 92.39999999999999,
+    "normalized": 92.4,
+    "diff": -1.4210854715202004e-14
+  },
+  {
+    "jeId": "je_e4ce6220-f0f2-4c2c-919d-fecfdee2ade5",
+    "field": "taxAmount",
+    "raw": 6.5235,
+    "normalized": 6.52,
+    "diff": 0.0035000000000007248
+  },
+  {
+    "jeId": "je_e8553bf1-8b12-42a2-9b26-58b02d6be5a3",
+    "field": "taxAmount",
+    "raw": 3.9119999999999995,
+    "normalized": 3.91,
+    "diff": 0.0019999999999993356
+  }
+]
