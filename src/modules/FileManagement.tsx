@@ -44,6 +44,7 @@ export const FileManagement: React.FC<FileManagementProps> = ({ appMode, onUploa
   const { user, profile } = useAuth();
   const [files, setFiles] = useState<UploadedFile[]>([]);
   const [stagedFiles, setStagedFiles] = useState<StagedUpload[]>([]);
+  const [uploadNotice, setUploadNotice] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -231,6 +232,7 @@ export const FileManagement: React.FC<FileManagementProps> = ({ appMode, onUploa
     if (!file || !user) return;
     setUploading(true);
     setError(null);
+    setUploadNotice(null);
     try {
       const token = await user.getIdToken();
       const formData = new FormData();
@@ -249,6 +251,7 @@ export const FileManagement: React.FC<FileManagementProps> = ({ appMode, onUploa
       }
       
       await fetchFiles();
+      setUploadNotice('تم رفع ملفك بنجاح ✓ — هو الآن قيد المراجعة والتصنيف، ولا يؤثر على تقاريرك المالية حتى تعتمده من القسم بالأسفل.');
 
       if (data.candidate && data.candidate.id) {
          const classification = data.candidate.classification;
@@ -279,6 +282,7 @@ export const FileManagement: React.FC<FileManagementProps> = ({ appMode, onUploa
 
   const handleActivate = async (stagedId: string) => {
     if (!user) return;
+    setUploadNotice(null);
     setActionLoading(stagedId);
     try {
       const token = await user.getIdToken();
@@ -346,6 +350,7 @@ export const FileManagement: React.FC<FileManagementProps> = ({ appMode, onUploa
 
   const handleCancelStaged = async (stagedId: string) => {
     if (!user) return;
+    setUploadNotice(null);
     setActionLoading(stagedId);
     try {
       const token = await user.getIdToken();
@@ -446,6 +451,13 @@ export const FileManagement: React.FC<FileManagementProps> = ({ appMode, onUploa
         <div className="bg-red-50 border border-red-200 p-4 rounded-xl flex items-start gap-3">
           <AlertCircle className="w-6 h-6 text-red-600 shrink-0" />
           <p className="text-red-800 font-bold">{error}</p>
+        </div>
+      )}
+
+      {uploadNotice && (
+        <div className="bg-emerald-50 border border-emerald-200 p-4 rounded-xl flex items-start gap-3">
+          <CheckCircle className="w-6 h-6 text-emerald-600 shrink-0" />
+          <p className="text-emerald-800 font-bold">{uploadNotice}</p>
         </div>
       )}
 
