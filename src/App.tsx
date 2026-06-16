@@ -53,6 +53,7 @@ import { SmartInvoice } from './modules/SmartInvoice';
 import { TaxDeclaration } from './modules/TaxDeclaration';
 import { Login } from './pages/Login';
 import { FileManagement } from './modules/FileManagement';
+import { WelcomePage } from './pages/WelcomePage';
 import { UserManagement } from './modules/UserManagement';
 
 // Firestore imports
@@ -2500,14 +2501,28 @@ export default function App() {
 
           {appMode === 'dashboard' && (
             <div className="h-full">
-              <GlobalDashboard 
-                incomeStatement={incomeStatement} 
-                handleNavClick={handleNavClick} 
-                totalAnomaliesCount={totalAnomaliesCount}
-                chartDataRaw={chartDataRaw}
-                revenuesData={revenuesData}
-                expensesData={expensesData}
-              />
+              {Object.values(availableFiles).every((arr: any[]) => !arr || arr.length === 0) ? (
+                <div className="space-y-8">
+                  <WelcomePage companyName={settings?.companyName} logo={settings?.logo} />
+                  <div className="text-center">
+                    <button
+                      onClick={() => handleNavClick('expenses', 'upload')}
+                      className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-8 py-4 rounded-xl shadow-lg transition-colors text-lg"
+                    >
+                      ابدأ برفع ملفاتك المالية
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <GlobalDashboard
+                  incomeStatement={incomeStatement}
+                  handleNavClick={handleNavClick}
+                  totalAnomaliesCount={totalAnomaliesCount}
+                  chartDataRaw={chartDataRaw}
+                  revenuesData={revenuesData}
+                  expensesData={expensesData}
+                />
+              )}
             </div>
           )}
 

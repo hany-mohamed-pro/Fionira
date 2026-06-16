@@ -785,6 +785,57 @@ app.post('/api/erp/dev/sync', express.json({limit: '50mb'}), async (req, res) =>
     }
   };
 
+  // Like authenticate(), but tolerant of a VALID token that is missing role/tenantId
+  // claims. Used ONLY by the bootstrap routes (users/init, admin/fix-role) so a brand
+  // new user can reach the handler that provisions their claims. A valid token with
+  // claims behaves exactly like authenticate(); an invalid/missing token is rejected.
+  const authenticateOrNewUser = async (req: Request, res: Response, next: NextFunction) => {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return res.status(401).json(sendError("Unauthorized: No token provided"));
+    }
+    const token = authHeader.split("Bearer ")[1];
+    if (!token || token === "undefined" || token === "null") {
+      return res.status(401).json(sendError("Unauthorized: Invalid token string"));
+    }
+    try {
+      let decodedToken: any;
+      if (token === 'fake.token.for-dev-mode' || token === 'fake-token-for-dev' || token.startsWith('fake-token-for-dev:')) {
+        const devAuthEnabled = ENV_MODE !== 'production' && process.env.VITE_ENABLE_DEV_AUTH === 'true';
+        const isLocalhost = req.ip === '127.0.0.1' || req.ip === '::1' || req.ip === '::ffff:127.0.0.1' || req.hostname === 'localhost';
+        if (!devAuthEnabled) {
+          return res.status(401).json(sendError("Unauthorized: Dev auth is disabled"));
+        }
+        if (!isLocalhost) {
+          return res.status(403).json(sendError("Forbidden: Dev auth is restricted to localhost requests only"));
+        }
+        const [, encodedTenantId, encodedUid] = token.split(':');
+        const tenantId = encodedTenantId ? decodeURIComponent(encodedTenantId) : (process.env.VITE_DEV_AUTH_TENANT_ID || 'test-user');
+        const uid = encodedUid ? decodeURIComponent(encodedUid) : (process.env.VITE_DEV_AUTH_UID || tenantId);
+        decodedToken = { uid, email: process.env.VITE_DEV_AUTH_EMAIL || 'dev-admin@local.test', tenantId, role: 'admin' };
+      } else {
+        decodedToken = await admin.auth().verifyIdToken(token);
+      }
+      (req as any).user = decodedToken;
+
+      // New-user tolerance: pass through even when role/tenantId are absent, with a
+      // null-claim profile so the bootstrap handler can provision claims. With claims
+      // present, build the same profile authenticate() would.
+      const hasClaims = !!(decodedToken.tenantId && decodedToken.role);
+      (req as any).userProfile = {
+        uid: decodedToken.uid,
+        email: decodedToken.email || '',
+        role: hasClaims ? decodedToken.role : null,
+        tenantId: hasClaims ? decodedToken.tenantId : null,
+        permissions: Array.isArray(decodedToken.permissions) ? decodedToken.permissions : []
+      };
+      next();
+    } catch (e: any) {
+      console.error("AUTH (new-user) MIDDLEWARE FAILURE:", e);
+      return res.status(401).json(sendError(`Unauthorized: ${e.message}`));
+    }
+  };
+
   const requireAdmin = (req: Request, res: Response, next: NextFunction) => {
     const profile = (req as any).userProfile;
     if (!profile || profile.role !== 'admin') {
@@ -818,7 +869,7 @@ app.post('/api/erp/dev/sync', express.json({limit: '50mb'}), async (req, res) =>
   });
 
   // --- USER & ROLE ENDPOINTS ---
-  app.post("/api/erp/users/init", authenticate, async (req: Request, res: Response) => {
+  app.post("/api/erp/users/init", authenticateOrNewUser, async (req: Request, res: Response) => {
     try {
       const user = (req as any).user;
       const userProfileFromToken = (req as any).userProfile;
@@ -835,7 +886,7 @@ app.post('/api/erp/dev/sync', express.json({limit: '50mb'}), async (req, res) =>
     }
   });
 
-  app.post("/api/erp/admin/fix-role", authenticate, async (req: Request, res: Response) => {
+  app.post("/api/erp/admin/fix-role", authenticateOrNewUser, async (req: Request, res: Response) => {
     try {
       const user = (req as any).user;
       
