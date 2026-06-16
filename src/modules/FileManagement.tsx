@@ -432,6 +432,12 @@ export const FileManagement: React.FC<FileManagementProps> = ({ appMode, onUploa
         </div>
       </div>
 
+      {/* First-upload guidance: accepted formats & size, shown upfront (not only on error) */}
+      <p className="text-sm text-slate-500 font-medium flex items-center gap-2 px-1 -mt-2">
+        <Info className="w-4 h-4 text-slate-400 shrink-0" />
+        الصيغ المدعومة: ملفات إكسل (xlsx و xls) وملفات CSV — بحد أقصى 10 ميجابايت لكل ملف.
+      </p>
+
       {error && (
         <div className="bg-red-50 border border-red-200 p-4 rounded-xl flex items-start gap-3">
           <AlertCircle className="w-6 h-6 text-red-600 shrink-0" />
