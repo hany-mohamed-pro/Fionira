@@ -139,6 +139,11 @@ service cloud.firestore {
              (!('sessionTimeout' in data) || data.sessionTimeout is number);
     }
 
+    function isParentFileTenantData(fileId) {
+      return get(/databases/$(database)/documents/uploadedFiles/$(fileId)).data.tenantId
+        == request.auth.token.tenantId;
+    }
+
     // ===============================================================
     // Rules
     // ===============================================================
@@ -187,23 +192,23 @@ service cloud.firestore {
       allow delete: if isAdmin() && isTenantData(resource.data);
 
       match /records/{recordId} {
-         allow read: if isAdmin() || (isAccountant() && isTenantData(resource.data));
-         allow write: if isAdmin() || (isAccountant() && isTenantData(request.resource.data));
+         allow read: if isAdmin() || (isAccountant() && isParentFileTenantData(fileId));
+         allow write: if isAdmin() || (isAccountant() && isParentFileTenantData(fileId));
       }
 
       match /skippedRows/{rowId} {
-         allow read: if isAdmin() || (isAccountant() && isTenantData(resource.data));
-         allow write: if isAdmin() || (isAccountant() && isTenantData(request.resource.data));
+         allow read: if isAdmin() || (isAccountant() && isParentFileTenantData(fileId));
+         allow write: if isAdmin() || (isAccountant() && isParentFileTenantData(fileId));
       }
 
       match /chunks/{chunkId} {
-         allow read: if isAdmin() || (isAccountant() && isTenantData(resource.data));
-         allow write: if isAdmin() || (isAccountant() && isTenantData(request.resource.data));
+         allow read: if isAdmin() || (isAccountant() && isParentFileTenantData(fileId));
+         allow write: if isAdmin() || (isAccountant() && isParentFileTenantData(fileId));
       }
 
       match /skippedChunks/{chunkId} {
-         allow read: if isAdmin() || (isAccountant() && isTenantData(resource.data));
-         allow write: if isAdmin() || (isAccountant() && isTenantData(request.resource.data));
+         allow read: if isAdmin() || (isAccountant() && isParentFileTenantData(fileId));
+         allow write: if isAdmin() || (isAccountant() && isParentFileTenantData(fileId));
       }
     }
 
