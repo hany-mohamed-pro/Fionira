@@ -396,7 +396,7 @@ export const FileManagement: React.FC<FileManagementProps> = ({ appMode, onUploa
           <div>
             <h2 className="text-2xl font-black text-slate-800 tracking-tight">إدارة ملفات {moduleTitle}</h2>
             <p className="text-slate-500 mt-1 font-medium">
-              ارفع ملف المشتريات وسيحدد النظام تلقائيًا ما إذا كان ملفًا جديدًا أو نسخة معدلة، مع حماية التقارير من التكرار أو التداخل.
+              ارفع ملف {moduleTitle} وسيحدد النظام تلقائيًا ما إذا كان ملفًا جديدًا أو نسخة معدلة، مع حماية التقارير من التكرار أو التداخل.
             </p>
           </div>
         </div>
@@ -426,7 +426,7 @@ export const FileManagement: React.FC<FileManagementProps> = ({ appMode, onUploa
               : 'bg-indigo-600 text-white hover:bg-indigo-700 hover:shadow-indigo-200 hover:shadow-xl hover:-translate-y-0.5'
             }`}>
               {uploading ? <Loader2 className="w-6 h-6 animate-spin" /> : <UploadIcon className="w-6 h-6" />}
-              {uploading ? 'جاري الرفع والتحليل...' : `رفع ملف Excel للمشتريات`}
+              {uploading ? 'جاري الرفع والتحليل...' : `رفع ملف ${moduleTitle}`}
             </div>
           </div>
         </div>
@@ -843,7 +843,7 @@ export const FileManagement: React.FC<FileManagementProps> = ({ appMode, onUploa
               <FileSpreadsheet className="w-8 h-8 text-slate-300" />
             </div>
             <p className="font-bold text-slate-500 text-lg">لا توجد ملفات مدرجة حاليًا</p>
-            <p className="text-sm mt-1 max-w-sm">قم برفع ملف المشتريات من الأعلى لبدء إضافة البيانات إلى التقارير.</p>
+            <p className="text-sm mt-1 max-w-sm">قم برفع ملف {moduleTitle} من الأعلى لبدء إضافة البيانات إلى التقارير.</p>
           </div>
         ) : (
           <div className="divide-y divide-slate-100">
