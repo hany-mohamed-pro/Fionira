@@ -10,6 +10,9 @@ coverage/
 # Firebase service account private key — never commit
 firebase-service-account.json
 
+# Runtime JSON state (uploads, registry, governance, staged files)
+/data/
+
 /src/generated/prisma
 .cache/
 .pnpm/
