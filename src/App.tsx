@@ -2517,7 +2517,7 @@ export default function App() {
 
           {appMode === 'dashboard' && (
             <div className="h-full">
-              {Object.values(availableFiles).every((arr: any[]) => !arr || arr.length === 0) ? (
+              {Object.values(availableFiles).every((arr: any[]) => !arr || arr.length === 0) && stagedFilesCount === 0 ? (
                 <div className="space-y-8">
                   <WelcomePage companyName={settings?.companyName} logo={settings?.logo} />
                   <div className="text-center">
