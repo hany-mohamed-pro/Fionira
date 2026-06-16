@@ -107,6 +107,7 @@ const devMemoryDbDefault = {
   auditLogs: [] as any[],
   governanceRequests: [] as any[],
   candidateReplacements: [] as any[],
+  tenantUsers: [] as any[],
   settings: {} as Record<string, any>
 };
 
@@ -122,6 +123,7 @@ const devMemoryDbSprint = {
   auditLogs: [] as any[],
   governanceRequests: [] as any[],
   candidateReplacements: [] as any[],
+  tenantUsers: [] as any[],
   settings: {} as Record<string, any>
 };
 
@@ -889,19 +891,59 @@ app.post('/api/erp/dev/sync', express.json({limit: '50mb'}), async (req, res) =>
   app.post("/api/erp/admin/fix-role", authenticateOrNewUser, async (req: Request, res: Response) => {
     try {
       const user = (req as any).user;
-      
-      console.log(`[FIX-ROLE] Applying one-time admin fix for UID: ${user.uid}`);
-      
-      // In a real production app we'd verify something else, but per instructions, we run this securely.
-      // We will set this user as an admin to their own tenant (or existing tenant).
-      const tenantId = user.tenantId || user.uid;
+      const uid = user.uid;
+      // First admin is bound to their OWN uid as the tenant. This guarantees at most one
+      // admin can be self-provisioned per tenant; further users must be promoted by that admin.
+      const tenantId = uid;
       const adminPermissions = ['expenses', 'revenues', 'payroll', 'banks', 'reports', 'smart_invoice', 'quotations'];
-      
-      // In dev mode we bypass setting actual claims and mock it in the middleware
-      // await admin.auth().setCustomUserClaims(user.uid, { ... })
-      
-      // Bypass role fixing in dev mode
-      return res.json({ success: true, message: "Custom claims fixed successfully. Please refresh the browser." });
+
+      // Dev tokens already carry mocked admin claims (synthesized in the middleware) and point
+      // at a non-existent Firebase user, so skip the real setCustomUserClaims call for them.
+      const rawToken = (req.headers.authorization || '').split('Bearer ')[1] || '';
+      const isDevToken = rawToken === 'fake.token.for-dev-mode' || rawToken === 'fake-token-for-dev' || rawToken.startsWith('fake-token-for-dev:');
+
+      // 1. Does this tenant already have an admin?
+      let adminExists = false;
+      if (isConnected()) {
+        const existing = await query("SELECT COUNT(*) FROM tenant_users WHERE tenant_id = $1 AND role = 'admin'", [tenantId]);
+        adminExists = parseInt(existing.rows[0].count, 10) > 0;
+      } else {
+        adminExists = devMemoryDb.tenantUsers.some((u: any) => u.tenantId === tenantId && u.role === 'admin');
+      }
+
+      // 2. Refuse if an admin already exists — only the FIRST user becomes admin.
+      if (adminExists) {
+        return res.status(403).json(sendError("Admin already exists for this tenant. Contact your administrator."));
+      }
+
+      // 3. First user becomes the first admin of their own tenant.
+      console.log(`[FIX-ROLE] Provisioning first admin for UID: ${uid} (tenant ${tenantId})`);
+      if (!isDevToken) {
+        await admin.auth().setCustomUserClaims(uid, { role: 'admin', tenantId, permissions: adminPermissions });
+      }
+
+      if (isConnected()) {
+        await query(
+          "INSERT INTO tenant_users (id, email, role, name, tenant_id) VALUES ($1, $2, $3, $4, $5) ON CONFLICT (id) DO NOTHING",
+          [uid, user.email || '', 'admin', user.email || null, tenantId]
+        );
+      } else {
+        devMemoryDb.tenantUsers.push({ id: uid, email: user.email || '', role: 'admin', name: user.email || null, tenantId, createdAt: new Date().toISOString() });
+      }
+
+      await addAuditLog({
+        action: 'first_admin_provisioned',
+        userId: uid,
+        userName: user.email || null,
+        tenantId,
+        details: `First admin bootstrap for tenant ${tenantId}`
+      });
+
+      return res.json({
+        success: true,
+        role: 'admin',
+        message: 'تم إعداد حسابك كمدير. يرجى تسجيل الخروج والدخول مجدداً.'
+      });
     } catch (e: any) {
       console.error("[FIX-ROLE] Error:", e);
       return res.status(500).json({ success: false, error: e.message });
