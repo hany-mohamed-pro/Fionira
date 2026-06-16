@@ -382,7 +382,11 @@ export const FileManagement: React.FC<FileManagementProps> = ({ appMode, onUploa
     }
   };
 
-  const moduleTitle = appMode === 'expenses' ? 'المشتريات' : (appMode === 'revenues' ? 'المبيعات' : 'الملفات');
+  const moduleTitle = appMode === 'expenses' ? 'المصروفات'
+    : appMode === 'revenues' ? 'الإيرادات'
+    : appMode === 'payroll' ? 'الرواتب'
+    : appMode === 'banks' ? 'البنوك'
+    : 'الملفات';
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500 pb-20">
