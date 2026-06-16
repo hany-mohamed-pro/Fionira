@@ -123,6 +123,7 @@ if (typeof window !== 'undefined') {
 export default function App() {
   const { user, profile, loading, isBootstrapping, authError, isAdmin, isAccountant } = useAuth();
   const [settings, setSettings] = useState<AppSettings | null>(null);
+  const [stagedFilesCount, setStagedFilesCount] = useState(0);
   const isSprintModeAllowed = (import.meta as any).env?.MODE !== 'production' &&
                                (import.meta as any).env?.VITE_ENABLE_DEV_AUTH === 'true' &&
                                (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
@@ -352,6 +353,21 @@ export default function App() {
         }
       }
     }).catch(err => console.warn("Expected API rejection caught:", err));
+  }, [profile?.tenantId, appMode, user]);
+
+  // Governance: count staged files awaiting decision across all modules (dashboard widget)
+  useEffect(() => {
+    if (!profile?.tenantId || !user || appMode !== 'dashboard') return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const token = await user.getIdToken();
+        const mods = ['expenses', 'revenues', 'payroll', 'banks'];
+        const res = await Promise.all(mods.map(m => fetch(`/api/erp/files/governance/staged-uploads?moduleType=${m}`, { headers: { Authorization: `Bearer ${token}` } }).then(r => r.json()).catch(() => null)));
+        if (!cancelled) setStagedFilesCount(res.reduce((s, d) => s + (d?.success && Array.isArray(d.stagedUploads) ? d.stagedUploads.length : 0), 0));
+      } catch {}
+    })();
+    return () => { cancelled = true; };
   }, [profile?.tenantId, appMode, user]);
 
   // Fetch data when active file changes or when entering reports mode
@@ -2521,6 +2537,7 @@ export default function App() {
                   chartDataRaw={chartDataRaw}
                   revenuesData={revenuesData}
                   expensesData={expensesData}
+                  stagedFilesCount={stagedFilesCount}
                 />
               )}
             </div>

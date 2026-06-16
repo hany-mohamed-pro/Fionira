@@ -3,13 +3,14 @@ import { useUI } from '../contexts/UIContext';
 import { Activity, Upload, FileText, ArrowUpRight, ArrowDownRight, TrendingUp, AlertTriangle, Users, CheckCircle, BarChart2, PieChart, AlertCircle } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer } from 'recharts';
 import { formatCurrency } from '../lib/formatters';
-export const GlobalDashboard = ({ 
-  incomeStatement, 
-  handleNavClick, 
+export const GlobalDashboard = ({
+  incomeStatement,
+  handleNavClick,
   totalAnomaliesCount,
   chartDataRaw,
   revenuesData,
-  expensesData
+  expensesData,
+  stagedFilesCount = 0
 }: any) => {
   const { language } = useUI();
   const isRTL = language === 'ar';
@@ -37,6 +38,22 @@ export const GlobalDashboard = ({
 
   return (
     <div className="space-y-4 w-full" dir={isRTL ? "rtl" : "ltr"}>
+      {stagedFilesCount > 0 && (
+        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4" dir="rtl">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center shrink-0">
+              <AlertTriangle className="w-6 h-6 text-amber-600" />
+            </div>
+            <div>
+              <h3 className="font-black text-amber-900 text-lg">ملفات تنتظر اعتمادك</h3>
+              <p className="text-amber-800 text-sm font-medium">{stagedFilesCount} ملف مرفوع قيد المراجعة — لا يؤثر على تقاريرك حتى تعتمده</p>
+            </div>
+          </div>
+          <button onClick={() => handleNavClick('expenses', 'upload')} className="px-6 py-3 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl shadow-sm transition-colors whitespace-nowrap">
+            مراجعة الملفات ←
+          </button>
+        </div>
+      )}
       {/* SECTION B - KPI ROW */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-[20px] md:gap-[24px]">
         <div className="bg-white rounded-[18px] border border-slate-200 p-5 shadow-[0_2px_10px_rgb(0,0,0,0.02)] flex flex-col justify-between h-[155px] group hover:border-[#22C55E]/30 hover:shadow-md transition-all">
