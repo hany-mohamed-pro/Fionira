@@ -174,6 +174,8 @@ export function processPayroll(buffer: ArrayBuffer, fileName: string) {
          'خصم غياب': absent,
          'سلف مستردة': loan
       },
+      // Arithmetic integrity (component sums), NOT classification accuracy.
+      Math_Integrity_Score: isMismatch ? 50 : 100,
       Confidence_Score: isMismatch ? 50 : 100,
       Financial_Mismatch: isMismatch
     };

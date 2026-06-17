@@ -193,6 +193,8 @@ export function processRevenues(buffer: ArrayBuffer, fileName: string) {
       NonTaxable_Amount: nonTaxable,
       Net_Amount: calcNet,
       Category: category,
+      // Arithmetic integrity (Net+VAT=Total), NOT classification accuracy.
+      Math_Integrity_Score: confidenceScore,
       Confidence_Score: confidenceScore,
       Financial_Mismatch: isMismatch,
       Financial_Integrity_Status: financialIdCheck

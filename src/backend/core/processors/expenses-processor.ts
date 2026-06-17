@@ -194,6 +194,10 @@ export function processExpenses(buffer: ArrayBuffer, fileName: string) {
       NonTaxable_Amount: nonTaxable,
       Net_Amount: calcNet,
       Category: category,
+      // NOTE: this score measures ARITHMETIC integrity (Net+VAT=Total), NOT
+      // classification accuracy. Exposed as Math_Integrity_Score to avoid implying
+      // the category itself is confident. Confidence_Score kept for back-compat.
+      Math_Integrity_Score: confidenceScore,
       Confidence_Score: confidenceScore,
       Financial_Mismatch: isMismatch,
       Financial_Integrity_Status: financialIdCheck

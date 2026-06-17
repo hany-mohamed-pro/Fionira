@@ -6,6 +6,25 @@
 const WB = "(?:^|[\\s/\\-,()])";
 const WE = "(?=[\\s/\\-,()]|$)";
 
+// Shared Arabic normalizer (input text passes through this before matching).
+const normalizeArabic = (text: string) =>
+  text
+    .replace(/ـ/g, '')        // remove tatweel
+    .replace(/[أإآ]/g, 'ا')   // unify alef
+    .replace(/ة/g, 'ه')       // unify taa marbouta -> haa
+    .replace(/ى/g, 'ي')       // unify alef maksoura -> yaa
+    .replace(/\s+/g, ' ');    // collapse whitespace
+
+// Apply the SAME Arabic letter-normalization to a regex's source, so patterns
+// authored with ة/أ/إ/آ/ى still match normalized text (fixes the صيانة -> صيانه
+// class of silent misses). Only Arabic letters are touched — regex syntax is safe.
+const nrx = (re: RegExp): RegExp =>
+  new RegExp(
+    re.source.replace(/ـ/g, '').replace(/[أإآ]/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي'),
+    re.flags
+  );
+const nTest = (re: RegExp, text: string): boolean => nrx(re).test(text);
+
 const REGEX_CAR = /(?:^|\s)(سيارة|سياره|سيارات|مركبة|car|vehicle|فحمات|مساعدات|زيت سيارة|زيت سياره|car oil|car oi l|فحص دوري|فلتر زيت|سيارة مبرده)(?=\s|$)/;
 const REGEX_DELIVERY = /(?:^|\s)(توصيل طلبية|توصيل بضاعة|توصيل للعميل)(?=\s|$)/;
 const REGEX_MAINTENANCE = /(?:^|\s)(صيانة|اصلاح|إصلاح|قطع غيار|كومبرسير|كمبروسر|كمبروسير|مكيف|ثلاجة|رداد|بطارية|سباك|خلاط|maintenance|repair|spare part)(?=\s|$)/;
@@ -66,13 +85,13 @@ export const getExpenseCategory = (name: string, desc: string, amount: number = 
 
   // --- STAGE 0: RULE OVERRIDE LAYER (Highest Priority) ---
   const overrideRules = [
-    { regex: /(صيانة|إصلاح|تصليح|كومبرسير|كمبروسر)/, cat: 'مصروفات عمومية وإدارية - صيانة وإصلاح' },
-    { regex: /(شاحن|كيبل|كيبيل|سلك|محول طاقة|أدوات طعام|مستلزمات تشغيل)/, cat: 'تكلفة المبيعات - مستهلكات تشغيلية' },
-    { regex: /(?:^|\s)(توزيعات|هدايا|هديّة|هديه)(?=\s|$)/, cat: 'مصروفات بيعية وتسويقية - دعاية وإعلان' },
+    { regex: /(صيانة|إصلاح|تصليح|كومبرسير|كمبروسر|maintenance|repair|overhaul)/, cat: 'مصروفات عمومية وإدارية - صيانة وإصلاح' },
+    { regex: /(شاحن|كيبل|كيبيل|سلك|محول طاقة|أدوات طعام|مستلزمات تشغيل|cable|charger|power adapter)/, cat: 'تكلفة المبيعات - مستهلكات تشغيلية' },
+    { regex: /(?:^|\s)(توزيعات|هدايا|هديّة|هديه|gift|gifts|giveaway)(?=\s|$)/, cat: 'مصروفات بيعية وتسويقية - دعاية وإعلان' },
 ];
 
   for (const rule of overrideRules) {
-    if (rule.regex.test(descText)) {
+    if (nTest(rule.regex, descText)) {
       finalCategory = rule.cat;
       detectedRule = 'Rule Override Layer (Priority 0)';
       if (process.env.NODE_ENV !== 'production') {
@@ -115,7 +134,7 @@ export const getExpenseCategory = (name: string, desc: string, amount: number = 
   ];
 
   vendors.forEach(v => {
-    if (v.regex.test(nameText)) addScore(v.cat, v.score);
+    if (nTest(v.regex, nameText)) addScore(v.cat, v.score);
   });
 
   // --- STAGE 2: ITEM DESCRIPTION / KEYWORD BASED CLASSIFICATION (Stronger Hint - Score 600-1000) ---
@@ -228,8 +247,8 @@ export const getExpenseCategory = (name: string, desc: string, amount: number = 
   ];
 
   keywords.forEach(k => {
-    if (k.regex.test(allText)) addScore(k.cat, k.score);
-    if (k.regex.test(descText)) addScore(k.cat, 200); // Bonus for being explicitly in the description
+    if (nTest(k.regex, allText)) addScore(k.cat, k.score);
+    if (nTest(k.regex, descText)) addScore(k.cat, 200); // Bonus for being explicitly in the description
   });
 
   // --- STAGE 3: CONTEXTUAL OVERRIDES & REFINEMENTS ---
@@ -439,7 +458,8 @@ export const getRevenueCategory = (name: string, desc: string, rawEnt: string): 
     scores[cat] = (scores[cat] || 0) + basePoints + (isDescMatch ? 150 : 0); 
   };
   const check = (regex: RegExp, cat: string, basePoints = 100) => {
-      if (regex.test(allText)) addScore(cat, basePoints, regex.test(descText));
+      const r = nrx(regex);
+      if (r.test(allText)) addScore(cat, basePoints, r.test(descText));
   };
 
   check(/(noon food|نون فود|noon|نون|فود)/i, 'إيرادات تطبيقات التوصيل', 1200);
