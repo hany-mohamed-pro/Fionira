@@ -101,3 +101,52 @@ Searched the codebase (`*.ts/tsx`) for `SOCPA|IFRS|GAAP|ZATCA|chart of accounts|
 ## What this audit does NOT do
 - No recommendation on *whether* to build the AI classifier, no effort estimate, no implementation. Fact-finding only.
 - The **Accounting Bundle remains blocked**; this audit informs its direction but does not start it.
+
+---
+
+## Reconciliation — 2026-06-16
+
+> Triggered by a real-data review that *looked* like advanced professional classification. Verified against **actual processed data** on disk: `data/erp_registry.json` (1138 records, 1179 journal entries from real uploads), not seed/test data.
+
+### TASK 1 — Real examples (record → classification → journal entry)
+Pulled live from `data/erp_registry.json`:
+
+| # | Entity / description (orig) | Total / VAT | `Category` (classification) | JE Debit | JE Credit | amount / tax | Integrity / Conf |
+|---|---|---|---|---|---|---|---|
+| 1 | العالمية للفواكة — "مانجو/رمان" | 90 / 0 | تكلفة المبيعات - مواد خام ومكونات | =Category | الموردين - العالمية للفواكة | 90 / 0 | PASS / 100 |
+| 2 | الوادي للدواجن — "eggs" | 455.95 / 59.47 | تكلفة المبيعات - مواد خام ومكونات | =Category | الموردين - الوادي للدواجن | 396.48 / 59.47 | PASS / 100 |
+| 3 | موسسة منارة البلاد — "طباعة اتفاقية مورد" | 30 / 0 | مصروفات عمومية وإدارية - أخرى | =Category | الموردين - … | 30 / 0 | PASS / 100 |
+| 4 | sfaqat — "cake board" | 50.00 / 6.52 | تكلفة المبيعات - مواد تعبئة وتغليف | =Category | الموردين - sfaqat | 43.48 / 6.52 | PASS / 100 |
+| 5 | صدقة المحل — "صدقه المحل دخل شهر12" | 1500 / 0 | مصروفات أخرى - تبرعات ومساهمات مجتمعية | =Category | الموردين - … | 1500 / 0 | PASS / 100 |
+| 6 | SLAM INTERNET — "INTERNIT" (misspelled) | 1721.55 / 224.55 | مصروفات عمومية وإدارية - اتصالات وإنترنت | =Category | الموردين - SLAM INTERNET | 1497 / 224.55 | PASS / 100 |
+| 7 | قصر البلاستيك — "فيري صحون" | 82.8 / 10.8 | مصروفات عمومية وإدارية - نظافة وضيافة | =Category | الموردين - … | 72 / 10.8 | PASS / 100 |
+| 8 | TAXI — "مواصلات موظفين" | 1000 / 0 | مصروفات عمومية وإدارية - مصاريف سفر وانتقالات | =Category | الموردين - TAXI | 1000 / 0 | PASS / 100 |
+| 9 | شركة المهندسين المحترفين — **"صيانة كومبرسر غرفة التبريد"** | 1380 / 180 | **مصروفات عمومية وإدارية - أخرى** ⚠️ | =Category | الموردين - … | 1200 / 180 | PASS / 100 |
+
+(20 distinct categories exist across the dataset — a real, well-structured expense chart.)
+
+### TASK 2 — Source trace (uniform across all examples)
+- **Category/account assignment:** `getExpenseCategory(finalEntity, rawDesc, total)` ([categorization-engine.ts:42](../../src/backend/core/categorization-engine.ts)) called at [expenses-processor.ts:175](../../src/backend/core/processors/expenses-processor.ts) → `Category`; then DR=`Category`, CR=`الموردين - {entity}` at [erp-engine.ts:116-117](../../src/backend/core/erp-engine.ts). (Revenues: `getRevenueCategory` [:422](../../src/backend/core/categorization-engine.ts); payroll: `getPayrollCategory`; banks/inventory: **static**.)
+- **Tax/zakat flag attached:** the only tax-related field persisted is `Financial_Integrity_Status` (PASS/FAIL) + `Confidence_Score`, computed at [expenses-processor.ts:166-178](../../src/backend/core/processors/expenses-processor.ts) — an **arithmetic check** (`|Total − (Taxable+NonTaxable+VAT)| ≤ 0.02`). VAT is merely **split** into `taxAmount`. **No zakat flag, no zakat calculation.**
+- **Risk/anomaly insight attached:** **none persisted on these records.** The `financial-intelligence/` `riskScore`/`insights` are computed for the validation screen ([intelligence-engine.ts:20-67](../../src/backend/core/financial-intelligence/intelligence-engine.ts)) and are **absent** from the record keys in `erp_registry.json`.
+
+### TASK 3 — Reconciliation answers (no hedging)
+
+**A) Professional-grade classification logic beyond keyword/rules? — No.** Tracing every real example lands in the same rule-based `categorization-engine.ts` (Arabic normalization + regex overrides + weighted keyword scoring). No AI, no standards-coded chart of accounts, no new classifier was found.
+
+**B) Why the output looks professional despite being keyword-based — specifically:**
+1. **Excellent category taxonomy / labels.** The 20 categories are genuine, well-modelled Arabic accounting lines (COGS raw-materials vs packaging, G&A sub-lines, marketing, donations, government fees). Good labels read as expert output.
+2. **A real financial-integrity check** (`Total = Net + VAT`, PASS/FAIL) makes results look *validated*. ⚠️ But `Confidence_Score: 100` is **arithmetic reconciliation confidence, not classification confidence** — it says the row's amounts balance, **not** that the category is correct. This is the single most misleading signal: it invites reading "100 = the AI is sure," when it only means the math adds up.
+3. **Correct Net/VAT separation + proper DR/CR routing** (expense account debited, supplier credited, VAT split) — textbook journal structure.
+4. **Keyword rules well-tuned for *this* business's vendors**, so results are frequently correct (eggs→raw materials, charity→donations, "INTERNIT"→telecom even when misspelled, because it matches on the entity "SLAM INTERNET"). This is **good tuning + good labels**, not reasoning.
+5. **Real misses exist** — example #9: a clear **maintenance** item ("صيانة كومبرسر") landed in **"أخرى" (other)** even though a maintenance override rule exists ([categorization-engine.ts:69](../../src/backend/core/categorization-engine.ts)). Likely cause: the override regex matches `صيانة` (with ة) but `normalizeArabic` already converted the text's ة→ه ([:49](../../src/backend/core/categorization-engine.ts)), so the rule can't fire — a concrete rule-fragility bug, invisible in aggregate because it silently falls back to "other."
+
+**C) Tax/zakat logic the previous audit missed? — Yes, two things (so the prior audit was *partially incomplete*, not wrong):**
+1. **Zakat/tax keyword routing exists** in the categorizer: `زكاة|ضريبة|رسوم حكومية` map transactions to `مصروفات عمومية وإدارية - رسوم حكومية` (government fees) ([categorization-engine.ts:40, 99, 167, 188](../../src/backend/core/categorization-engine.ts)). The prior audit said "ZATCA only VAT + UI," which **understated** these. **But they are keyword *routing to an expense category*, not zakat computation or ZATCA tax-treatment classification.**
+2. **The financial-integrity reconciliation layer** (`Financial_Integrity_Status`/`Confidence_Score`/`Financial_Mismatch`) in the processors was not detailed in the prior audit. It's a genuine validation step (arithmetic balance), worth crediting.
+
+### Verdict (plain)
+**The previous audit's core finding STANDS, and is PARTIALLY INCOMPLETE — not wrong.**
+- ✅ Stands: classification is **keyword/rule-based, no AI, no SOCPA/IFRS coded chart of accounts, no zakat calculation/ZATCA tax-treatment logic.** Confirmed by tracing real data end-to-end.
+- ⚠️ Incomplete: it understated (a) the **professional quality of the category taxonomy**, (b) the **financial-integrity reconciliation** layer, and (c) the **zakat/tax keyword-routing** rules.
+- The user's impression of "advanced professional classification" is explained by **expert-quality labels + a real arithmetic-integrity check + keyword rules well-tuned to their vendors producing correct results** — **not** by AI or standards-based accounting logic. The professional *appearance* is real and earned at the data-modelling/label level; the *mechanism* underneath is deterministic rules with known blind spots (e.g., #9, and the misleading `Confidence_Score`).
