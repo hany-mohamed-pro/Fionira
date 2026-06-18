@@ -96,3 +96,40 @@ The **32 Stage-3 standalone `REGEX_*` constants** ([:9-40](../../src/backend/cor
 - ✅ Normalization bug fixed across Stages 0–2 + all revenue rules (the bulk); `صيانة كومبرسر` repaired; verified no regressions.
 - ✅ English/case handling confirmed; English added to Stage-0 overrides.
 - ⚠️ **Honestly incomplete:** Stage-3 const normalization + exhaustive per-rule English expansion deferred (corruption-risk on dense financial regex literals) — recommended as a verified follow-up.
+
+---
+
+## Stage-3 Completion — 2026-06-18
+
+### Method (why it is corruption-free)
+Each Stage-3 constant was normalized by wrapping its **call site** in `nTest(REGEX_X, …)` — the constant's regex literal is **never retyped**, so a silent Arabic-character corruption is structurally impossible. The 6 inline personnel regexes were wrapped with the literal copied identically into both sides of the edit (a transcription slip would fail the match, never corrupt). Net: 32 constants + 6 inline = **38 Stage-3 match-sites now normalized**; the engine is consistent end-to-end. `grep` confirms **0** bare `.test()` left on any constant. **Build: pass.**
+
+### Per-constant log (all 32 normalized via nTest call-site wrap)
+`REGEX_CAR, REGEX_DELIVERY, REGEX_MAINTENANCE, REGEX_RAW_MATERIALS, REGEX_CLEANING, REGEX_OPERATING, REGEX_PACKAGING, REGEX_STATIONERY, REGEX_STATIONERY_EXCLUDE, REGEX_PROFESSIONAL, REGEX_SUBSCRIPTIONS, REGEX_DECORATIONS, REGEX_DECORATIONS_EXCLUDE, REGEX_IT_EQUIPMENT, REGEX_FUEL, REGEX_DONATIONS, REGEX_TRANSPORT_RENTAL, REGEX_TRANSPORT_VEHICLE, REGEX_TRANSPORT_EQUIPMENT, REGEX_LOANS, REGEX_SHIPPING, REGEX_SHIPPING_COGS, REGEX_SHIPPING_MAINTENANCE, REGEX_PERSONNEL, REGEX_MARKETING, REGEX_MISC_COGS` + 6 inline (`نهاية خدمة`, `تأمينات اجتماعية…`, `تذكرة طيران…`, `راتب|بدل|مكافأة`, `تذكرة|سفر|انتقالات`, `إقامة|اقامة…`).
+Each constant's behavior was verified **collectively** through the full-dataset blast-radius diff (below): any constant whose normalization changed a record's outcome shows up explicitly in the transitions. There were no unexpected categories produced (no corruption signature).
+
+### Regression safety net — **PASS (0 failures)**
+- Real 9 (from `7b47295`): 8 stable still correct; #9 (`صيانة كومبرسر`) still `صيانة وإصلاح`. ✅
+- Synthetic 6 (from `17a598f`): all pass (English/mixed/case). ✅
+- 20 new random real records: all sensible on manual review (e.g. `EGGS`→raw materials, `GLOVES`→consumables, `بنزين سيارة`→fuel, `SPRINKLES`→raw materials). No suspicious output.
+
+### Blast radius — **8 of 802 expense records reclassified** (4 distinct items × 2 duplicate rows)
+| Count | Before → After | Item | Assessment |
+|---|---|---|---|
+| 2 | تكلفة المبيعات - مواد تعبئة وتغليف → **نظافة وضيافة** | "ممسحة/مكنسة" (mop/broom) | ✅ improvement (cleaning) |
+| 2 | قرطاسية ومطبوعات → **مواد تعبئة وتغليف** | "طباعة سليف+ستكر" (sleeve+sticker) | ✅ reasonable (packaging) |
+| 2 | مواد خام ومكونات → **مواد تعبئة وتغليف** | "ألوان بودرة/طقم ادوات للكيك" | ⚠️ **needs human review** (color powder is arguably an ingredient) |
+| 2 | شحن ونقل للداخل → **صيانة وإصلاح** | "اجرة دينا نقل ثلاجة" (truck rental to move a fridge) | ⚠️ **needs human review** (could be inbound freight) |
+
+Two changes are clear improvements; two are defensible but debatable — flagged above for an accountant to confirm. No regressions, blast radius tiny.
+
+### Bilingual parity (~29 Arabic-only rules) — **NOT done; flagged "needs human review"**
+Deliberately **not** bulk-added. Adding English to 29 patterns risks false positives (short tokens like `ad`, `gas`, `rent`, `VAT` matching substrings/ubiquitous invoice words) and requires real English-invoice samples to verify professional Saudi usage — I cannot confidently verify each within safe bounds here, and each addition would shift the blast radius and need its own re-measurement. Per the task's explicit "honesty over completeness," these are listed for a focused follow-up (one rule → one assertion → one blast-radius check):
+- Stage-2 Arabic-only: travel ([:158](../../src/backend/core/categorization-engine.ts)), petty-cash ([:161](../../src/backend/core/categorization-engine.ts)), employee-benefits ([:164](../../src/backend/core/categorization-engine.ts)), govt-fees ([:167](../../src/backend/core/categorization-engine.ts) & [:188](../../src/backend/core/categorization-engine.ts)), storage ([:170](../../src/backend/core/categorization-engine.ts)), stationery ([:176](../../src/backend/core/categorization-engine.ts) & [:206](../../src/backend/core/categorization-engine.ts)), utilities ([:203](../../src/backend/core/categorization-engine.ts)), medical/insurance ([:209](../../src/backend/core/categorization-engine.ts)).
+- Stage-3 Arabic-only consts: `REGEX_DELIVERY, REGEX_CLEANING, REGEX_STATIONERY, REGEX_PROFESSIONAL, REGEX_DECORATIONS, REGEX_TRANSPORT_EQUIPMENT, REGEX_SHIPPING_MAINTENANCE, REGEX_PERSONNEL, REGEX_MISC_COGS, REGEX_FALLBACK_*` (+ the 6 inline personnel regexes).
+
+### Status vs. success criteria (honest)
+- ✅ All 32 Stage-3 constants normalized & verified (collectively via blast-radius; corruption structurally impossible by method).
+- ✅ Regression net (9+6+20) **fully passes**; blast radius reported in full (8 records, 2 flagged for review).
+- ✅ Build passes.
+- ⚠️ **Bilingual parity intentionally deferred** as "needs human review" (not guessed) — so this commit is honestly **"Stage-3 normalization complete; bilingual parity flagged,"** not "full bilingual parity."

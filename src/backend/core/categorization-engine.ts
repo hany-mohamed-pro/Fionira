@@ -254,8 +254,8 @@ export const getExpenseCategory = (name: string, desc: string, amount: number = 
   // --- STAGE 3: CONTEXTUAL OVERRIDES & REFINEMENTS ---
   
   // 1. Vehicle & Car Expenses (Highest Priority for Car related)
-  if (REGEX_CAR.test(allText)) {
-      if (REGEX_DELIVERY.test(allText)) {
+  if (nTest(REGEX_CAR, allText)) {
+      if (nTest(REGEX_DELIVERY, allText)) {
           addScore('مصروفات بيعية وتسويقية - نقل وتوصيل', 4500);
       } else {
           addScore('مصروفات عمومية وإدارية - مصاريف سيارات', 4000);
@@ -263,35 +263,35 @@ export const getExpenseCategory = (name: string, desc: string, amount: number = 
   }
 
   // 2. Maintenance & Repairs (Non-vehicle)
-  if (REGEX_MAINTENANCE.test(allText)) {
-      if (!REGEX_CAR.test(allText)) {
+  if (nTest(REGEX_MAINTENANCE, allText)) {
+      if (!nTest(REGEX_CAR, allText)) {
           addScore('مصروفات عمومية وإدارية - صيانة وإصلاح', 3500);
       }
   }
 
   // 3. Raw Materials & Ingredients (Food)
-  if (REGEX_RAW_MATERIALS.test(allText)) {
+  if (nTest(REGEX_RAW_MATERIALS, allText)) {
       addScore('تكلفة المبيعات - مواد خام ومكونات', 3500);
   }
 
   // 4. Cleaning & Hospitality
-  if (REGEX_CLEANING.test(allText)) {
+  if (nTest(REGEX_CLEANING, allText)) {
       addScore('مصروفات عمومية وإدارية - نظافة وضيافة', 3500);
   }
 
   // 4.5 Operating Consumables (Kitchen tools, gloves, film, etc.)
-  if (REGEX_OPERATING.test(allText)) {
+  if (nTest(REGEX_OPERATING, allText)) {
       addScore('تكلفة المبيعات - مستهلكات تشغيلية', 3500);
   }
 
   // 5. Packaging & Disposables (Takeaway items)
-  if (REGEX_PACKAGING.test(allText)) {
+  if (nTest(REGEX_PACKAGING, allText)) {
       // If it's a raw material carton (like lemon carton), don't override
-      if (!REGEX_RAW_MATERIALS.test(allText)) {
+      if (!nTest(REGEX_RAW_MATERIALS, allText)) {
           // If it's an operating consumable, don't override
-          if (!REGEX_OPERATING.test(allText)) {
+          if (!nTest(REGEX_OPERATING, allText)) {
               // If it's explicitly office stationery, don't override
-              if (!REGEX_STATIONERY.test(allText)) {
+              if (!nTest(REGEX_STATIONERY, allText)) {
                   addScore('تكلفة المبيعات - مواد تعبئة وتغليف', 3000);
               }
           }
@@ -299,53 +299,53 @@ export const getExpenseCategory = (name: string, desc: string, amount: number = 
   }
 
   // 5.5 Stationery Override
-  if (REGEX_STATIONERY.test(allText)) {
-      if (!REGEX_STATIONERY_EXCLUDE.test(allText)) {
+  if (nTest(REGEX_STATIONERY, allText)) {
+      if (!nTest(REGEX_STATIONERY_EXCLUDE, allText)) {
           addScore('مصروفات عمومية وإدارية - قرطاسية ومطبوعات', 3500);
       }
   }
 
   // 5.6 Professional Fees Override
-  if (REGEX_PROFESSIONAL.test(allText)) {
+  if (nTest(REGEX_PROFESSIONAL, allText)) {
       addScore('مصروفات عمومية وإدارية - أتعاب مهنية واستشارات', 4500);
   }
 
   // 6. Subscriptions vs Government Fees
-  if (REGEX_SUBSCRIPTIONS.test(allText)) {
+  if (nTest(REGEX_SUBSCRIPTIONS, allText)) {
       addScore('مصروفات عمومية وإدارية - اشتراكات وبرمجيات', 3500);
   }
 
   // 7. Decorations & Events
-  if (REGEX_DECORATIONS.test(descText)) {
-      if (!REGEX_DECORATIONS_EXCLUDE.test(descText)) { // Exclude edible/cake decorations
+  if (nTest(REGEX_DECORATIONS, descText)) {
+      if (!nTest(REGEX_DECORATIONS_EXCLUDE, descText)) { // Exclude edible/cake decorations
           addScore('مصروفات بيعية وتسويقية - دعاية وإعلان', 3000);
       }
   }
 
   // 8. IT Equipment & Accessories
-  if (REGEX_IT_EQUIPMENT.test(allText)) {
+  if (nTest(REGEX_IT_EQUIPMENT, allText)) {
       addScore('أصول ثابتة - أجهزة حاسب آلي', 3500);
   }
 
   // 9. Fuel overrides vehicle purchase and maintenance
-  if (REGEX_FUEL.test(allText)) {
+  if (nTest(REGEX_FUEL, allText)) {
       addScore('مصروفات عمومية وإدارية - محروقات وطاقة', 4000);
   }
 
   // 10. Donations overrides
-  if (REGEX_DONATIONS.test(allText)) {
+  if (nTest(REGEX_DONATIONS, allText)) {
       addScore('مصروفات أخرى - تبرعات ومساهمات مجتمعية', 4000);
   }
 
   // 11. Transport/Freight Rentals (e.g. "اجرة دينا")
-  if (REGEX_TRANSPORT_RENTAL.test(allText) && REGEX_TRANSPORT_VEHICLE.test(allText)) {
-      if (REGEX_TRANSPORT_EQUIPMENT.test(allText)) {
+  if (nTest(REGEX_TRANSPORT_RENTAL, allText) && nTest(REGEX_TRANSPORT_VEHICLE, allText)) {
+      if (nTest(REGEX_TRANSPORT_EQUIPMENT, allText)) {
           addScore('مصروفات عمومية وإدارية - صيانة وإصلاح', 4000); // Moving equipment is usually maintenance/setup
       } else {
           addScore('تكلفة المبيعات - شحن ونقل للداخل', 1500); // Default to inbound freight for transport rentals
       }
-  } else if (REGEX_TRANSPORT_VEHICLE.test(allText)) {
-      if (REGEX_TRANSPORT_EQUIPMENT.test(allText)) {
+  } else if (nTest(REGEX_TRANSPORT_VEHICLE, allText)) {
+      if (nTest(REGEX_TRANSPORT_EQUIPMENT, allText)) {
           addScore('مصروفات عمومية وإدارية - صيانة وإصلاح', 4000);
       } else {
           addScore('تكلفة المبيعات - شحن ونقل للداخل', 1000); // "دينا" usually means transport, not buying a truck
@@ -353,13 +353,13 @@ export const getExpenseCategory = (name: string, desc: string, amount: number = 
   }
 
   // 12. If it's a bank but the description mentions loans/interest
-  if (REGEX_LOANS.test(allText)) {
+  if (nTest(REGEX_LOANS, allText)) {
       addScore('تكاليف تمويلية - فوائد وعمولات قروض', 4000);
   }
 
   // 13. If it's shipping/freight AND raw materials are mentioned, it's inbound freight (COGS)
-  if (REGEX_SHIPPING.test(allText) && REGEX_SHIPPING_COGS.test(allText)) {
-      if (REGEX_SHIPPING_MAINTENANCE.test(allText)) {
+  if (nTest(REGEX_SHIPPING, allText) && nTest(REGEX_SHIPPING_COGS, allText)) {
+      if (nTest(REGEX_SHIPPING_MAINTENANCE, allText)) {
           addScore('مصروفات عمومية وإدارية - صيانة وإصلاح', 4000);
       } else {
           addScore('تكلفة المبيعات - شحن ونقل للداخل', 2000);
@@ -367,29 +367,29 @@ export const getExpenseCategory = (name: string, desc: string, amount: number = 
   }
 
   // 15. Personnel & Employee Benefits (Higher Priority)
-  if (REGEX_PERSONNEL.test(allText)) {
-      if (/(نهاية خدمة)/.test(allText)) {
+  if (nTest(REGEX_PERSONNEL, allText)) {
+      if (nTest(/(نهاية خدمة)/, allText)) {
           addScore('مصروفات عمومية وإدارية - رواتب ومنافع موظفين - مستحقات نهاية الخدمة', 4500);
-      } else if (/(تأمينات اجتماعية|تأمينات|gosi)/.test(allText)) {
+      } else if (nTest(/(تأمينات اجتماعية|تأمينات|gosi)/, allText)) {
           addScore('مصروفات عمومية وإدارية - رواتب ومنافع موظفين - تأمينات اجتماعية', 4500);
-      } else if (/(تذكرة طيران|تذكرة سفر|flight ticket)/.test(allText)) {
+      } else if (nTest(/(تذكرة طيران|تذكرة سفر|flight ticket)/, allText)) {
           addScore('مصروفات عمومية وإدارية - رواتب ومنافع موظفين - تذاكر طيران', 4500);
-      } else if (/(راتب|بدل|مكافأة)/.test(allText)) {
+      } else if (nTest(/(راتب|بدل|مكافأة)/, allText)) {
           addScore('مصروفات عمومية وإدارية - رواتب ومنافع موظفين - رواتب وأجور', 4500);
-      } else if (/(تذكرة|سفر|انتقالات)/.test(allText)) {
+      } else if (nTest(/(تذكرة|سفر|انتقالات)/, allText)) {
           addScore('مصروفات عمومية وإدارية - مصاريف سفر وانتقالات', 4500);
-      } else if (/(إقامة|اقامة|تجديد|تأشيرة|تاشيرة|سجل تجاري)/.test(allText)) {
+      } else if (nTest(/(إقامة|اقامة|تجديد|تأشيرة|تاشيرة|سجل تجاري)/, allText)) {
           addScore('مصروفات عمومية وإدارية - رسوم حكومية', 4500);
       }
   }
 
   // 16. Marketing & Sales Commissions
-  if (REGEX_MARKETING.test(allText)) {
+  if (nTest(REGEX_MARKETING, allText)) {
       addScore('مصروفات بيعية وتسويقية - دعاية وإعلان', 4500);
   }
 
   // 17. Specific COGS items that were misclassified
-  if (REGEX_MISC_COGS.test(allText)) {
+  if (nTest(REGEX_MISC_COGS, allText)) {
       addScore('تكلفة المبيعات - مستهلكات تشغيلية', 4500);
   }
 
