@@ -6,15 +6,6 @@
 const WB = "(?:^|[\\s/\\-,()])";
 const WE = "(?=[\\s/\\-,()]|$)";
 
-// Shared Arabic normalizer (input text passes through this before matching).
-const normalizeArabic = (text: string) =>
-  text
-    .replace(/ـ/g, '')        // remove tatweel
-    .replace(/[أإآ]/g, 'ا')   // unify alef
-    .replace(/ة/g, 'ه')       // unify taa marbouta -> haa
-    .replace(/ى/g, 'ي')       // unify alef maksoura -> yaa
-    .replace(/\s+/g, ' ');    // collapse whitespace
-
 // Apply the SAME Arabic letter-normalization to a regex's source, so patterns
 // authored with ة/أ/إ/آ/ى still match normalized text (fixes the صيانة -> صيانه
 // class of silent misses). Only Arabic letters are touched — regex syntax is safe.
@@ -104,7 +95,6 @@ export const getExpenseCategory = (name: string, desc: string, amount: number = 
           final_category: finalCategory
         }, null, 2));
       }
-      if (!(globalThis as any)._debugTableRows) { (globalThis as any)._debugTableRows = []; }
       return finalCategory;
     }
   }
@@ -429,10 +419,6 @@ export const getExpenseCategory = (name: string, desc: string, amount: number = 
        matched_rule: detectedRule,
        final_category: finalCategory
     }, null, 2));
-  }
-  
-  if (!(globalThis as any)._debugTableRows) {
-        (globalThis as any)._debugTableRows = [];
   }
 
   return finalCategory;
