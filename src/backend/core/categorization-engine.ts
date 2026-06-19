@@ -157,9 +157,6 @@ export const getExpenseCategory = (name: string, desc: string, amount: number = 
     // OPEX - Rent
     { regex: /(\brent\b|\blease\b|\breal estate\b|\bwarehouse\b|\baccommodation\b|\bhousing\b|\bproperty\b|\boffice\b|\bshop\b|\bstore\b|(?:^|\s)(إيجار|ايجار|عقار|سكن|مستودع|محل|مكتب)(?=\s|$))/, cat: 'مصروفات عمومية وإدارية - إيجارات', score: 600 },
     
-    // OPEX - Marketing
-    { regex: /(\bmarketing\b|\badvertising\b|\bad\b|\bcampaign\b|\bpromotion\b|\bsnapchat\b|\binstagram\b|\btiktok\b|\bgoogle\b|\bmeta\b|\bfacebook\b|\bseo\b|\bbranding\b|\bpr\b|(?:^|\s)(تسويق|إعلان|دعاية|حملة|ترويج|سناب|انستقرام|تيك توك|لوحات)(?=\s|$))/, cat: 'مصروفات بيعية وتسويقية - دعاية وإعلان', score: 600 },
-    
     // OPEX - Delivery & Freight Outwards
     { regex: /(\bdelivery\b|\bshipping\b|\bcourier\b|\btransport\b|(?:^|\s)(توصيل|نقل طلبية|شحن للعملاء|مندوب توصيل|رسوم توصيل|توصيل بضاعة|مرسول|جاهز|هنقرستيشن|شحنة بريد|نقل شحنة|اجرة ديانا)(?=\s|$))/, cat: 'مصروفات بيعية وتسويقية - نقل وتوصيل', score: 600 },
 
@@ -172,17 +169,11 @@ export const getExpenseCategory = (name: string, desc: string, amount: number = 
     // OPEX - Employee Benefits
     { regex: /(?:^|\s)(أدوية|علاج|طبي|حذاء|ملابس|زي|وجبة|إعاشة)(?=\s|$)/, cat: 'مصروفات عمومية وإدارية - رواتب ومنافع موظفين - مزايا أخرى', score: 600 },
 
-    // OPEX - Government Fees
-    { regex: /(?:^|\s)(سجل تجاري|رخصة|بلدية|غرفة تجارية|زكاة|ضريبة|رسوم حكومية|سلامة|دفاع مدني)(?=\s|$)/, cat: 'مصروفات عمومية وإدارية - رسوم حكومية', score: 600 },
-
     // OPEX - Storage
     { regex: /(?:^|\s)(تخزين|مستودع|ايجار|إيجار)(?=\s|$)/, cat: 'مصروفات عمومية وإدارية - إيجارات', score: 600 },
 
     // OPEX - Marketing
     { regex: /(\bmarketing\b|\badvertising\b|\bad\b|\bcampaign\b|\bpromotion\b|\bsnapchat\b|\binstagram\b|\btiktok\b|\bgoogle\b|\bmeta\b|\bfacebook\b|\bseo\b|\bbranding\b|\bpr\b|(?:^|\s)(تسويق|إعلان|دعاية|حملة|ترويج|سناب|انستقرام|تيك توك|لوحات|علاقات عامة|هدايا|توزيعات|العاب أطفال|ورق صور|مستلزمات للحملة الترويجية)(?=\s|$))/, cat: 'مصروفات بيعية وتسويقية - دعاية وإعلان', score: 600 },
-
-    // OPEX - Stationery
-    { regex: /(?:^|\s)(قرطاسية|مكتبية|ورق طباعة|أقلام|اقلام|طباعة)(?=\s|$)/, cat: 'مصروفات عمومية وإدارية - قرطاسية ومطبوعات', score: 600 },
 
     // OPEX - Uniforms
     { regex: /(\buniform\b|\bunforim\b|\bworkwear\b|\bclothing\b|\btailor\b|\bapparel\b|\battire\b|\bsafety shoes\b|\bhelmet\b|\bvest\b|(?:^|\s)(ملابس|يونيفورم|زي|خياط|مريلة|طاقية)(?=\s|$))/, cat: 'مصروفات عمومية وإدارية - رواتب ومنافع موظفين - زي ومهمات عاملين', score: 600 },
@@ -193,8 +184,8 @@ export const getExpenseCategory = (name: string, desc: string, amount: number = 
     // OPEX - Travel & Accommodation
     { regex: /(\btravel\b|\bflight\b|\bticket\b|\bhotel\b|\baccommodation\b|\btransportation\b|(?:^|\s)(سفر|تذكرة|تذاكر|طيران|فندق|إقامة|مواصلات|تذاكر سفر|انتقالات|مرتبة للموظف|توصيل موظف|مرتبة)(?=\s|$))/, cat: 'مصروفات عمومية وإدارية - مصاريف سفر وانتقالات', score: 600 },
     
-    // OPEX - Government Fees
-    { regex: /(?:^|\s)(تجديد|رخصة|رخص|سجل|تصريح|تراخيص|اشتراك غرفه|غرفة تجارية|بلدية|دفاع مدني|زكاة|ضريبة|اقامة|نقل كفالة|خروج وعودة|مكتب العمل|قوى|مقيم|مدد|جوازات|مرور|استمارة|تأشيرة|تاشيرة|فيزا|visa|فيزا عامل)(?=\s|$)/, cat: 'مصروفات عمومية وإدارية - رسوم حكومية', score: 600 },
+    // OPEX - Government Fees (merged: union of former duplicate blocks, scored once)
+    { regex: /(?:^|\s)(رسوم حكومية|سلامة|سجل تجاري|تجديد|رخصة|رخص|سجل|تصريح|تراخيص|اشتراك غرفه|غرفة تجارية|بلدية|دفاع مدني|زكاة|ضريبة|اقامة|نقل كفالة|خروج وعودة|مكتب العمل|قوى|مقيم|مدد|جوازات|مرور|استمارة|تأشيرة|تاشيرة|فيزا|visa|فيزا عامل)(?=\s|$)/, cat: 'مصروفات عمومية وإدارية - رسوم حكومية', score: 600 },
 
     // OPEX - Bank Fees
     { regex: /(?:^|\s)(رسوم تحويل|رسوم ادارية|عمولة بنك|نقاط بيع|مدى|فيزا|ماستركارد|شبكة|كشف حساب|دفتر شيكات|فوائد|مرابحة|تمويل|تحويل بنكي|صراف|بنك)(?=\s|$)/, cat: 'مصروفات عمومية وإدارية - رسوم بنكية ونقاط بيع', score: 600 },
@@ -211,8 +202,8 @@ export const getExpenseCategory = (name: string, desc: string, amount: number = 
     // OPEX - Utilities
     { regex: /(?:^|\s)(كهرباء|مياه|غاز|فاتورة كهرباء|فاتورة مياه)(?=\s|$)/, cat: 'مصروفات عمومية وإدارية - منافع (كهرباء ومياه)', score: 600 },
 
-    // OPEX - Stationery & Printing
-    { regex: /(?:^|\s)(قرطاسية|مطبوعات|ورق تصوير|حبر|احبار|اقلام|ملفات|اختام|طباعة|تصوير|بنر|لوحات|كروت|أدوات مكتبية|ادوات مكتبية|ختم شوكولاته)(?=\s|$)/, cat: 'مصروفات عمومية وإدارية - قرطاسية ومطبوعات', score: 600 },
+    // OPEX - Stationery & Printing (merged: union of former duplicate blocks, scored once)
+    { regex: /(?:^|\s)(قرطاسية|مكتبية|ورق طباعة|مطبوعات|ورق تصوير|حبر|احبار|اقلام|ملفات|اختام|طباعة|تصوير|بنر|لوحات|كروت|أدوات مكتبية|ادوات مكتبية|ختم شوكولاته)(?=\s|$)/, cat: 'مصروفات عمومية وإدارية - قرطاسية ومطبوعات', score: 600 },
 
     // OPEX - Medical & Insurance
     { regex: /(?:^|\s)(تأمين|تامين|طبي|مستشفى|عيادة|صيدلية|دواء|علاج|فحص|تحليل|اشعة|نظارات|اسنان|ولادة|عملية|تنويم|اسعاف|طوارئ)(?=\s|$)/, cat: 'مصروفات عمومية وإدارية - رواتب ومنافع موظفين - تأمين طبي', score: 600 },
