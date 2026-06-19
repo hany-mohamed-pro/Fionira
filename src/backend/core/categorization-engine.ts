@@ -160,8 +160,8 @@ export const getExpenseCategory = (name: string, desc: string, amount: number = 
     // OPEX - Delivery & Freight Outwards
     { regex: /(\bdelivery\b|\bshipping\b|\bcourier\b|\btransport\b|(?:^|\s)(توصيل|نقل طلبية|شحن للعملاء|مندوب توصيل|رسوم توصيل|توصيل بضاعة|مرسول|جاهز|هنقرستيشن|شحنة بريد|نقل شحنة|اجرة ديانا)(?=\s|$))/, cat: 'مصروفات بيعية وتسويقية - نقل وتوصيل', score: 600 },
 
-    // OPEX - Travel
-    { regex: /(?:^|\s)(طيران|تذاكر|سفر|فندق|سكن|تأشيرة|فيزا|اقامة|جزطيران)(?=\s|$)/, cat: 'مصروفات عمومية وإدارية - سفر وانتقالات', score: 600 },
+    // OPEX - Travel & Accommodation (merged: union of former duplicate blocks, scored once; canonical account name)
+    { regex: /(\btravel\b|\bflight\b|\bticket\b|\bhotel\b|\baccommodation\b|\btransportation\b|(?:^|\s)(طيران|تذاكر|تذكرة|تذاكر سفر|سفر|فندق|سكن|تأشيرة|فيزا|اقامة|إقامة|جزطيران|مواصلات|انتقالات|مرتبة للموظف|توصيل موظف|مرتبة)(?=\s|$))/, cat: 'مصروفات عمومية وإدارية - مصاريف سفر وانتقالات', score: 600 },
 
     // OPEX - Petty Cash
     { regex: /(?:^|\s)(عهدة|نثرية|سواق|أغراض)(?=\s|$)/, cat: 'مصروفات عمومية وإدارية - عهد ومصروفات نثرية', score: 600 },
@@ -180,9 +180,6 @@ export const getExpenseCategory = (name: string, desc: string, amount: number = 
     
     // OPEX - Training
     { regex: /(\btraining\b|\bcourse\b|\bworkshop\b|\bdevelopment\b|\bseminar\b|\beducation\b|\bcertification\b|\blearning\b|(?:^|\s)(تدريب|دورة|معهد|ورشة|تطوير)(?=\s|$))/, cat: 'مصروفات عمومية وإدارية - رواتب ومنافع موظفين - تدريب وتطوير', score: 600 },
-    
-    // OPEX - Travel & Accommodation
-    { regex: /(\btravel\b|\bflight\b|\bticket\b|\bhotel\b|\baccommodation\b|\btransportation\b|(?:^|\s)(سفر|تذكرة|تذاكر|طيران|فندق|إقامة|مواصلات|تذاكر سفر|انتقالات|مرتبة للموظف|توصيل موظف|مرتبة)(?=\s|$))/, cat: 'مصروفات عمومية وإدارية - مصاريف سفر وانتقالات', score: 600 },
     
     // OPEX - Government Fees (merged: union of former duplicate blocks, scored once)
     { regex: /(?:^|\s)(رسوم حكومية|سلامة|سجل تجاري|تجديد|رخصة|رخص|سجل|تصريح|تراخيص|اشتراك غرفه|غرفة تجارية|بلدية|دفاع مدني|زكاة|ضريبة|اقامة|نقل كفالة|خروج وعودة|مكتب العمل|قوى|مقيم|مدد|جوازات|مرور|استمارة|تأشيرة|تاشيرة|فيزا|visa|فيزا عامل)(?=\s|$)/, cat: 'مصروفات عمومية وإدارية - رسوم حكومية', score: 600 },
