@@ -1792,7 +1792,8 @@ app.post('/api/erp/dev/sync', express.json({limit: '50mb'}), async (req, res) =>
     let session;
     try {
        const filesToProcess = [{ buffer: arrayBuffer, name: safeOriginalName, fileHash: fileHash }];
-       session = await createValidationSession(filesToProcess, moduleType);
+       const activityProfile = devMemoryDb.settings[tenantId]?.activity;
+       session = await createValidationSession(filesToProcess, moduleType, undefined, activityProfile);
     } catch (e) {
        console.error("Failed to parse staged file:", e);
        if (fs.existsSync(storagePath)) fs.unlinkSync(storagePath);

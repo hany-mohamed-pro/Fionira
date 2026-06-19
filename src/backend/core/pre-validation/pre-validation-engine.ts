@@ -5,7 +5,8 @@ import { routeToDomainIntelligence } from '../financial-intelligence/domain-orch
 export async function createValidationSession(
   files: { buffer: ArrayBuffer; name: string; fileHash?: string }[],
   moduleType: 'expenses' | 'revenues' | 'payroll' | 'banks' | 'inventory',
-  onProgress?: (msg: string) => void
+  onProgress?: (msg: string) => void,
+  activityProfile?: string
 ): Promise<ValidationSession> {
   const session = await processUploadBatch(files, moduleType, onProgress);
   
@@ -18,7 +19,7 @@ export async function createValidationSession(
   
   // CFO-Grade Domain Specific Financial Intelligence
   // We pass historical data if we fetch it, for now we pass an empty array or recent history
-  const intelligenceResults = routeToDomainIntelligence(rawRecords, moduleType, []);
+  const intelligenceResults = routeToDomainIntelligence(rawRecords, moduleType, [], activityProfile);
 
   const sessionRecords: any[] = [];
   let cleanRecords = 0;

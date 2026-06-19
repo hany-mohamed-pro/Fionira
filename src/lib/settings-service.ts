@@ -1,10 +1,33 @@
 import { doc, getDoc, setDoc, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
 
+/**
+ * Stable activity keys used to drive activity-aware classification logic.
+ * The empty string means "unset" and preserves today's exact behavior
+ * (no activity-specific rule activates). Matching logic depends on these
+ * keys, never on the Arabic display label.
+ */
+export type ActivityKey =
+  | ''
+  | 'trading_retail'
+  | 'manufacturing_food'
+  | 'professional_services'
+  | 'contracting_construction'
+  | 'restaurant_fb';
+
+export const ACTIVITY_OPTIONS: { key: ActivityKey; label: string }[] = [
+  { key: '', label: 'غير محدد' },
+  { key: 'trading_retail', label: 'تجارة التجزئة والجملة' },
+  { key: 'manufacturing_food', label: 'التصنيع والمنتجات الغذائية' },
+  { key: 'professional_services', label: 'الخدمات المهنية والاستشارية' },
+  { key: 'contracting_construction', label: 'المقاولات والإنشاءات' },
+  { key: 'restaurant_fb', label: 'المطاعم وخدمات الأغذية' },
+];
+
 export interface AppSettings {
   companyName: string;
   logo?: string;
-  activity: string;
+  activity: ActivityKey | string; // stable enum key (legacy free-text tolerated, treated as unset)
   taxId: string;
   address: string;
   website: string;
@@ -26,7 +49,7 @@ export interface AppSettings {
 
 const DEFAULT_SETTINGS: AppSettings = {
   companyName: '',
-  activity: 'خدمات',
+  activity: '', // unset by default = today's exact classification behavior
   taxId: '',
   address: '',
   website: '',

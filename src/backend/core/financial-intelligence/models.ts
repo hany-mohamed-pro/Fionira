@@ -31,6 +31,11 @@ export interface IntelligenceContext {
     historicalData: FinancialRecord[];
     currentBatch: FinancialRecord[];
     vendorProfiles: Record<string, VendorProfile>;
+    /**
+     * Stable activity key for the tenant (e.g. 'restaurant_fb'). Undefined/empty
+     * means unset — activity-aware rules stay inert, preserving today's behavior.
+     */
+    activityProfile?: string;
 }
 
 export interface IntelligenceRule {

@@ -1,10 +1,11 @@
 import { FinancialRecord } from '../../../../types';
 import { IntelligenceResult, Insight, IntelligenceContext } from '../models';
 import { buildVendorProfiles } from '../vendor-profiler';
+import { restaurantWastageRule } from '../rules/activity/restaurant-wastage';
 
-export function analyzeExpenses(records: FinancialRecord[], historicalData: FinancialRecord[] = []): IntelligenceResult[] {
+export function analyzeExpenses(records: FinancialRecord[], historicalData: FinancialRecord[] = [], activityProfile?: string): IntelligenceResult[] {
     const profiles = buildVendorProfiles(historicalData);
-    const context: IntelligenceContext = { historicalData, currentBatch: records, vendorProfiles: profiles };
+    const context: IntelligenceContext = { historicalData, currentBatch: records, vendorProfiles: profiles, activityProfile };
 
     return records.map(record => {
         const insights: Insight[] = [];
@@ -120,6 +121,14 @@ export function analyzeExpenses(records: FinancialRecord[], historicalData: Fina
                     insights.push({ type: 'OUTSIDE_FISCAL_PERIOD', severity: 'LOW', message: 'تاريخ المستند قديم أو يقع خارج الفترة المالية (معلومة إرشادية)', confidence: 0.9, scoreImpact: 5 });
                 }
             }
+        }
+
+        // 5. Activity-aware rules (inert unless the tenant's activityProfile matches).
+        //    These never change classification — they only add review insights.
+        const wastageInsight = restaurantWastageRule.execute(record, context);
+        if (wastageInsight) {
+            if (Array.isArray(wastageInsight)) insights.push(...wastageInsight);
+            else insights.push(wastageInsight);
         }
 
         // Risk Score Calculation

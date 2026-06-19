@@ -7,13 +7,14 @@ import { analyzeBanks } from './domains/bank-intelligence-engine';
 import { analyzeInventory } from './domains/inventory-intelligence-engine';
 
 export function routeToDomainIntelligence(
-    records: FinancialRecord[], 
+    records: FinancialRecord[],
     moduleType: 'expenses' | 'revenues' | 'payroll' | 'banks' | 'inventory',
-    historicalData: FinancialRecord[] = []
+    historicalData: FinancialRecord[] = [],
+    activityProfile?: string
 ): IntelligenceResult[] {
     switch (moduleType) {
         case 'expenses':
-            return analyzeExpenses(records, historicalData);
+            return analyzeExpenses(records, historicalData, activityProfile);
         case 'revenues':
             return analyzeRevenues(records, historicalData);
         case 'payroll':

@@ -18,7 +18,7 @@ import {
 import { UserManagement } from '../modules/UserManagement';
 import { Card } from '../shared/Card';
 import { useUI } from '../contexts/UIContext';
-import { AppSettings, getSettings, saveSettings } from '../lib/settings-service';
+import { AppSettings, getSettings, saveSettings, ACTIVITY_OPTIONS } from '../lib/settings-service';
 
 interface SettingsProps {
   profile: any;
@@ -112,12 +112,15 @@ export const Settings: React.FC<SettingsProps> = ({ profile }) => {
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-slate-700">نشاط الشركة</label>
-                  <input 
-                    type="text" 
-                    value={companyInfo.activity}
+                  <select
+                    value={ACTIVITY_OPTIONS.some(o => o.key === companyInfo.activity) ? companyInfo.activity : ''}
                     onChange={e => setCompanyInfo({...companyInfo, activity: e.target.value})}
                     className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all font-medium"
-                  />
+                  >
+                    {ACTIVITY_OPTIONS.map(o => (
+                      <option key={o.key} value={o.key}>{o.label}</option>
+                    ))}
+                  </select>
                 </div>
               </div>
 
