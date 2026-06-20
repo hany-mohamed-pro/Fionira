@@ -9,6 +9,20 @@ complete**, since later phases may surface more of the same class of bug.
 All items below are **keyword-collision / tie-break** issues in the scoring engine, or a
 **missing chart-of-accounts category** — not regressions introduced by the activity rules.
 
+## Resolution status
+
+- **Track 1 (context-aware tokenization) — DONE.** Resolved **D1, D3, D4, D6, D8, D9** with surgical
+  context guards + a `descOnly` vendor/description separation. Verified zero regression on the 730 real
+  records and on all 5 synthetic fixtures. See `engine-fix-track1-context-tokenization.md`.
+- **D5 — partially improved, still OPEN.** No longer mis-routed to إيجارات (now "أخرى"), but reaching
+  the expected *professional* category is blocked on **D13** (the "ال" prefix root), deferred by
+  user decision to its own session.
+- **D13 (NEW, discovered in Track 1) — OPEN, deferred.** The Arabic definite article "ال" and attached
+  prepositions (لـ/بـ) break word-boundary matching: `التدقيق`≠`تدقيق`, `المورد`≠`مورد`,
+  `للبضاعة`≠`بضاعة`. Systemic (affects all keyword groups) and high-risk — needs its own dedicated
+  session. Directly blocks the full fix of D5 and is the deepest reason several silent misses exist.
+- **Untouched (separate tracks): D2, D7, D10, D11, D12** (missing accounts + coverage gaps).
+
 | # | Symptom (real-ish input) | Engine output (wrong) | Expected | Likely cause | Found in |
 |---|---|---|---|---|---|
 | D1 | `فاتورة كهرباء المصنع` (utility bill) | مصروفات عمومية وإدارية - صيانة وإصلاح | منافع (كهرباء ومياه) | `كهرباء` appears in the maintenance keyword set (electrical-repair sense) and wins the tie vs the utilities sense | Phase 2 |
@@ -23,6 +37,9 @@ All items below are **keyword-collision / tie-break** issues in the scoring engi
 | D10 | `شراء خلاطة خرسانة جديدة` (equipment purchase) | مصروفات عمومية وإدارية - أخرى | أصول ثابتة - أجهزة ومعدات (capitalize) | **Coverage gap** — `خلاطة خرسانة` (concrete mixer) isn't in the CAPEX-equipment keywords, so a clear asset purchase is not capitalized | Phase 5 |
 | D11 | construction materials/labor (`أسمنت`, `حديد تسليح`, `بلوك خرساني`, `يوميات عمال`) | مصروفات عمومية وإدارية - أخرى (all of them) | direct project cost / WIP (COGS) | **Coverage gap** — the engine has no construction vocabulary; all project costs fall to "G&A - other" | Phase 5 |
 | D12 | customer advance payment (revenue) | إيرادات المبيعات | إيراد مقدم / unearned (liability) | **Missing account** (revenue side) — no deferred-revenue account exists (same class as D2/D7) | Phase 5 |
+| D13 | `التدقيق`, `المورد`, `للبضاعة` (prefixed words) | keyword silently NOT matched | should match the base word | **Arabic "ال"/attached-preposition prefix breaks word-boundary matching** — systemic; blocks full D5 fix | Track 1 |
+
+**Status legend:** ✅ resolved in Track 1 → **D1, D3, D4, D6, D8, D9**. ⚠️ open → **D5** (partial), **D13** (new). Untouched → **D2, D7, D10, D11, D12**.
 
 ## Diagnostic note — the shared root pattern (D3–D6, and likely D1)
 

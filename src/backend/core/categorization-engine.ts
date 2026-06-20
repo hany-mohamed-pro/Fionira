@@ -23,7 +23,7 @@ const REGEX_RAW_MATERIALS = new RegExp(`${WB}(ليمون|دجاج|لحم|بيض|
 const REGEX_CLEANING = new RegExp(`${WB}(نظافة|تنظيف|صابون|معقم|منظفات|أكياس نفاية|ممسحة|مكنسة|كلوركس|ديتول|ضيافة|استقبال|اسفنجة|إسفنجة|فيري|ادوات تنظيف|أدوات تنظيف)${WE}`);
 const REGEX_OPERATING = new RegExp(`${WB}(قفازات|gloves|maxi roul|ماكسي رول|cilling filem|cling film|sd17|بايركس|صحون بلاستيك صغيرة|baking paper|قالب كيك|فلين ابيض|ملاعق بلاستيك)${WE}`);
 const REGEX_PACKAGING = new RegExp(`${WB}(تغليف|علب|أكياس|كيس|أكواب|كوب|كاسات|قصدير|مصاص|رول|قواعد|شريط|سليف|ستكر|استيكر|استيكرات|ليبل|ملصق|ريبون|رينون|بوكس|بوكسات|بنتو|بورد|تاريخ|اكرليك|أكرليك|طباعة|ملاعق بلاستيك|اعواد اسنان|كوب صوصات|packaging|box|carton|كرتون للشحن 10)${WE}`);
-const REGEX_STATIONERY = new RegExp(`${WB}(ورق تصوير|ورق طباعة|اتفاقية|عقد|حبر|أحبار|اقلام|أقلام|ملفات|اختام|بنر|لوحات|كروت|ختم شوكولاته)${WE}`);
+const REGEX_STATIONERY = new RegExp(`${WB}(ورق تصوير|ورق طباعة|طباعة تقارير|طباعة مستندات|طباعة عقود|طباعة فواتير|اتفاقية|عقد|حبر|أحبار|اقلام|أقلام|ملفات|اختام|بنر|لوحات|كروت|ختم شوكولاته)${WE}`);
 const REGEX_STATIONERY_EXCLUDE = new RegExp(`${WB}(انتهاء التواريخ|تلوين)${WE}`);
 const REGEX_PROFESSIONAL = new RegExp(`${WB}(مراجعة وتعديل بنود عقد|أتعاب التفاوض|انهاء عقد|اتعاب|أتعاب|استشارات|محاماة|محاسب|تدقيق|تخليص|معقب)${WE}`);
 const REGEX_SUBSCRIPTIONS = new RegExp(`${WB}(اشتراك|برنامج|تطبيق|نظام|استضافة|دومين|سيرفر|كلاود|فودكس|cloud|software|app|subscription|hosting|domain|license|renewal|foodics)${WE}`);
@@ -139,8 +139,9 @@ export const getExpenseCategory = (name: string, desc: string, amount: number = 
     // COGS - Operating Consumables
     { regex: /(\bkitchenware\b|\butensil\b|\bplate\b|\bspoon\b|\bfork\b|\bknife\b|\bpot\b|\bpan\b|\bglass\b|\bcutlery\b|\bbowl\b|\bdish\b|\bmug\b|\btray\b|\bpyrex\b|\btool\b|\btools\b|\bpippng\b|\bflower\b|\bplastic\b|\bpaper\b|\bcarton\b|\bcutter\b|(?:^|\s)(أدوات مطبخ|أدوات طعام|صحون|ملاعق|شوك|سكاكين|قدور|أكواب زجاجية|صواني|طناجر|عجان|ثلاجة|شمع|شمع حفلات|ديكور|زينة|ورد|بايركس|قفازات|كمامات|نايلون|سفرة|عود|اعواد|أعواد|مريلة|مريله|شبك|فحم|حطب|ولاعة|ادوات|أدوات|شجره|شجرة|فانوس|فانوس رمضان|بطاريات|بطارية|قرع|بلاستيك|بلاستك|ورق|كرتون|قالب|فلين|مواد للمطبخ|قطاعة|قطاعات|مستهلكات|منظفات|قوالب كيك المونيوم|صينية زجاج بيضاوى|أدوات طعام|مواد طبخ)(?=\s|$))/, cat: 'تكلفة المبيعات - مستهلكات تشغيلية', score: 600 },
     
-    // COGS - Freight Inwards
-    { regex: /(?:^|\s)(تخليص جمركي|رسوم جمركية|شحن للداخل|نقل بضاعة|جمارك|نقل مشتريات|customs|clearance)(?=\s|$)/, cat: 'تكلفة المبيعات - شحن ونقل للداخل', score: 600 },
+    // COGS - Freight Inwards (score raised to 850 so inbound beats the generic
+    // raw-materials "مشتريات" tie; explicit inbound phrases added. Fixes D8a/D8b.)
+    { regex: /(?:^|\s)(تخليص جمركي|رسوم جمركية|شحن للداخل|شحن وارد|نقل وارد|شحنة واردة|بضاعة واردة|نقل بضاعة|جمارك|نقل مشتريات|customs|clearance)(?=\s|$)/, cat: 'تكلفة المبيعات - شحن ونقل للداخل', score: 850 },
 
     // OPEX - Fuel & Energy
     { regex: /(?:^|\s)(بنزين|وقود|محروقات|ديزل|gasoline|fuel|diesel|petrol)(?=\s|$)/, cat: 'مصروفات عمومية وإدارية - محروقات وطاقة', score: 800 },
@@ -149,13 +150,16 @@ export const getExpenseCategory = (name: string, desc: string, amount: number = 
     { regex: /(?:^|\s)(سيارة|سيارات|كفر|كفرات|اطار|اطارات|زيت سيارة|تغيير زيت|فحص دوري|غسيل سيارة|car|vehicle|oil change|car wash|car oil)(?=\s|$)/, cat: 'مصروفات عمومية وإدارية - مصاريف سيارات', score: 700 },
 
     // OPEX - Maintenance & Repairs
-    { regex: /(\bmaintenance\b|\brepair\b|\bspare part\b|\bfix\b|\bservice\b|\boverhaul\b|\bcompressor\b|\bcable\b|\bcharger\b|(?:^|\s)(صيانة|إصلاح|تصليح|قطع غيار|ورشة|سباكة|سباك|كهرباء|تكييف|جوال|شاشة|بطارية|مكينة|كومبرسير|كمبروسر|رداد|خلاط|سلك|مفك|مفكات|صفاية|صفايات|شاحن|كيبيل|كيبل)(?=\s|$))/, cat: 'مصروفات عمومية وإدارية - صيانة وإصلاح', score: 600 },
+    { regex: /(\bmaintenance\b|\brepair\b|\bspare part\b|\bfix\b|\bservice\b|\boverhaul\b|\bcompressor\b|\bcable\b|\bcharger\b|(?:^|\s)(صيانة|إصلاح|تصليح|قطع غيار|ورشة|سباكة|سباك|تكييف|جوال|شاشة|بطارية|مكينة|كومبرسير|كمبروسر|رداد|خلاط|سلك|مفك|مفكات|صفاية|صفايات|شاحن|كيبيل|كيبل)(?=\s|$))/, cat: 'مصروفات عمومية وإدارية - صيانة وإصلاح', score: 600 },
     
     // OPEX - Cleaning & Hospitality
     { regex: /(\bcleaning\b|\bdetergent\b|\bsoap\b|\bbleach\b|\btrash\b|\bglove\b|\bsanitizer\b|\bhygiene\b|\bwipe\b|\bbroom\b|\bmop\b|\bsponge\b|\bdisinfectant\b|\bwash\b|\bclean\b|\btissue\b|\btesho\b|(?:^|\s)(نظافة|تنظيف|صابون|معقم|منظفات|أكياس نفاية|قفازات|ممسحة|مكنسة|كلوركس|ديتول|ضيافة|استقبال|اسفنجة|إسفنجة|فيري|ادوات تنظيف|أدوات تنظيف|إزالة مواد مترسبة|صوف القطن)(?=\s|$))/, cat: 'مصروفات عمومية وإدارية - نظافة وضيافة', score: 600 },
     
-    // OPEX - Rent
-    { regex: /(\brent\b|\blease\b|\breal estate\b|\bwarehouse\b|\baccommodation\b|\bhousing\b|\bproperty\b|\boffice\b|\bshop\b|\bstore\b|(?:^|\s)(إيجار|ايجار|عقار|سكن|مستودع|محل|مكتب)(?=\s|$))/, cat: 'مصروفات عمومية وإدارية - إيجارات', score: 600 },
+    // OPEX - Rent (intent words — may appear in vendor name or description)
+    { regex: /(\brent\b|\blease\b|\breal estate\b|\baccommodation\b|\bhousing\b|\bproperty\b|(?:^|\s)(إيجار|ايجار|عقار|سكن)(?=\s|$))/, cat: 'مصروفات عمومية وإدارية - إيجارات', score: 600 },
+    // OPEX - Rent (generic-location words — DESCRIPTION ONLY, so a vendor named
+    // "مكتب ترجمة" / "مستودع الجملة" is not mis-routed to rent). Fixes D5/D9.
+    { regex: /(\bwarehouse\b|\boffice\b|\bshop\b|\bstore\b|(?:^|\s)(مستودع|محل|مكتب)(?=\s|$))/, cat: 'مصروفات عمومية وإدارية - إيجارات', score: 600, descOnly: true },
     
     // OPEX - Delivery & Freight Outwards
     { regex: /(\bdelivery\b|\bshipping\b|\bcourier\b|\btransport\b|(?:^|\s)(توصيل|نقل طلبية|شحن للعملاء|مندوب توصيل|رسوم توصيل|توصيل بضاعة|مرسول|جاهز|هنقرستيشن|شحنة بريد|نقل شحنة|اجرة ديانا)(?=\s|$))/, cat: 'مصروفات بيعية وتسويقية - نقل وتوصيل', score: 600 },
@@ -169,8 +173,9 @@ export const getExpenseCategory = (name: string, desc: string, amount: number = 
     // OPEX - Employee Benefits
     { regex: /(?:^|\s)(أدوية|علاج|طبي|حذاء|ملابس|زي|وجبة|إعاشة)(?=\s|$)/, cat: 'مصروفات عمومية وإدارية - رواتب ومنافع موظفين - مزايا أخرى', score: 600 },
 
-    // OPEX - Storage
-    { regex: /(?:^|\s)(تخزين|مستودع|ايجار|إيجار)(?=\s|$)/, cat: 'مصروفات عمومية وإدارية - إيجارات', score: 600 },
+    // OPEX - Storage (مستودع moved to the description-only rent rule above to
+    // avoid vendor-name bleed; تخزين/ايجار remain intent words)
+    { regex: /(?:^|\s)(تخزين|ايجار|إيجار)(?=\s|$)/, cat: 'مصروفات عمومية وإدارية - إيجارات', score: 600 },
 
     // OPEX - Marketing
     { regex: /(\bmarketing\b|\badvertising\b|\bad\b|\bcampaign\b|\bpromotion\b|\bsnapchat\b|\binstagram\b|\btiktok\b|\bgoogle\b|\bmeta\b|\bfacebook\b|\bseo\b|\bbranding\b|\bpr\b|(?:^|\s)(تسويق|إعلان|دعاية|حملة|ترويج|سناب|انستقرام|تيك توك|لوحات|علاقات عامة|هدايا|توزيعات|العاب أطفال|ورق صور|مستلزمات للحملة الترويجية)(?=\s|$))/, cat: 'مصروفات بيعية وتسويقية - دعاية وإعلان', score: 600 },
@@ -225,6 +230,13 @@ export const getExpenseCategory = (name: string, desc: string, amount: number = 
   ];
 
   keywords.forEach(k => {
+    // descOnly keywords match the ITEM DESCRIPTION only, never the vendor name.
+    // This stops a generic word inside a vendor's name (e.g. "مكتب"/"مستودع" in
+    // "مكتب ترجمة" / "مستودع الجملة") from capturing the rent category.
+    if ((k as any).descOnly) {
+      if (nTest(k.regex, descText)) addScore(k.cat, k.score);
+      return;
+    }
     if (nTest(k.regex, allText)) addScore(k.cat, k.score);
     if (nTest(k.regex, descText)) addScore(k.cat, 200); // Bonus for being explicitly in the description
   });
@@ -283,8 +295,9 @@ export const getExpenseCategory = (name: string, desc: string, amount: number = 
       }
   }
 
-  // 5.6 Professional Fees Override
-  if (nTest(REGEX_PROFESSIONAL, allText)) {
+  // 5.6 Professional Fees Override (suppressed when it's an employee's salary —
+  // "راتب محاسب" is a salary, not a professional fee. Fixes D6.)
+  if (nTest(REGEX_PROFESSIONAL, allText) && !nTest(/(راتب|رواتب|مرتب|مرتبات|أجور)/, allText)) {
       addScore('مصروفات عمومية وإدارية - أتعاب مهنية واستشارات', 4500);
   }
 
@@ -352,6 +365,9 @@ export const getExpenseCategory = (name: string, desc: string, amount: number = 
           addScore('مصروفات عمومية وإدارية - رواتب ومنافع موظفين - تأمينات اجتماعية', 4500);
       } else if (nTest(/(تذكرة طيران|تذكرة سفر|flight ticket)/, allText)) {
           addScore('مصروفات عمومية وإدارية - رواتب ومنافع موظفين - تذاكر طيران', 4500);
+      } else if (nTest(/(بدل إقامة|بدل سفر|بدل انتقالات|بدل مبيت|بدل تذاكر)/, allText)) {
+          // Travel-specific allowance ("بدل إقامة فندق") is travel, not salary. Fixes D4.
+          addScore('مصروفات عمومية وإدارية - مصاريف سفر وانتقالات', 4500);
       } else if (nTest(/(راتب|بدل|مكافأة)/, allText)) {
           addScore('مصروفات عمومية وإدارية - رواتب ومنافع موظفين - رواتب وأجور', 4500);
       } else if (nTest(/(تذكرة|سفر|انتقالات)/, allText)) {
