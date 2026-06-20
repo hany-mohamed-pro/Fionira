@@ -888,10 +888,12 @@ export default function App() {
 
   const incomeStatement = useMemo(() => {
       const cogsCategories = [
-          'تكلفة المبيعات - مواد خام ومكونات', 
+          'تكلفة المبيعات - مواد خام ومكونات',
           'تكلفة المبيعات - مواد تعبئة وتغليف',
           'تكلفة المبيعات - مستهلكات تشغيلية',
-          'تكلفة المبيعات - شحن ونقل للداخل'
+          'تكلفة المبيعات - شحن ونقل للداخل',
+          'تكلفة المبيعات - هدر وتلف إنتاج',   // D2 — production wastage (added so it aggregates under COGS)
+          'تكلفة المبيعات - هالك وعجز مخزون'   // D7 — inventory shrinkage
       ];
       const capexCategories = [
           'أصول ثابتة - أجهزة ومعدات',

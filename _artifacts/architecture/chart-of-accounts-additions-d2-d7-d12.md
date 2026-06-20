@@ -4,6 +4,16 @@
 displays them under COGS). **D12 deferred** — correctly identified as a *liability*, but the system has
 no liability-account infrastructure (estimated balance sheet), so it cannot be homed correctly now.
 
+> **⚠️ CORRECTION (added post-audit).** The "Income Statement displays them under COGS … via the تكلفة
+> prefix (no code change needed)" claim below (TASK 1.B, TASK 4 "Statement rendering", TASK 5 "end-to-end")
+> was **overstated**. `income-statement-audit.md` (commit `5a165ed`) found the Income Statement's
+> COGS/OPEX split is driven by a **hard-coded `cogsCategories` list** in `App.tsx` (not a `تكلفة`
+> prefix), and that list did **not** include D2/D7 — so wastage/shrinkage was aggregating under
+> **Operating Expenses**, not COGS. This was fixed by adding D2/D7 to that list; see
+> `income-statement-d2-d7-cogs-fix.md`. Net profit was never affected; the present-day numeric impact was
+> nil (no wastage/shrinkage records in the 730 real data). With that fix, the "end-to-end under COGS"
+> statement is now accurate.
+
 ---
 
 ## TASK 1 — the true chart-of-accounts source (evidence)
