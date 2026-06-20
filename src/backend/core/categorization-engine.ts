@@ -402,6 +402,16 @@ export const getExpenseCategory = (name: string, desc: string, amount: number = 
       addScore('تكلفة المبيعات - مواد خام ومكونات', 1500);
   }
 
+  // 20. Production wastage (D2) -> its own COGS account, instead of plain raw materials.
+  if (nTest(/(هدر.*إنتاج|تلف.*إنتاج|هدر مواد خام|إتلاف.*إنتاج|هالك إنتاج|تلف مواد خام)/, allText)) {
+      addScore('تكلفة المبيعات - هدر وتلف إنتاج', 5000);
+  }
+
+  // 21. Inventory shrinkage (D7) -> its own COGS account.
+  if (nTest(/(هالك مخزون|هالك بضاعة|عجز جرد|عجز مخزون|نقص مخزون|فاقد مخزون|جرد سنوي|بضاعة تالفة|تلف بضاعة)/, allText)) {
+      addScore('تكلفة المبيعات - هالك وعجز مخزون', 5000);
+  }
+
   // --- STAGE 4: RESOLUTION ---
   let max = 0;
   for (const [cat, score] of Object.entries(scores)) {

@@ -41,6 +41,13 @@ All items below are **keyword-collision / tie-break** issues in the scoring engi
   legitimate signal from leakage either. **Reverted** (engine unchanged from Track A; D5 not regressed).
   D13's real fix needs **per-keyword vendor-safety tagging FIRST**, then field separation, then "ال" —
   a larger separately-scoped effort. See `engine-fix-trackB-combined-d13.md`.
+- **Chart-of-accounts additions — D2 & D7 RESOLVED (end-to-end), D12 still DEFERRED.** Added two new
+  COGS accounts (`تكلفة المبيعات - هدر وتلف إنتاج` for D2; `تكلفة المبيعات - هالك وعجز مخزون` for D7) to
+  `CATEGORY_ORDER` + two new Stage-3 routing rules; they display under COGS in the Income Statement.
+  Zero regression on 730 real, only 3 intended synthetic changes, activity non-interference confirmed.
+  **D12 deferred** — it is a *liability* (unearned revenue), and the balance sheet is fully estimated
+  with **no liability-account infrastructure**; adding it as revenue would be accounting-wrong. Needs an
+  account-driven balance sheet + accountant decision. See `chart-of-accounts-additions-d2-d7-d12.md`.
 
 | # | Symptom (real-ish input) | Engine output (wrong) | Expected | Likely cause | Found in |
 |---|---|---|---|---|---|
@@ -58,9 +65,10 @@ All items below are **keyword-collision / tie-break** issues in the scoring engi
 | D12 | customer advance payment (revenue) | إيرادات المبيعات | إيراد مقدم / unearned (liability) | **Missing account** (revenue side) — no deferred-revenue account exists (same class as D2/D7) | Phase 5 |
 | D13 | `التدقيق`, `المورد`, `للبضاعة` (prefixed words) | keyword silently NOT matched | should match the base word | **Arabic "ال"/attached-preposition prefix breaks word-boundary matching** — systemic; blocks full D5 fix | Track 1 |
 
-**Status legend:** ✅ resolved → **D1, D3, D4, D6, D8, D9** (Track 1), **D5** (Track 2), **D10** (Track A).
-🟡 partial → **D11** (Track A — COGS routing; WIP account deferred). ⛔ deferred (need new COA account +
-accountant) → **D2, D7, D12**. ⚠️ open/rescoped → **D13** (pair with vendor/desc field separation).
+**Status legend:** ✅ resolved → **D1, D3, D4, D6, D8, D9** (Track 1), **D5** (Track 2), **D10** (Track A),
+**D2, D7** (COA additions). 🟡 partial → **D11** (Track A — COGS routing; WIP account deferred).
+⛔ deferred → **D12** (liability; needs account-driven balance sheet + accountant). ⚠️ open/rescoped →
+**D13** (pair with vendor/desc field separation, after per-keyword vendor-safety tagging).
 
 ## Diagnostic note — the shared root pattern (D3–D6, and likely D1)
 
