@@ -1,6 +1,6 @@
 # Fionira — Session Handoff
 
-> Resume point for any future session. HEAD = `cf90a62`. Working tree clean except the three
+> Resume point for any future session. HEAD = `bb88233`. Working tree clean except the three
 > long-standing untouched data/lock files (`data/erp_registry.json`, `data/uploads.json`,
 > `package-lock.json`). Evidence-based; pulled from live git + file state, not memory.
 
@@ -11,9 +11,9 @@ to act as the **expert *for* a non-specialist user** — the owner does not need
 system classifies, validates, and governs the financials and surfaces plain-language decisions. It is
 **not** a traditional ERP and does not push accounting mechanics onto the user.
 
-## 2. Complete chronological commit ledger (root → HEAD, 31 commits)
+## 2. Complete chronological commit ledger (root → HEAD, 33 commits)
 
-This Claude Code session resumed at `12a0529`; commits `2aaa928` → `cf90a62` are this session's work.
+This Claude Code session resumed at `12a0529`; commits `2aaa928` → `bb88233` are this session's work.
 Everything above `12a0529` was already in history at session start (security/UX/early-classification).
 
 | # | Hash | Tag | Description |
@@ -48,7 +48,9 @@ Everything above `12a0529` was already in history at session start (security/UX/
 | 28 | `a6a5731` | [CLASSIFICATION] | activity phase 3 — professional services |
 | 29 | `ced0cc2` | [CLASSIFICATION] | activity phase 4 — trading/retail |
 | 30 | `679f791` | [CLASSIFICATION] | activity phase 5 — contracting/construction (expenses+revenues) |
-| 31 | `cf90a62` | [ENGINE-FIX] | Track 1 — context-aware tokenization (resolves D1,D3-D6,D8,D9) |
+| 31 | `cf90a62` | [ENGINE-FIX] | Track 1 — context-aware tokenization (resolves 6 of 7: D1,D3,D4,D6,D8,D9) |
+| 32 | `6705b53` | [DOCS] | session handoff document created |
+| 33 | `bb88233` | [ENGINE-FIX] | Track 2 — D5 resolved surgically (ترجمة/translation = professional); global "ال"-prefix fix attempted, **measured unsafe** (21-record blast radius dominated by vendor-name leakage), **rejected and reverted** |
 
 ## 3. Current system state (factual, verified)
 
@@ -61,8 +63,11 @@ Everything above `12a0529` was already in history at session start (security/UX/
   (`devMemoryDb` in `server.ts`) persisted to `data/*.json`; the client uses **Firestore**; a
   **Postgres** `journal_entries` schema is **planned only** (`01e6e19`, no execution, no cutover).
 - **Classification engine (`categorization-engine.ts`):** Stages 0–2 hardened with `nrx`/`nTest`
-  normalization (`17a598f`), Stage-3 normalization complete (`2e6349a`), and **Track 1 context-aware
-  fixes applied** (`cf90a62`). Treated as frozen except via approved engine-fix tracks.
+  normalization (`17a598f`), Stage-3 normalization complete (`2e6349a`), **Track 1 context-aware fixes**
+  (`cf90a62`), and **Track 2's surgical D5 fix** (`bb88233`). The net engine change since Track 1 is
+  **only D5's targeted keyword** (`ترجمة`/`translation`) — the global "ال" tokenization attempt was
+  reverted and left **zero trace** (confirmed by `git diff`). Treated as frozen except via approved
+  engine-fix tracks.
 - **Activity-aware layer:** 5 profiles live (restaurant_fb, manufacturing_food, professional_services,
   trading_retail, contracting_construction), **insight-only**, **zero engine coupling** — verified by
   the cross-rule non-interference test (re-confirmed after Track 1). Wired through both the expenses and
@@ -72,43 +77,57 @@ Everything above `12a0529` was already in history at session start (security/UX/
 
 ## 4. Open technical debt (live from `engine-technical-debt.md`)
 
-Track 1 resolved **D1, D3, D4, D6, D8, D9** (zero regression). Still open:
+**RESOLVED — 7 items:** D1, D3, D4, D6, D8, D9 (Track 1) + **D5** (Track 2, surgical). All zero-regression.
+
+**OPEN — 5 items (unchanged):**
 
 | # | Description | Discovered | Severity | Recommended track |
 |---|---|---|---|---|
-| D5 | translation-office vendor → was إيجارات, now "أخرى"; full *professional* fix blocked on D13 | Phase 3 (`a6a5731`) | MEDIUM | with D13 |
-| D13 | Arabic "ال"/attached-preposition prefix breaks word-boundary matching (`التدقيق`≠`تدقيق`) — systemic, likely many silent misses | Track 1 (`cf90a62`) | **HIGH** | **Track 4 (next)** |
-| D2 | production-wastage has no dedicated account | Phase 2 (`6a66112`) | MEDIUM | Track 2 (new accounts) |
-| D7 | inventory-shrinkage has no dedicated account | Phase 4 (`ced0cc2`) | MEDIUM | Track 2 (new accounts) |
-| D12 | customer advance → no deferred-revenue (unearned) account | Phase 5 (`679f791`) | MEDIUM-HIGH | Track 2 (new accounts) |
-| D10 | equipment purchase (concrete mixer) not capitalized | Phase 5 (`679f791`) | MEDIUM-HIGH | Track 3 (coverage) |
-| D11 | no construction vocabulary — project costs fall to "G&A - other" | Phase 5 (`679f791`) | MEDIUM | Track 3 (coverage) |
+| D2 | production-wastage has no dedicated account | Phase 2 (`6a66112`) | MEDIUM | new-accounts track |
+| D7 | inventory-shrinkage has no dedicated account | Phase 4 (`ced0cc2`) | MEDIUM | new-accounts track |
+| D12 | customer advance → no deferred-revenue (unearned) account | Phase 5 (`679f791`) | MEDIUM-HIGH | new-accounts track |
+| D10 | equipment purchase (concrete mixer) not capitalized | Phase 5 (`679f791`) | MEDIUM-HIGH | coverage track |
+| D11 | no construction vocabulary — project costs fall to "G&A - other" | Phase 5 (`679f791`) | MEDIUM | coverage track |
 
-**6 open items** (D2, D5, D7, D10, D11, D12, D13 — i.e. 6 distinct + D5 pending D13). Confirmed against
-the live file, not assumed.
+**D13 — RESCOPED, not a standalone fix.** The "ال"-prefix root is **entangled with vendor-name /
+description-field separation** (the same architectural gap behind D5/D9). Track 2 *proved* this: a
+universal "ال" strip re-exposes vendor-name leakage —
+- `مؤسسة تأجير المعدات` (a *rental* company) → `المعدات`→`معدات` → **fixed-asset** category (wrong);
+- `عمالة الموقع` (site-labor vendor) → `الموقع`→`موقع` (website) → **subscriptions** category (wrong).
+
+The isolated attempt was measured (21-record blast radius) and **rejected**. D13 must be solved
+**together with** the field-separation work — see §6.
 
 ## 5. Explicitly NOT started
 
 - **Bilingual parity** — flagged needs-human-review (~29 rules per the prior audit; see `17a598f`,
   `2e6349a`). Not implemented.
 - **Any activity beyond the 5** implemented.
-- **Any engine-fix track beyond Track 1** (D13 / Track 2 / Track 3 all pending).
+- **Any engine-fix track beyond Tracks 1–2** (new-accounts, coverage, and the combined
+  field-separation + ال track all pending).
 - **Accounting Bundle** — dedup re-enable, VAT-posting formalization, double-entry enforcement.
   Explicitly still **gated**, not started.
 
 ## 6. Recommended next-session priority (professional opinion)
 
-**Yes — D13 (the "ال"/prefix root) is the correct next priority.** Justification:
-- It is the **deepest root**: it surfaced *during* Track 1 as a previously-unknown systemic cause. The
-  word-boundary failure on prefixed words (`المورد`, `للبضاعة`, `التدقيق`) almost certainly causes
-  **silent misses across the full 730** that we have *not* measured — we only proved the 7 named cases.
-- It **blocks D5** and is entangled with several Track-1 cases.
-- It is the **highest-risk** change (touches matching for all ~44 rule groups), so it deserves its own
-  dedicated session with the same baseline-first discipline used in Track 1 — never bundled with the
-  lower-risk account/coverage tracks.
-- Nothing else discovered this session outranks it. Track 2 (missing accounts) and Track 3 (coverage)
-  are independent and can follow; they are lower-risk and the insight layer already compensates for them
-  operationally.
+**COMBINED TRACK: vendor-name/description-field separation + ال-prefix normalization, designed and
+tested together as ONE mechanism — not two sequential attempts.**
+
+Rationale: Track 2 *proved* these are **not independent problems** — solving one without the other
+reopens the other (universal "ال" stripping re-exposes the vendor-name leakage that field-separation is
+meant to close). A future session should:
+
+1. **Design the field-separation mechanism FIRST** — likely a `descOnly`-style flag extended
+   project-wide (building on the `descOnly` pattern already introduced in Track 1 for D9), so item
+   keywords match the **description text**, not the vendor name.
+2. **Then layer ال-prefix normalization on top** of the now-separated description text (vendor names no
+   longer feed item-keyword matching, so stripping "ال" can no longer leak generic vendor words).
+3. **Then re-measure blast radius** on that *combined* mechanism — never on raw "ال"-stripping alone
+   (which Track 2 showed is dominated by vendor leakage, not by genuine prefix fixes).
+
+Same baseline-first, one-change-at-a-time, full-regression discipline as Tracks 1–2. The independent
+**new-accounts** (D2, D7, D12) and **coverage** (D10, D11) tracks are lower-risk, can be done in any
+order, and the insight layer already compensates for them operationally.
 
 ## 7. Critical operational reminders for next session
 
