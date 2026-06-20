@@ -387,6 +387,21 @@ export const getExpenseCategory = (name: string, desc: string, amount: number = 
       addScore('تكلفة المبيعات - مستهلكات تشغيلية', 4500);
   }
 
+  // 18. Construction / heavy-equipment PURCHASE -> fixed asset (D10). Rental is
+  //     excluded so leased equipment is not capitalised.
+  if (nTest(/(خلاطة خرسانة|خلاطه باطون|حفار|حفارة|رافعة برجية|بلدوزر|شيول|لودر|ونش رفع|جريدر)/, allText)) {
+      if (!nTest(/(استئجار|تأجير|إيجار|ايجار|اجار|\brent\b|\bhire\b|\blease\b)/, allText)) {
+          addScore('أصول ثابتة - أجهزة ومعدات', 1000);
+      }
+  }
+
+  // 19. Construction materials -> direct project cost. Routed to the existing COGS
+  //     raw-materials account (a dedicated WIP/direct-cost account does not exist —
+  //     that remains deferred debt). Partially resolves D11.
+  if (nTest(/(أسمنت|حديد تسليح|بلوك خرساني|بلوك اسمنتي|خرسانة جاهزة|خرسانة مسلحة|طابوق|بحص|حصمة|اسفلت)/, allText)) {
+      addScore('تكلفة المبيعات - مواد خام ومكونات', 1500);
+  }
+
   // --- STAGE 4: RESOLUTION ---
   let max = 0;
   for (const [cat, score] of Object.entries(scores)) {

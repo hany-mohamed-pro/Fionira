@@ -26,7 +26,13 @@ All items below are **keyword-collision / tie-break** issues in the scoring engi
   also relied on this accidental bleed. **Reverted.** D13's true fix must be done **together with
   vendor/description field separation** (the `allText→descText` item-keyword change deferred in Track 1)
   — not as a standalone tokenization change. Re-scoped accordingly.
-- **Untouched (separate tracks): D2, D7, D10, D11, D12** (missing accounts + coverage gaps).
+- **Track A (independent items) — DONE** (engine-only). **D10 resolved** (equipment purchase →
+  fixed-asset, rental-guarded). **D11 partially resolved** (construction materials → existing COGS
+  raw-materials account; dedicated WIP/direct-cost account remains deferred). **D2, D7, D12 deferred
+  with reason** — each needs a NEW chart-of-accounts entry in the protected `financial-utils.ts` plus
+  an accountant decision (out of engine-only scope); the activity-insight layer already surfaces them.
+  Zero regression on 730 real + only 3 intended synthetic changes. See
+  `engine-fix-trackA-independent-items.md`.
 
 | # | Symptom (real-ish input) | Engine output (wrong) | Expected | Likely cause | Found in |
 |---|---|---|---|---|---|
@@ -44,9 +50,9 @@ All items below are **keyword-collision / tie-break** issues in the scoring engi
 | D12 | customer advance payment (revenue) | إيرادات المبيعات | إيراد مقدم / unearned (liability) | **Missing account** (revenue side) — no deferred-revenue account exists (same class as D2/D7) | Phase 5 |
 | D13 | `التدقيق`, `المورد`, `للبضاعة` (prefixed words) | keyword silently NOT matched | should match the base word | **Arabic "ال"/attached-preposition prefix breaks word-boundary matching** — systemic; blocks full D5 fix | Track 1 |
 
-**Status legend:** ✅ resolved → **D1, D3, D4, D6, D8, D9** (Track 1), **D5** (Track 2). ⚠️ open → **D13**
-(global fix rejected as unsafe; re-scoped to pair with vendor/desc field separation). Untouched →
-**D2, D7, D10, D11, D12**.
+**Status legend:** ✅ resolved → **D1, D3, D4, D6, D8, D9** (Track 1), **D5** (Track 2), **D10** (Track A).
+🟡 partial → **D11** (Track A — COGS routing; WIP account deferred). ⛔ deferred (need new COA account +
+accountant) → **D2, D7, D12**. ⚠️ open/rescoped → **D13** (pair with vendor/desc field separation).
 
 ## Diagnostic note — the shared root pattern (D3–D6, and likely D1)
 
