@@ -33,6 +33,14 @@ All items below are **keyword-collision / tie-break** issues in the scoring engi
   an accountant decision (out of engine-only scope); the activity-insight layer already surfaces them.
   Zero regression on 730 real + only 3 intended synthetic changes. See
   `engine-fix-trackA-independent-items.md`.
+- **Track B (D13 combined mechanism) — ATTEMPTED, MEASURED unsafe, D13 STILL OPEN.** Field separation
+  (Stage-2 item keywords → description only) was implemented and measured ALONE first: 8-record blast
+  radius including **genuine regressions** — vendor names carry *legitimate* signal sometimes
+  (`عامل سباكة`/plumber → maintenance; `معدات المخابز`/equipment vendor → fixed-asset are *correct*
+  vendor signals that blunt field-separation discards). A lower-score vendor pass does not separate
+  legitimate signal from leakage either. **Reverted** (engine unchanged from Track A; D5 not regressed).
+  D13's real fix needs **per-keyword vendor-safety tagging FIRST**, then field separation, then "ال" —
+  a larger separately-scoped effort. See `engine-fix-trackB-combined-d13.md`.
 
 | # | Symptom (real-ish input) | Engine output (wrong) | Expected | Likely cause | Found in |
 |---|---|---|---|---|---|
