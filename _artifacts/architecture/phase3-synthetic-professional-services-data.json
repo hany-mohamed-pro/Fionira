@@ -1,0 +1,24 @@
+{
+  "_SYNTHETIC": true,
+  "_warning": "SYNTHETIC TEST DATA — NOT REAL. Generated for activity-aware classification Phase 3 (professional services / consulting) pre-launch verification. No real tenant, vendor, client, project, or transaction is represented. Saudi-style Arabic names/descriptions are illustrative only.",
+  "_activityProfile": "professional_services",
+  "_columns": ["المورد", "البيان", "الخاضع للضريبة", "ضريبة القيمة المضافة", "الإجمالي", "رقم الفاتورة", "التاريخ"],
+  "rows": [
+    { "group": "project_linked",   "entity": "الخطوط السعودية",          "desc": "تذاكر طيران لزيارة موقع مشروع شركة النخبة",        "taxable": 2400, "vat": 360,  "total": 2760,  "invoice": "PS-3001", "date": "2025-02-03" },
+    { "group": "project_linked",   "entity": "مستشار مالي مستقل",        "desc": "أتعاب مستشار من الباطن - عقد رقم 4471",            "taxable": 8000, "vat": 1200, "total": 9200,  "invoice": "PS-3002", "date": "2025-02-05" },
+    { "group": "project_linked",   "entity": "مطابع الرياض",             "desc": "طباعة تقارير لحساب العميل مجموعة الفيصل",          "taxable": 600,  "vat": 90,   "total": 690,   "invoice": "PS-3003", "date": "2025-02-07" },
+    { "group": "project_linked",   "entity": "فندق الحياة",              "desc": "بدل إقامة فندق لمهمة عميل في جدة",                 "taxable": 1800, "vat": 270,  "total": 2070,  "invoice": "PS-3004", "date": "2025-02-09" },
+    { "group": "project_linked",   "entity": "مكتب ترجمة معتمد",         "desc": "ترجمة مستندات لصالح مشروع التدقيق الضريبي",        "taxable": 1200, "vat": 180,  "total": 1380,  "invoice": "PS-3005", "date": "2025-02-11" },
+    { "group": "project_linked",   "entity": "ضيافة الاجتماعات",         "desc": "ضيافة اجتماع مع العميل ضمن أمر عمل استشاري",       "taxable": 350,  "vat": 52.5, "total": 402.5, "invoice": "PS-3006", "date": "2025-02-13" },
+    { "group": "billable_no_ref",  "entity": "الخطوط السعودية",          "desc": "تذاكر طيران داخلية",                               "taxable": 900,  "vat": 135,  "total": 1035,  "invoice": "PS-3007", "date": "2025-02-15" },
+    { "group": "billable_no_ref",  "entity": "مكتب طباعة",               "desc": "طباعة وتصوير مستندات",                             "taxable": 200,  "vat": 30,   "total": 230,   "invoice": "PS-3008", "date": "2025-02-16" },
+    { "group": "general",          "entity": "أملاك الرياض العقارية",    "desc": "إيجار مكتب الشركة الشهري",                         "taxable": 0,    "vat": 0,    "total": 9000,  "invoice": "PS-3009", "date": "2025-02-17" },
+    { "group": "general",          "entity": "مسير الرواتب",             "desc": "راتب محاسب أول",                                   "taxable": 0,    "vat": 0,    "total": 11000, "invoice": "PS-3010", "date": "2025-02-18" },
+    { "group": "general",          "entity": "زوهو / Zoho",              "desc": "اشتراك برنامج محاسبة سحابي سنوي",                  "taxable": 1500, "vat": 225,  "total": 1725,  "invoice": "PS-3011", "date": "2025-02-19" },
+    { "group": "general",          "entity": "شركة الاتصالات السعودية",  "desc": "فاتورة إنترنت المكتب",                             "taxable": 400,  "vat": 60,   "total": 460,   "invoice": "PS-3012", "date": "2025-02-20" },
+    { "group": "general",          "entity": "مكتبة جرير",               "desc": "قرطاسية مكتبية عامة",                              "taxable": 300,  "vat": 45,   "total": 345,   "invoice": "PS-3013", "date": "2025-02-21" },
+    { "group": "general",          "entity": "التأمينات الاجتماعية",     "desc": "اشتراك تأمينات اجتماعية gosi",                     "taxable": 0,    "vat": 0,    "total": 2200,  "invoice": "PS-3014", "date": "2025-02-22" },
+    { "group": "general",          "entity": "وزارة التجارة",            "desc": "رسوم تجديد سجل تجاري",                             "taxable": 0,    "vat": 0,    "total": 1200,  "invoice": "PS-3015", "date": "2025-02-23" },
+    { "group": "general",          "entity": "النهدي",                   "desc": "تأمين طبي للموظفين",                               "taxable": 0,    "vat": 0,    "total": 5000,  "invoice": "PS-3016", "date": "2025-02-24" }
+  ]
+}

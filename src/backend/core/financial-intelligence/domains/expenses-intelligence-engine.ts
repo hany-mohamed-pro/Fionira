@@ -3,10 +3,11 @@ import { IntelligenceResult, Insight, IntelligenceContext } from '../models';
 import { buildVendorProfiles } from '../vendor-profiler';
 import { restaurantWastageRule } from '../rules/activity/restaurant-wastage';
 import { manufacturingFoodRule } from '../rules/activity/manufacturing-food';
+import { professionalServicesRule } from '../rules/activity/professional-services';
 
 // Activity-aware rules. Each self-gates on context.activityProfile and only ADDS
 // insights — none of them changes a record's category.
-const activityRules = [restaurantWastageRule, manufacturingFoodRule];
+const activityRules = [restaurantWastageRule, manufacturingFoodRule, professionalServicesRule];
 
 export function analyzeExpenses(records: FinancialRecord[], historicalData: FinancialRecord[] = [], activityProfile?: string): IntelligenceResult[] {
     const profiles = buildVendorProfiles(historicalData);
