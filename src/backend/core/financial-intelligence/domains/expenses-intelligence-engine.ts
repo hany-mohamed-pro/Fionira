@@ -2,6 +2,11 @@ import { FinancialRecord } from '../../../../types';
 import { IntelligenceResult, Insight, IntelligenceContext } from '../models';
 import { buildVendorProfiles } from '../vendor-profiler';
 import { restaurantWastageRule } from '../rules/activity/restaurant-wastage';
+import { manufacturingFoodRule } from '../rules/activity/manufacturing-food';
+
+// Activity-aware rules. Each self-gates on context.activityProfile and only ADDS
+// insights — none of them changes a record's category.
+const activityRules = [restaurantWastageRule, manufacturingFoodRule];
 
 export function analyzeExpenses(records: FinancialRecord[], historicalData: FinancialRecord[] = [], activityProfile?: string): IntelligenceResult[] {
     const profiles = buildVendorProfiles(historicalData);
@@ -125,10 +130,11 @@ export function analyzeExpenses(records: FinancialRecord[], historicalData: Fina
 
         // 5. Activity-aware rules (inert unless the tenant's activityProfile matches).
         //    These never change classification — they only add review insights.
-        const wastageInsight = restaurantWastageRule.execute(record, context);
-        if (wastageInsight) {
-            if (Array.isArray(wastageInsight)) insights.push(...wastageInsight);
-            else insights.push(wastageInsight);
+        for (const rule of activityRules) {
+            const result = rule.execute(record, context);
+            if (!result) continue;
+            if (Array.isArray(result)) insights.push(...result);
+            else insights.push(result);
         }
 
         // Risk Score Calculation
