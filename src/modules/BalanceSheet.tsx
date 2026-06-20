@@ -30,6 +30,15 @@ export const BalanceSheet: React.FC<BalanceSheetProps> = ({ data, onNavigateToTa
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
+      {/* Honest-labeling banner: these figures are estimated from the income statement, NOT real account balances. */}
+      <div className="p-5 bg-rose-50 border-2 border-rose-200 rounded-xl text-rose-800">
+        <p className="font-black text-base mb-1">⚠️ هذه ليست ميزانية محاسبية فعلية — أرقام تقديرية توضيحية فقط</p>
+        <p className="text-sm font-medium leading-relaxed">
+          القيم أدناه محسوبة بنِسب افتراضية من قائمة الدخل (مثلاً: النقد = 40% من صافي الربح، الذمم المدينة = 15% من الإيرادات)،
+          وليست أرصدة حسابات حقيقية. لا تُستخدم لاتخاذ قرارات مالية أو ائتمانية.
+        </p>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card className="p-6 bg-indigo-50 border-indigo-100">
           <div className="flex items-center gap-4">
@@ -37,7 +46,7 @@ export const BalanceSheet: React.FC<BalanceSheetProps> = ({ data, onNavigateToTa
               <ArrowUpCircle className="w-6 h-6 text-indigo-600" />
             </div>
             <div>
-              <p className="text-sm font-bold text-indigo-600">إجمالي الأصول</p>
+              <p className="text-sm font-bold text-indigo-600">إجمالي الأصول <span className="text-[10px] font-bold text-rose-500 bg-rose-50 px-1.5 py-0.5 rounded ml-1">تقديري</span></p>
               <p className="text-2xl font-black text-slate-900">{formatCurrency(totalAssets)}</p>
             </div>
           </div>
@@ -48,7 +57,7 @@ export const BalanceSheet: React.FC<BalanceSheetProps> = ({ data, onNavigateToTa
               <ArrowDownCircle className="w-6 h-6 text-rose-600" />
             </div>
             <div>
-              <p className="text-sm font-bold text-rose-600">إجمالي الالتزامات</p>
+              <p className="text-sm font-bold text-rose-600">إجمالي الالتزامات <span className="text-[10px] font-bold text-rose-500 bg-rose-50 px-1.5 py-0.5 rounded ml-1">تقديري</span></p>
               <p className="text-2xl font-black text-slate-900">{formatCurrency(totalLiabilities)}</p>
             </div>
           </div>
@@ -59,7 +68,7 @@ export const BalanceSheet: React.FC<BalanceSheetProps> = ({ data, onNavigateToTa
               <Wallet className="w-6 h-6 text-emerald-600" />
             </div>
             <div>
-              <p className="text-sm font-bold text-emerald-600">حقوق الملكية</p>
+              <p className="text-sm font-bold text-emerald-600">حقوق الملكية <span className="text-[10px] font-bold text-rose-500 bg-rose-50 px-1.5 py-0.5 rounded ml-1">تقديري</span></p>
               <p className="text-2xl font-black text-slate-900">{formatCurrency(equity)}</p>
             </div>
           </div>
@@ -69,7 +78,7 @@ export const BalanceSheet: React.FC<BalanceSheetProps> = ({ data, onNavigateToTa
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <Card className="p-8">
           <h3 className="text-xl font-black text-slate-900 mb-6 flex items-center gap-2 border-b pb-4">
-            الأصول (Assets)
+            الأصول (Assets) <span className="text-[11px] font-bold text-rose-500 bg-rose-50 px-2 py-0.5 rounded">تقديري</span>
           </h3>
           <div className="space-y-4">
             <div 
@@ -105,7 +114,7 @@ export const BalanceSheet: React.FC<BalanceSheetProps> = ({ data, onNavigateToTa
 
         <Card className="p-8">
           <h3 className="text-xl font-black text-slate-900 mb-6 flex items-center gap-2 border-b pb-4">
-            الالتزامات وحقوق الملكية
+            الالتزامات وحقوق الملكية <span className="text-[11px] font-bold text-rose-500 bg-rose-50 px-2 py-0.5 rounded">تقديري</span>
           </h3>
           <div className="space-y-4">
             <div 
@@ -151,7 +160,7 @@ export const BalanceSheet: React.FC<BalanceSheetProps> = ({ data, onNavigateToTa
       </div>
       
       <div className="p-4 bg-amber-50 border border-amber-100 rounded-xl text-amber-800 text-sm font-bold">
-        تنبيه: هذه الميزانية تقديرية بناءً على البيانات المرفوعة للمصروفات والإيرادات والرواتب، ولا تشمل الأصول الثابتة أو القروض طويلة الأجل ما لم يتم إدراجها في البيانات.
+        تنبيه: الأرقام أعلاه ليست أرصدة حسابات حقيقية، بل قيم مشتقّة بنِسب افتراضية ثابتة من قائمة الدخل (الإيرادات/المصروفات/الرواتب) — وتتوازن تلقائياً بحكم طريقة الحساب لا لصحتها. لإصدار ميزانية محاسبية فعلية يلزم دليل حسابات بأنواعه وقيود مرحّلة وأرصدة افتتاحية (عمل مؤجّل ضمن الأساس المحاسبي).
       </div>
     </div>
   );
