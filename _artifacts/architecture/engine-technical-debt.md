@@ -17,6 +17,38 @@ All items below are **keyword-collision / tie-break** issues in the scoring engi
 | D4 | `بدل إقامة فندق لمهمة عميل` (accommodation allowance) | مصروفات عمومية وإدارية - رواتب ومنافع موظفين - رواتب وأجور | مصاريف سفر وانتقالات | `بدل` triggers the personnel/salary path; "بدل إقامة" (travel per-diem) collides with salary "بدل/بدلات" | Phase 3 |
 | D5 | vendor `مكتب ترجمة معتمد` (translation office) | مصروفات عمومية وإدارية - إيجارات | أتعاب/خدمات مهنية (translation service) | `مكتب` is a rent keyword (office space); any vendor whose name contains `مكتب` is pulled toward إيجارات | Phase 3 |
 | D6 | `راتب محاسب أول` (accountant's salary) | مصروفات عمومية وإدارية - أتعاب مهنية واستشارات | رواتب ومنافع موظفين - رواتب وأجور | `محاسب` (accountant → professional services) outweighs `راتب` (salary); an employee's job title hijacks the category | Phase 3 |
+| D7 | `هالك مخزون`, `عجز جرد سنوي` (inventory shrinkage) | تكلفة المبيعات - مواد خام ومكونات / مصروفات عمومية - أخرى | a distinct "inventory shrinkage" account | **No such account exists** in the chart of accounts (same class as D2) | Phase 4 |
+| D8 | `شحن وارد للبضاعة من المورد` / `نقل مشتريات أصناف` (inbound freight) | مصروفات بيعية وتسويقية - نقل وتوصيل للعملاء (outbound!) / مواد خام ومكونات | تكلفة المبيعات - شحن ونقل للداخل | `شحن/نقل` matched without distinguishing **inbound (وارد/مشتريات)** from **outbound (للعملاء)** | Phase 4 |
+| D9 | vendor `مستودع الجملة` (wholesale warehouse) | مصروفات عمومية وإدارية - إيجارات | تكلفة بضاعة / COGS | `مستودع` (warehouse) is a rent keyword; the **vendor name** hijacks the category — same root as D5 | Phase 4 |
+
+## Diagnostic note — the shared root pattern (D3–D6, and likely D1)
+
+D3–D6 (and D1) are **not five unrelated bugs — they are one structural defect repeated**:
+
+> A **single Arabic word** is matched as a **substring** and chosen on its own, **without
+> understanding the full sentence context**. One token has two senses, and the keyword scorer
+> fires on the wrong sense because it never weighs the surrounding words.
+
+- `طباعة` (printing) → assumed packaging, ignoring "تقارير" (reports) → D3
+- `بدل` (allowance) → assumed salary, ignoring "إقامة فندق" (hotel per-diem = travel) → D4
+- `مكتب` (office) → assumed rent, ignoring it is part of a **vendor name** ("مكتب ترجمة") → D5
+- `محاسب` (accountant) → assumed professional service, ignoring "راتب" (salary) right before it → D6
+- `كهرباء` (electricity) → assumed electrical-repair, ignoring "فاتورة" (bill = utility) → D1
+
+Phase 4 added two more instances of the very same pattern:
+- `شحن/نقل` (shipping) → picked outbound vs inbound on the bare token, ignoring `وارد/مشتريات`
+  (inbound) vs `للعملاء` (outbound) → D8
+- `مستودع` (warehouse) → assumed rent, ignoring it is part of a **vendor name** ("مستودع الجملة"),
+  exactly like `مكتب` in D5 → D9
+
+**Implication for the fix session:** patching each keyword individually is whack-a-mole. The durable
+fix is **context-aware scoring** — e.g. (a) require/deny qualifiers (negative lookahead: `طباعة` is
+NOT packaging when near `تقارير/مستندات`; `بدل` is NOT salary when near `إقامة/فندق/سفر`; `شحن` is
+inbound when near `وارد/مشتريات/من المورد`), (b) separate the **vendor-name** field from the
+**item-description** field so a vendor's name (`مكتب…`, `مستودع…`) can't drive the item category, and
+(c) give multi-word phrases priority over single-token substrings. Fixing the **pattern** should
+resolve D1, D3, D4, D5, D6, D8, D9 together; D2 and D7 are the "missing account" class that
+additionally need new chart-of-accounts entries.
 
 ## Notes for the future engine-fix session
 - D1, D3, D4, D5, D6 are the same root pattern: a keyword has two senses, and the

@@ -1,0 +1,26 @@
+{
+  "_SYNTHETIC": true,
+  "_warning": "SYNTHETIC TEST DATA — NOT REAL. Generated for activity-aware classification Phase 4 (trading / retail) pre-launch verification. No real tenant, vendor, or transaction is represented. Saudi-style Arabic names/descriptions are illustrative only.",
+  "_activityProfile": "trading_retail",
+  "_columns": ["المورد", "البيان", "الخاضع للضريبة", "ضريبة القيمة المضافة", "الإجمالي", "رقم الفاتورة", "التاريخ"],
+  "rows": [
+    { "group": "inbound_freight",  "entity": "ناقل اللوجستية",          "desc": "شحن وارد للبضاعة من المورد للمستودع",     "taxable": 1200, "vat": 180,  "total": 1380,  "invoice": "TR-4001", "date": "2025-01-04" },
+    { "group": "inbound_freight",  "entity": "شركة الشحن البري",        "desc": "نقل مشتريات أصناف من ميناء جدة",          "taxable": 2000, "vat": 300,  "total": 2300,  "invoice": "TR-4002", "date": "2025-01-05" },
+    { "group": "sale_packaging",   "entity": "مصنع الأكياس",            "desc": "أكياس تسوق بشعار المتجر للعملاء",         "taxable": 800,  "vat": 120,  "total": 920,   "invoice": "TR-4003", "date": "2025-01-06" },
+    { "group": "sale_packaging",   "entity": "بلاستيك الخليج",          "desc": "أكياس بلاستيك للعملاء عند البيع",         "taxable": 500,  "vat": 75,   "total": 575,   "invoice": "TR-4004", "date": "2025-01-07" },
+    { "group": "sale_packaging",   "entity": "ورق التغليف الحديث",      "desc": "ورق تغليف هدايا للمناسبات",               "taxable": 350,  "vat": 52.5, "total": 402.5, "invoice": "TR-4005", "date": "2025-01-08" },
+    { "group": "shrinkage",        "entity": "جرد المستودع",            "desc": "هالك مخزون بضاعة تالفة",                  "taxable": 0,    "vat": 0,    "total": 1500,  "invoice": "TR-4006", "date": "2025-01-09" },
+    { "group": "shrinkage",        "entity": "جرد المستودع",            "desc": "عجز جرد سنوي في الأصناف",                 "taxable": 0,    "vat": 0,    "total": 900,   "invoice": "TR-4007", "date": "2025-01-10" },
+    { "group": "commission",       "entity": "مندوب المبيعات",          "desc": "عمولة مبيعات شهرية للمندوبين",            "taxable": 0,    "vat": 0,    "total": 4000,  "invoice": "TR-4008", "date": "2025-01-11" },
+    { "group": "commission",       "entity": "مندوب المبيعات",          "desc": "عمولة مندوب مبيعات على الصفقات",          "taxable": 0,    "vat": 0,    "total": 2500,  "invoice": "TR-4009", "date": "2025-01-12" },
+    { "group": "goods",            "entity": "مستودع الجملة",           "desc": "شراء بضاعة للبيع - أصناف متنوعة",         "taxable": 15000,"vat": 2250, "total": 17250, "invoice": "TR-4010", "date": "2025-01-13" },
+    { "group": "goods",            "entity": "موزع المواد",             "desc": "مشتريات بضاعة تجزئة للمعرض",              "taxable": 9000, "vat": 1350, "total": 10350, "invoice": "TR-4011", "date": "2025-01-14" },
+    { "group": "general",          "entity": "أملاك الرياض العقارية",   "desc": "إيجار المتجر الشهري",                     "taxable": 0,    "vat": 0,    "total": 14000, "invoice": "TR-4012", "date": "2025-01-15" },
+    { "group": "general",          "entity": "مسير الرواتب",            "desc": "راتب بائع المعرض",                        "taxable": 0,    "vat": 0,    "total": 4500,  "invoice": "TR-4013", "date": "2025-01-16" },
+    { "group": "general",          "entity": "الشركة السعودية للكهرباء","desc": "فاتورة كهرباء المعرض",                    "taxable": 0,    "vat": 0,    "total": 2800,  "invoice": "TR-4014", "date": "2025-01-17" },
+    { "group": "general",          "entity": "فودكس / Foodics",         "desc": "اشتراك نظام نقاط بيع كاشير",              "taxable": 700,  "vat": 105,  "total": 805,   "invoice": "TR-4015", "date": "2025-01-18" },
+    { "group": "general",          "entity": "مدى",                     "desc": "رسوم نقاط بيع mada على المعاملات",        "taxable": 300,  "vat": 45,   "total": 345,   "invoice": "TR-4016", "date": "2025-01-19" },
+    { "group": "general",          "entity": "التأمينات الاجتماعية",    "desc": "اشتراك تأمينات اجتماعية gosi",            "taxable": 0,    "vat": 0,    "total": 1900,  "invoice": "TR-4017", "date": "2025-01-20" },
+    { "group": "general",          "entity": "شركة التسويق الرقمي",     "desc": "حملة إعلانية على سناب شات",               "taxable": 2000, "vat": 300,  "total": 2300,  "invoice": "TR-4018", "date": "2025-01-21" }
+  ]
+}
