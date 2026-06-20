@@ -1,6 +1,6 @@
 # Fionira — Session Handoff
 
-> Resume point for any future session. HEAD = `bb88233`. Working tree clean except the three
+> Resume point for any future session. HEAD = `849c2b0`. Working tree clean except the three
 > long-standing untouched data/lock files (`data/erp_registry.json`, `data/uploads.json`,
 > `package-lock.json`). Evidence-based; pulled from live git + file state, not memory.
 
@@ -11,9 +11,9 @@ to act as the **expert *for* a non-specialist user** — the owner does not need
 system classifies, validates, and governs the financials and surfaces plain-language decisions. It is
 **not** a traditional ERP and does not push accounting mechanics onto the user.
 
-## 2. Complete chronological commit ledger (root → HEAD, 33 commits)
+## 2. Complete chronological commit ledger (root → HEAD, 35 commits)
 
-This Claude Code session resumed at `12a0529`; commits `2aaa928` → `bb88233` are this session's work.
+This Claude Code session resumed at `12a0529`; commits `2aaa928` → `849c2b0` are this session's work.
 Everything above `12a0529` was already in history at session start (security/UX/early-classification).
 
 | # | Hash | Tag | Description |
@@ -51,6 +51,8 @@ Everything above `12a0529` was already in history at session start (security/UX/
 | 31 | `cf90a62` | [ENGINE-FIX] | Track 1 — context-aware tokenization (resolves 6 of 7: D1,D3,D4,D6,D8,D9) |
 | 32 | `6705b53` | [DOCS] | session handoff document created |
 | 33 | `bb88233` | [ENGINE-FIX] | Track 2 — D5 resolved surgically (ترجمة/translation = professional); global "ال"-prefix fix attempted, **measured unsafe** (21-record blast radius dominated by vendor-name leakage), **rejected and reverted** |
+| 34 | `ecef9da` | [ENGINE-FIX] | Track A — D10 resolved (equipment purchase→fixed asset, rental-guarded); D11 partial (construction materials→existing COGS); D2/D7/D12 deferred (need new COA account) |
+| 35 | `849c2b0` | [ENGINE-FIX] | Track B — D13 combined fix attempted; field-separation **measured unsafe** (8-record blast radius, legitimate vendor-signal regressions), **reverted**; D13 stays open (needs per-keyword vendor-safety tagging first) |
 
 ## 3. Current system state (factual, verified)
 
@@ -64,10 +66,11 @@ Everything above `12a0529` was already in history at session start (security/UX/
   **Postgres** `journal_entries` schema is **planned only** (`01e6e19`, no execution, no cutover).
 - **Classification engine (`categorization-engine.ts`):** Stages 0–2 hardened with `nrx`/`nTest`
   normalization (`17a598f`), Stage-3 normalization complete (`2e6349a`), **Track 1 context-aware fixes**
-  (`cf90a62`), and **Track 2's surgical D5 fix** (`bb88233`). The net engine change since Track 1 is
-  **only D5's targeted keyword** (`ترجمة`/`translation`) — the global "ال" tokenization attempt was
-  reverted and left **zero trace** (confirmed by `git diff`). Treated as frozen except via approved
-  engine-fix tracks.
+  (`cf90a62`), **Track 2's surgical D5 fix** (`bb88233`), and **Track A's two new Stage-3 rules**
+  (`ecef9da`): construction/heavy-equipment purchase → fixed asset (rental-guarded, D10) and
+  construction materials → COGS (D11). **Track B changed nothing** — its field-separation candidate was
+  measured unsafe and reverted (`git diff` clean). Net effect: every engine change to date is verified
+  zero-regression on the 730 real records. Treated as frozen except via approved engine-fix tracks.
 - **Activity-aware layer:** 5 profiles live (restaurant_fb, manufacturing_food, professional_services,
   trading_retail, contracting_construction), **insight-only**, **zero engine coupling** — verified by
   the cross-rule non-interference test (re-confirmed after Track 1). Wired through both the expenses and
@@ -77,26 +80,27 @@ Everything above `12a0529` was already in history at session start (security/UX/
 
 ## 4. Open technical debt (live from `engine-technical-debt.md`)
 
-**RESOLVED — 7 items:** D1, D3, D4, D6, D8, D9 (Track 1) + **D5** (Track 2, surgical). All zero-regression.
+**RESOLVED — 8 items:** D1, D3, D4, D6, D8, D9 (Track 1) + **D5** (Track 2) + **D10** (Track A). All zero-regression.
 
-**OPEN — 5 items (unchanged):**
+**PARTIALLY RESOLVED — 1 item:** **D11** (Track A) — construction materials now route to the existing
+COGS raw-materials account; a *dedicated* construction direct-cost/WIP account is still missing.
 
-| # | Description | Discovered | Severity | Recommended track |
-|---|---|---|---|---|
-| D2 | production-wastage has no dedicated account | Phase 2 (`6a66112`) | MEDIUM | new-accounts track |
-| D7 | inventory-shrinkage has no dedicated account | Phase 4 (`ced0cc2`) | MEDIUM | new-accounts track |
-| D12 | customer advance → no deferred-revenue (unearned) account | Phase 5 (`679f791`) | MEDIUM-HIGH | new-accounts track |
-| D10 | equipment purchase (concrete mixer) not capitalized | Phase 5 (`679f791`) | MEDIUM-HIGH | coverage track |
-| D11 | no construction vocabulary — project costs fall to "G&A - other" | Phase 5 (`679f791`) | MEDIUM | coverage track |
+**DEFERRED — need a NEW chart-of-accounts entry in `financial-utils.ts` + an accountant decision
+(out of engine-only scope; the activity-insight layer already surfaces all three operationally):**
 
-**D13 — RESCOPED, not a standalone fix.** The "ال"-prefix root is **entangled with vendor-name /
-description-field separation** (the same architectural gap behind D5/D9). Track 2 *proved* this: a
-universal "ال" strip re-exposes vendor-name leakage —
-- `مؤسسة تأجير المعدات` (a *rental* company) → `المعدات`→`معدات` → **fixed-asset** category (wrong);
-- `عمالة الموقع` (site-labor vendor) → `الموقع`→`موقع` (website) → **subscriptions** category (wrong).
+| # | Description | Discovered | Severity |
+|---|---|---|---|
+| D2 | production-wastage has no dedicated account | Phase 2 (`6a66112`) | MEDIUM |
+| D7 | inventory-shrinkage has no dedicated account | Phase 4 (`ced0cc2`) | MEDIUM |
+| D12 | customer advance → no deferred-revenue (unearned) account | Phase 5 (`679f791`) | MEDIUM-HIGH |
 
-The isolated attempt was measured (21-record blast radius) and **rejected**. D13 must be solved
-**together with** the field-separation work — see §6.
+**D13 — STILL OPEN, twice-measured, sharpened diagnosis.** Track 2 showed a universal "ال" strip
+re-exposes vendor-name leakage (`المعدات`→`معدات`→fixed-asset for a *rental*; `الموقع`→`موقع`→
+subscriptions). Track B then showed the prerequisite **field-separation** step itself regresses
+*legitimate* vendor signal (`عامل سباكة`/plumber → maintenance; `معدات المخابز`/equipment vendor →
+fixed-asset are correct vendor hints that blunt separation discards). **Conclusion:** D13 needs
+**per-keyword vendor-safety tagging FIRST** (declare per pattern whether it may match the vendor name),
+then field separation, then "ال" — see §6.
 
 ## 5. Explicitly NOT started
 
@@ -110,27 +114,36 @@ The isolated attempt was measured (21-record blast radius) and **rejected**. D13
 
 ## 6. Recommended next-session priority (professional opinion)
 
-**COMBINED TRACK: vendor-name/description-field separation + ال-prefix normalization, designed and
-tested together as ONE mechanism — not two sequential attempts.**
+Two tracks remain, in this order:
 
-Rationale: Track 2 *proved* these are **not independent problems** — solving one without the other
-reopens the other (universal "ال" stripping re-exposes the vendor-name leakage that field-separation is
-meant to close). A future session should:
+**(1) NEW-ACCOUNTS track — D2, D7, D12 (do this first; lowest risk, highest clarity-of-scope).**
+These are *not* engine bugs — each needs a new account added to the chart of accounts
+(`financial-utils.ts`) plus the user/accountant's decision on naming + IFRS treatment
+(production-wastage, inventory-shrinkage, deferred/unearned-revenue). Once the accounts exist, wiring the
+engine to route to them is trivial and low-risk. This is a **product/accounting decision**, not a
+tokenization risk — ideal to bring to the financial-manager user directly.
 
-1. **Design the field-separation mechanism FIRST** — likely a `descOnly`-style flag extended
-   project-wide (building on the `descOnly` pattern already introduced in Track 1 for D9), so item
-   keywords match the **description text**, not the vendor name.
-2. **Then layer ال-prefix normalization on top** of the now-separated description text (vendor names no
-   longer feed item-keyword matching, so stripping "ال" can no longer leak generic vendor words).
-3. **Then re-measure blast radius** on that *combined* mechanism — never on raw "ال"-stripping alone
-   (which Track 2 showed is dominated by vendor leakage, not by genuine prefix fixes).
+**(2) D13 — only via per-keyword vendor-safety tagging FIRST (highest risk; do last).** Track 2 and
+Track B together proved the naive paths are unsafe: a universal "ال" strip re-exposes vendor-name leakage
+(Track 2), and blunt field-separation discards *legitimate* vendor signal (Track B — plumber→maintenance,
+equipment-vendor→equipment). The only safe sequence is:
+1. **Tag each of the ~85 patterns** with whether it may match the vendor name (vendor-safe) or
+   description-only — building on the `descOnly` flag from Track 1.
+2. **Then** apply field separation using those tags.
+3. **Then** layer "ال" normalization on the separated description text.
+4. **Re-measure blast radius** at each step. Expect D13 may stay open if step 1 proves too large.
 
-Same baseline-first, one-change-at-a-time, full-regression discipline as Tracks 1–2. The independent
-**new-accounts** (D2, D7, D12) and **coverage** (D10, D11) tracks are lower-risk, can be done in any
-order, and the insight layer already compensates for them operationally.
+D11's remaining part (dedicated construction WIP/direct-cost account) folds into track (1).
+Same baseline-first, one-change-at-a-time, full-regression discipline as every track so far.
 
 ## 7. Critical operational reminders for next session
 
+- **⚠️ VERIFICATION NEEDED (named, explicit — check FIRST in the practical-testing phase):** Compare the
+  current engine output on the user's **real restaurant Excel data** against the user's own
+  **previously-corrected results** (which pre-date today's Track 1/2/A/B engine changes), to confirm no
+  silent regression was introduced for that specific real-world dataset. The in-repo 730-record fixture
+  showed **zero** regression at every step, but it is not guaranteed identical to the user's latest real
+  file — so this is a distinct, mandatory check, not a vague caveat. Run it before any new engine work.
 - **Firebase service-account key:** `firebase-service-account.json` exists in the repo root; the prior
   checkpoint notes **key rotation/validity must be verified manually by the user** — do not assume the
   live Firebase environment is functional. Auth/RBAC and PATCH-7 enforcement are unverifiable from the
