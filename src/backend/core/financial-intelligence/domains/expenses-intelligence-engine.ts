@@ -5,10 +5,11 @@ import { restaurantWastageRule } from '../rules/activity/restaurant-wastage';
 import { manufacturingFoodRule } from '../rules/activity/manufacturing-food';
 import { professionalServicesRule } from '../rules/activity/professional-services';
 import { tradingRetailRule } from '../rules/activity/trading-retail';
+import { contractingExpenseRule } from '../rules/activity/contracting-construction';
 
 // Activity-aware rules. Each self-gates on context.activityProfile and only ADDS
 // insights — none of them changes a record's category.
-const activityRules = [restaurantWastageRule, manufacturingFoodRule, professionalServicesRule, tradingRetailRule];
+const activityRules = [restaurantWastageRule, manufacturingFoodRule, professionalServicesRule, tradingRetailRule, contractingExpenseRule];
 
 export function analyzeExpenses(records: FinancialRecord[], historicalData: FinancialRecord[] = [], activityProfile?: string): IntelligenceResult[] {
     const profiles = buildVendorProfiles(historicalData);

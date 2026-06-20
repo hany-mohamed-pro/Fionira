@@ -1,0 +1,25 @@
+{
+  "_SYNTHETIC": true,
+  "_warning": "SYNTHETIC TEST DATA — NOT REAL. Generated for activity-aware classification Phase 5 (contracting / construction) pre-launch verification. No real tenant, vendor, client, project, or transaction is represented. Saudi-style Arabic names/descriptions are illustrative only. Two concurrent projects: مشروع فيلا الياسمين, مشروع برج التجارة.",
+  "_activityProfile": "contracting_construction",
+  "_columns": ["الطرف", "البيان", "الخاضع للضريبة", "ضريبة القيمة المضافة", "الإجمالي", "رقم الفاتورة", "التاريخ"],
+  "expenses": [
+    { "group": "materials_project",  "entity": "مصنع الأسمنت السعودي",  "desc": "توريد أسمنت وحديد تسليح لمشروع فيلا الياسمين", "taxable": 45000, "vat": 6750, "total": 51750, "invoice": "CC-5001", "date": "2025-01-06" },
+    { "group": "materials_project",  "entity": "مورد البلوك",           "desc": "بلوك خرساني لموقع مشروع برج التجارة",          "taxable": 18000, "vat": 2700, "total": 20700, "invoice": "CC-5002", "date": "2025-01-08" },
+    { "group": "equipment_rental",   "entity": "مؤسسة تأجير المعدات",   "desc": "استئجار حفّار ثقيل لمشروع برج التجارة",         "taxable": 12000, "vat": 1800, "total": 13800, "invoice": "CC-5003", "date": "2025-01-10" },
+    { "group": "equipment_rental",   "entity": "معدات الإنشاء",         "desc": "تأجير رافعة برجية لموقع فيلا الياسمين",        "taxable": 9000,  "vat": 1350, "total": 10350, "invoice": "CC-5004", "date": "2025-01-12" },
+    { "group": "equipment_purchase", "entity": "معرض المعدات الثقيلة",  "desc": "شراء خلاطة خرسانة جديدة",                      "taxable": 85000, "vat": 12750,"total": 97750, "invoice": "CC-5005", "date": "2025-01-14" },
+    { "group": "daily_labor",        "entity": "عمالة الموقع",          "desc": "أجور عمالة يومية لمشروع فيلا الياسمين",        "taxable": 0,     "vat": 0,    "total": 8000,  "invoice": "CC-5006", "date": "2025-01-15" },
+    { "group": "daily_labor",        "entity": "مقاول الباطن",          "desc": "يوميات عمال صب الخرسانة بالموقع",              "taxable": 0,     "vat": 0,    "total": 6500,  "invoice": "CC-5007", "date": "2025-01-16" },
+    { "group": "general",            "entity": "أملاك الرياض",          "desc": "إيجار مكتب الإدارة الشهري",                    "taxable": 0,     "vat": 0,    "total": 9000,  "invoice": "CC-5008", "date": "2025-01-17" },
+    { "group": "general",            "entity": "مسير الرواتب",          "desc": "راتب مدير المشاريع",                           "taxable": 0,     "vat": 0,    "total": 18000, "invoice": "CC-5009", "date": "2025-01-18" },
+    { "group": "general",            "entity": "الشركة السعودية للكهرباء","desc": "فاتورة كهرباء المكتب",                       "taxable": 0,     "vat": 0,    "total": 1500,  "invoice": "CC-5010", "date": "2025-01-19" },
+    { "group": "general",            "entity": "التأمينات الاجتماعية",  "desc": "اشتراك تأمينات اجتماعية gosi",                 "taxable": 0,     "vat": 0,    "total": 3500,  "invoice": "CC-5011", "date": "2025-01-20" }
+  ],
+  "revenues": [
+    { "group": "advance_payment",    "entity": "العميل شركة النخبة",    "desc": "دفعة مقدمة من العميل لمشروع برج التجارة",      "taxable": 100000,"vat": 15000,"total": 115000,"invoice": "RV-5001", "date": "2025-01-07" },
+    { "group": "advance_payment",    "entity": "عميل فيلا الياسمين",    "desc": "عربون توقيع العقد - مقدم أعمال",               "taxable": 50000, "vat": 7500, "total": 57500, "invoice": "RV-5002", "date": "2025-01-09" },
+    { "group": "progress_billing",   "entity": "العميل شركة النخبة",    "desc": "مستخلص أعمال المرحلة الأولى المنجزة",          "taxable": 80000, "vat": 12000,"total": 92000, "invoice": "RV-5003", "date": "2025-02-15" },
+    { "group": "progress_billing",   "entity": "عميل فيلا الياسمين",    "desc": "مستخلص أعمال شهري عن نسبة الإنجاز",            "taxable": 60000, "vat": 9000, "total": 69000, "invoice": "RV-5004", "date": "2025-02-20" }
+  ]
+}

@@ -16,7 +16,7 @@ export function routeToDomainIntelligence(
         case 'expenses':
             return analyzeExpenses(records, historicalData, activityProfile);
         case 'revenues':
-            return analyzeRevenues(records, historicalData);
+            return analyzeRevenues(records, historicalData, activityProfile);
         case 'payroll':
             return analyzePayroll(records, historicalData);
         case 'banks':

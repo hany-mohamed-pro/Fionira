@@ -20,6 +20,9 @@ All items below are **keyword-collision / tie-break** issues in the scoring engi
 | D7 | `هالك مخزون`, `عجز جرد سنوي` (inventory shrinkage) | تكلفة المبيعات - مواد خام ومكونات / مصروفات عمومية - أخرى | a distinct "inventory shrinkage" account | **No such account exists** in the chart of accounts (same class as D2) | Phase 4 |
 | D8 | `شحن وارد للبضاعة من المورد` / `نقل مشتريات أصناف` (inbound freight) | مصروفات بيعية وتسويقية - نقل وتوصيل للعملاء (outbound!) / مواد خام ومكونات | تكلفة المبيعات - شحن ونقل للداخل | `شحن/نقل` matched without distinguishing **inbound (وارد/مشتريات)** from **outbound (للعملاء)** | Phase 4 |
 | D9 | vendor `مستودع الجملة` (wholesale warehouse) | مصروفات عمومية وإدارية - إيجارات | تكلفة بضاعة / COGS | `مستودع` (warehouse) is a rent keyword; the **vendor name** hijacks the category — same root as D5 | Phase 4 |
+| D10 | `شراء خلاطة خرسانة جديدة` (equipment purchase) | مصروفات عمومية وإدارية - أخرى | أصول ثابتة - أجهزة ومعدات (capitalize) | **Coverage gap** — `خلاطة خرسانة` (concrete mixer) isn't in the CAPEX-equipment keywords, so a clear asset purchase is not capitalized | Phase 5 |
+| D11 | construction materials/labor (`أسمنت`, `حديد تسليح`, `بلوك خرساني`, `يوميات عمال`) | مصروفات عمومية وإدارية - أخرى (all of them) | direct project cost / WIP (COGS) | **Coverage gap** — the engine has no construction vocabulary; all project costs fall to "G&A - other" | Phase 5 |
+| D12 | customer advance payment (revenue) | إيرادات المبيعات | إيراد مقدم / unearned (liability) | **Missing account** (revenue side) — no deferred-revenue account exists (same class as D2/D7) | Phase 5 |
 
 ## Diagnostic note — the shared root pattern (D3–D6, and likely D1)
 
@@ -47,8 +50,13 @@ NOT packaging when near `تقارير/مستندات`; `بدل` is NOT salary wh
 inbound when near `وارد/مشتريات/من المورد`), (b) separate the **vendor-name** field from the
 **item-description** field so a vendor's name (`مكتب…`, `مستودع…`) can't drive the item category, and
 (c) give multi-word phrases priority over single-token substrings. Fixing the **pattern** should
-resolve D1, D3, D4, D5, D6, D8, D9 together; D2 and D7 are the "missing account" class that
-additionally need new chart-of-accounts entries.
+resolve D1, D3, D4, D5, D6, D8, D9 together.
+
+The other items split into two more classes:
+- **Missing accounts** (need new chart-of-accounts entries): D2 (production wastage), D7 (inventory
+  shrinkage), D12 (deferred/unearned revenue).
+- **Coverage gaps** (need new vocabulary/routing): D10 (concrete mixer → capitalize), D11 (no
+  construction-materials/WIP vocabulary — all project costs fall to "G&A - other").
 
 ## Notes for the future engine-fix session
 - D1, D3, D4, D5, D6 are the same root pattern: a keyword has two senses, and the

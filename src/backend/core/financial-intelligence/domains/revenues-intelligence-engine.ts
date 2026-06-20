@@ -1,8 +1,12 @@
 import { FinancialRecord } from '../../../../types';
 import { IntelligenceResult, Insight, IntelligenceContext } from '../models';
+import { contractingRevenueRule } from '../rules/activity/contracting-construction';
 
-export function analyzeRevenues(records: FinancialRecord[], historicalData: FinancialRecord[] = []): IntelligenceResult[] {
-    const context: IntelligenceContext = { historicalData, currentBatch: records, vendorProfiles: {} };
+// Revenue-side activity-aware rules. Self-gate on activityProfile; insight-only.
+const revenueActivityRules = [contractingRevenueRule];
+
+export function analyzeRevenues(records: FinancialRecord[], historicalData: FinancialRecord[] = [], activityProfile?: string): IntelligenceResult[] {
+    const context: IntelligenceContext = { historicalData, currentBatch: records, vendorProfiles: {}, activityProfile };
 
     return records.map(record => {
         const insights: Insight[] = [];
@@ -95,6 +99,14 @@ export function analyzeRevenues(records: FinancialRecord[], historicalData: Fina
                     insights.push({ type: 'OUTSIDE_FISCAL_PERIOD', severity: 'LOW', message: 'تاريخ الإيراد قديم أو يقع خارج الفترة المالية (معلومة إرشادية)', confidence: 0.9, scoreImpact: 5 });
                 }
             }
+        }
+
+        // Activity-aware rules (inert unless the tenant's activityProfile matches).
+        for (const rule of revenueActivityRules) {
+            const result = rule.execute(record, context);
+            if (!result) continue;
+            if (Array.isArray(result)) insights.push(...result);
+            else insights.push(result);
         }
 
         // Risk Score Calculation
