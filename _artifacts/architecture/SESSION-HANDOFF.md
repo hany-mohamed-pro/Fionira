@@ -1,6 +1,6 @@
 # Fionira — Session Handoff
 
-> Resume point for any future session. HEAD = `849c2b0`. Working tree clean except the three
+> Resume point for any future session. HEAD = `892c4df`. Working tree clean except the three
 > long-standing untouched data/lock files (`data/erp_registry.json`, `data/uploads.json`,
 > `package-lock.json`). Evidence-based; pulled from live git + file state, not memory.
 
@@ -11,9 +11,9 @@ to act as the **expert *for* a non-specialist user** — the owner does not need
 system classifies, validates, and governs the financials and surfaces plain-language decisions. It is
 **not** a traditional ERP and does not push accounting mechanics onto the user.
 
-## 2. Complete chronological commit ledger (root → HEAD, 35 commits)
+## 2. Complete chronological commit ledger (root → HEAD, 42 commits)
 
-This Claude Code session resumed at `12a0529`; commits `2aaa928` → `849c2b0` are this session's work.
+This Claude Code session resumed at `12a0529`; commits `2aaa928` → `892c4df` are this session's work.
 Everything above `12a0529` was already in history at session start (security/UX/early-classification).
 
 | # | Hash | Tag | Description |
@@ -53,6 +53,13 @@ Everything above `12a0529` was already in history at session start (security/UX/
 | 33 | `bb88233` | [ENGINE-FIX] | Track 2 — D5 resolved surgically (ترجمة/translation = professional); global "ال"-prefix fix attempted, **measured unsafe** (21-record blast radius dominated by vendor-name leakage), **rejected and reverted** |
 | 34 | `ecef9da` | [ENGINE-FIX] | Track A — D10 resolved (equipment purchase→fixed asset, rental-guarded); D11 partial (construction materials→existing COGS); D2/D7/D12 deferred (need new COA account) |
 | 35 | `849c2b0` | [ENGINE-FIX] | Track B — D13 combined fix attempted; field-separation **measured unsafe** (8-record blast radius, legitimate vendor-signal regressions), **reverted**; D13 stays open (needs per-keyword vendor-safety tagging first) |
+| 36 | `3ca0d0c` | [DOCS] | handoff update post Phase A (Track A + Track B outcomes) |
+| 37 | `e46052f` | [CLASSIFICATION] | D2/D7 chart-of-accounts additions (engine routing + `CATEGORY_ORDER`); D12 deferred — later found COGS wiring incomplete (see #41/#42) |
+| 38 | `e8510d6` | [AUDIT] | Balance Sheet deep audit — verdict: **actively misleading** (figures fabricated by fixed ratios; equity is a forced plug → always balances vacuously) |
+| 39 | `f60038f` | [UX] | Balance Sheet honest labeling — top warning banner + 6 "تقديري" badges + reworded disclaimer |
+| 40 | `9ed75b9` | [AUDIT] | Trial Balance deep audit — verdict: **sound** (real tenant-scoped journal entries; balance guaranteed by double-entry construction, not a plug); no fix needed |
+| 41 | `5a165ed` | [AUDIT] | Income Statement deep audit — verdict: **sound source**; found D2/D7 NOT actually in `cogsCategories` (corrects e46052f's overstated "under COGS" claim) |
+| 42 | `892c4df` | [FIX] | Income Statement `cogsCategories` — D2/D7 now genuinely end-to-end under COGS; zero regression on 730 real |
 
 ## 3. Current system state (factual, verified)
 
@@ -78,21 +85,32 @@ Everything above `12a0529` was already in history at session start (security/UX/
 - **PATCH-7 (subcollection tenant isolation):** committed structurally (`a9e16bc`); **live Firebase
   rules deployment to a real environment remains pending/unverifiable from the repo.**
 
+### Financial Statement Triad — Audited 2026-06-21 (Phase B)
+
+| Statement | Verdict | Evidence / status |
+|---|---|---|
+| **Balance Sheet** | ❌ **Actively misleading** | Fully ESTIMATED via fixed ratios from the Income Statement's net profit (`cash = netIncome×0.4`, `AR = revenues×0.15` …); **equity is a forced plug** so it always balances vacuously. Now **labeled "تقديري"** in the UI (`f60038f`: banner + per-card/section badges + reworded disclaimer). A *real* fix requires the Postgres `journal_entries` schema + a chart-of-accounts-with-types (Phase C1 `01e6e19`) — **architecturally blocked**, not a `BalanceSheet.tsx` change. Audit: `balance-sheet-audit.md`. |
+| **Trial Balance** | ✅ **Sound** | Real journal-entry aggregation; balance **guaranteed by double-entry construction** (each entry adds its amount to one debit + one credit), **not** a forced plug; tenant-scoped; correctly excludes superseded `_v{n}` versions (`isActive !== false`); has a genuine imbalance warning. No fix needed. Audit: `trial-balance-audit.md`. |
+| **Income Statement** | ✅ **Sound source** | Aggregates **real revenue/expense records** (not estimates). D2/D7 wastage/shrinkage now correctly flow into **COGS** (`892c4df`, after `5a165ed` found them landing in OPEX via a stale hard-coded list). **Net profit has been reliable throughout** — the D2/D7 gap only affected the COGS/OPEX *split presentation*, never the bottom line. Audits: `income-statement-audit.md`, `income-statement-d2-d7-cogs-fix.md`. |
+
+**Strategic implication:** the core **double-entry / posting foundation is sound** (Trial Balance + Income
+Statement both run on real data). The **one** flawed statement (Balance Sheet) is flawed **only in its own
+ratio-conversion layer** — it distorts good upstream data, it does **not** inherit bad data. So the fix
+surface is contained and well-understood, not a systemic data-integrity problem.
+
 ## 4. Open technical debt (live from `engine-technical-debt.md`)
 
-**RESOLVED — 8 items:** D1, D3, D4, D6, D8, D9 (Track 1) + **D5** (Track 2) + **D10** (Track A). All zero-regression.
+**RESOLVED — 10 items:** D1, D3, D4, D6, D8, D9 (Track 1) + **D5** (Track 2) + **D10** (Track A) +
+**D2, D7** (COA additions `e46052f`, now genuinely end-to-end under COGS as of `892c4df`). All zero-regression.
 
 **PARTIALLY RESOLVED — 1 item:** **D11** (Track A) — construction materials now route to the existing
 COGS raw-materials account; a *dedicated* construction direct-cost/WIP account is still missing.
 
-**DEFERRED — need a NEW chart-of-accounts entry in `financial-utils.ts` + an accountant decision
-(out of engine-only scope; the activity-insight layer already surfaces all three operationally):**
+**DEFERRED — needs a NEW account-type the system doesn't have + an accountant decision:**
 
 | # | Description | Discovered | Severity |
 |---|---|---|---|
-| D2 | production-wastage has no dedicated account | Phase 2 (`6a66112`) | MEDIUM |
-| D7 | inventory-shrinkage has no dedicated account | Phase 4 (`ced0cc2`) | MEDIUM |
-| D12 | customer advance → no deferred-revenue (unearned) account | Phase 5 (`679f791`) | MEDIUM-HIGH |
+| D12 | customer advance → **deferred/unearned revenue is a LIABILITY**; the Balance Sheet is estimated with no liability-account infrastructure, so there is no correct home yet (adding it as revenue would be accounting-wrong) | Phase 5 (`679f791`) | MEDIUM-HIGH |
 
 **D13 — STILL OPEN, twice-measured, sharpened diagnosis.** Track 2 showed a universal "ال" strip
 re-exposes vendor-name leakage (`المعدات`→`معدات`→fixed-asset for a *rental*; `الموقع`→`موقع`→
@@ -114,26 +132,25 @@ then field separation, then "ال" — see §6.
 
 ## 6. Recommended next-session priority (professional opinion)
 
-Two tracks remain, in this order:
+**Phase B continues — audit the remaining modules, in priority order by financial / user-trust
+sensitivity** (apply the SAME discipline used for the statement triad: read-only audit first, then
+label-or-fix **only after explicit confirmation**):
 
-**(1) NEW-ACCOUNTS track — D2, D7, D12 (do this first; lowest risk, highest clarity-of-scope).**
-These are *not* engine bugs — each needs a new account added to the chart of accounts
-(`financial-utils.ts`) plus the user/accountant's decision on naming + IFRS treatment
-(production-wastage, inventory-shrinkage, deferred/unearned-revenue). Once the accounts exist, wiring the
-engine to route to them is trivial and low-risk. This is a **product/accounting decision**, not a
-tokenization risk — ideal to bring to the financial-manager user directly.
+1. **TaxDeclaration** — ZATCA-facing, highest sensitivity (wrong VAT figures have regulatory consequence).
+2. **OwnersSummary** — owner-equity / drawings view; trust-sensitive.
+3. **PayrollDashboard** — wages/GOSI; sensitive but mostly pass-through of payroll records.
+4. **BanksDashboard** — cash/bank movements.
+5. **SmartInvoice / QuotationManager** — outward-facing documents (customer-visible).
+6. **UserManagement** — lowest financial sensitivity, mostly admin CRUD.
 
-**(2) D13 — only via per-keyword vendor-safety tagging FIRST (highest risk; do last).** Track 2 and
-Track B together proved the naive paths are unsafe: a universal "ال" strip re-exposes vendor-name leakage
-(Track 2), and blunt field-separation discards *legitimate* vendor signal (Track B — plumber→maintenance,
-equipment-vendor→equipment). The only safe sequence is:
-1. **Tag each of the ~85 patterns** with whether it may match the vendor name (vendor-safe) or
-   description-only — building on the `descOnly` flag from Track 1.
-2. **Then** apply field separation using those tags.
-3. **Then** layer "ال" normalization on the separated description text.
-4. **Re-measure blast radius** at each step. Expect D13 may stay open if step 1 proves too large.
+**Still-open engine/accounting debt (tracked in §4, parallel to the module audits):**
+- **D12** (deferred/unearned-revenue LIABILITY) + **D11's** dedicated construction WIP/direct-cost
+  account — both need the **chart-of-accounts-with-types / account-driven balance sheet** foundation
+  (also what unblocks the real Balance Sheet). Bring the account naming + IFRS treatment to the
+  financial-manager user as a product decision.
+- **D13** (the "ال"/vendor-leakage tokenization issue) — highest risk; only via **per-keyword
+  vendor-safety tagging FIRST** (Track 2 + Track B proved naive paths regress). May stay open.
 
-D11's remaining part (dedicated construction WIP/direct-cost account) folds into track (1).
 Same baseline-first, one-change-at-a-time, full-regression discipline as every track so far.
 
 ## 7. Critical operational reminders for next session
