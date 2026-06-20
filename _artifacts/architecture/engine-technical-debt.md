@@ -14,13 +14,18 @@ All items below are **keyword-collision / tie-break** issues in the scoring engi
 - **Track 1 (context-aware tokenization) — DONE.** Resolved **D1, D3, D4, D6, D8, D9** with surgical
   context guards + a `descOnly` vendor/description separation. Verified zero regression on the 730 real
   records and on all 5 synthetic fixtures. See `engine-fix-track1-context-tokenization.md`.
-- **D5 — partially improved, still OPEN.** No longer mis-routed to إيجارات (now "أخرى"), but reaching
-  the expected *professional* category is blocked on **D13** (the "ال" prefix root), deferred by
-  user decision to its own session.
-- **D13 (NEW, discovered in Track 1) — OPEN, deferred.** The Arabic definite article "ال" and attached
-  prepositions (لـ/بـ) break word-boundary matching: `التدقيق`≠`تدقيق`, `المورد`≠`مورد`,
-  `للبضاعة`≠`بضاعة`. Systemic (affects all keyword groups) and high-risk — needs its own dedicated
-  session. Directly blocks the full fix of D5 and is the deepest reason several silent misses exist.
+- **D5 — RESOLVED (Track 2).** Fixed with a targeted, semantically-correct keyword: `ترجمة`/translation
+  is now recognized as a professional service, so the translation-office expense classifies as
+  أتعاب مهنية واستشارات. Zero regression on the 730 real records; only the D5 record changed. This
+  sidesteps D13 entirely (no dependency on the "ال" root).
+- **D13 — STILL OPEN; global fix MEASURED and REJECTED as unsafe (Track 2).** A symmetric "ال"/"لل"
+  strip was implemented and measured: it changed **21 records** (17 real + 4 synthetic). Crucially it
+  **re-exposes the vendor-name-bleed class** — stripping the article off a vendor name surfaces a
+  generic word that then bleeds into item-keyword matching (`المعدات`→`معدات`→fixed-asset for a *rental*
+  company; `الموقع`→`موقع`/website→subscriptions for site labor). Several "improvements" on real data
+  also relied on this accidental bleed. **Reverted.** D13's true fix must be done **together with
+  vendor/description field separation** (the `allText→descText` item-keyword change deferred in Track 1)
+  — not as a standalone tokenization change. Re-scoped accordingly.
 - **Untouched (separate tracks): D2, D7, D10, D11, D12** (missing accounts + coverage gaps).
 
 | # | Symptom (real-ish input) | Engine output (wrong) | Expected | Likely cause | Found in |
@@ -39,7 +44,9 @@ All items below are **keyword-collision / tie-break** issues in the scoring engi
 | D12 | customer advance payment (revenue) | إيرادات المبيعات | إيراد مقدم / unearned (liability) | **Missing account** (revenue side) — no deferred-revenue account exists (same class as D2/D7) | Phase 5 |
 | D13 | `التدقيق`, `المورد`, `للبضاعة` (prefixed words) | keyword silently NOT matched | should match the base word | **Arabic "ال"/attached-preposition prefix breaks word-boundary matching** — systemic; blocks full D5 fix | Track 1 |
 
-**Status legend:** ✅ resolved in Track 1 → **D1, D3, D4, D6, D8, D9**. ⚠️ open → **D5** (partial), **D13** (new). Untouched → **D2, D7, D10, D11, D12**.
+**Status legend:** ✅ resolved → **D1, D3, D4, D6, D8, D9** (Track 1), **D5** (Track 2). ⚠️ open → **D13**
+(global fix rejected as unsafe; re-scoped to pair with vendor/desc field separation). Untouched →
+**D2, D7, D10, D11, D12**.
 
 ## Diagnostic note — the shared root pattern (D3–D6, and likely D1)
 

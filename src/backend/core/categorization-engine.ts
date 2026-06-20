@@ -25,7 +25,7 @@ const REGEX_OPERATING = new RegExp(`${WB}(قفازات|gloves|maxi roul|ماكس
 const REGEX_PACKAGING = new RegExp(`${WB}(تغليف|علب|أكياس|كيس|أكواب|كوب|كاسات|قصدير|مصاص|رول|قواعد|شريط|سليف|ستكر|استيكر|استيكرات|ليبل|ملصق|ريبون|رينون|بوكس|بوكسات|بنتو|بورد|تاريخ|اكرليك|أكرليك|طباعة|ملاعق بلاستيك|اعواد اسنان|كوب صوصات|packaging|box|carton|كرتون للشحن 10)${WE}`);
 const REGEX_STATIONERY = new RegExp(`${WB}(ورق تصوير|ورق طباعة|طباعة تقارير|طباعة مستندات|طباعة عقود|طباعة فواتير|اتفاقية|عقد|حبر|أحبار|اقلام|أقلام|ملفات|اختام|بنر|لوحات|كروت|ختم شوكولاته)${WE}`);
 const REGEX_STATIONERY_EXCLUDE = new RegExp(`${WB}(انتهاء التواريخ|تلوين)${WE}`);
-const REGEX_PROFESSIONAL = new RegExp(`${WB}(مراجعة وتعديل بنود عقد|أتعاب التفاوض|انهاء عقد|اتعاب|أتعاب|استشارات|محاماة|محاسب|تدقيق|تخليص|معقب)${WE}`);
+const REGEX_PROFESSIONAL = new RegExp(`${WB}(مراجعة وتعديل بنود عقد|أتعاب التفاوض|انهاء عقد|اتعاب|أتعاب|استشارات|محاماة|محاسب|تدقيق|تخليص|معقب|ترجمة|ترجمه)${WE}`);
 const REGEX_SUBSCRIPTIONS = new RegExp(`${WB}(اشتراك|برنامج|تطبيق|نظام|استضافة|دومين|سيرفر|كلاود|فودكس|cloud|software|app|subscription|hosting|domain|license|renewal|foodics)${WE}`);
 const REGEX_DECORATIONS = new RegExp(`${WB}(ديكور|زينة|شجره|شجرة|بطاريات|فانوس|فانوس رمضان|شمع حفلات)${WE}`);
 const REGEX_DECORATIONS_EXCLUDE = new RegExp(`${WB}(ماء ورد|ورد مجفف|ورد|flower)${WE}`);
@@ -196,7 +196,7 @@ export const getExpenseCategory = (name: string, desc: string, amount: number = 
     { regex: /(?:^|\s)(اشتراك|تجديد اشتراك|برنامج|تطبيق|نظام|استضافة|دومين|سيرفر|كلاود|فودكس|موقع|cloud|software|app|subscription|hosting|domain|license|renewal|foodics)(?=\s|$)/, cat: 'مصروفات عمومية وإدارية - اشتراكات وبرمجيات', score: 600 },
 
     // OPEX - Professional Services
-    { regex: /(?:^|\s)(اتعاب|استشارات|محاماة|محاسب|مراجعة|تدقيق|تخليص|معقب|خدمات عامة|استقدام|مكتب عمل|professional services|consulting|consultancy|consultant|audit|legal|services)(?=\s|$)/, cat: 'مصروفات عمومية وإدارية - أتعاب مهنية واستشارات', score: 600 },
+    { regex: /(?:^|\s)(اتعاب|استشارات|محاماة|محاسب|مراجعة|تدقيق|تخليص|معقب|ترجمة|ترجمه|خدمات عامة|استقدام|مكتب عمل|professional services|consulting|consultancy|consultant|translation|audit|legal|services)(?=\s|$)/, cat: 'مصروفات عمومية وإدارية - أتعاب مهنية واستشارات', score: 600 },
 
     // OPEX - Telecom & Internet
     { regex: /(?:^|\s)(فاتورة جوال|انترنت|الياف|شحن رصيد|باقة|stc|mobily|zain|internit|internet)(?=\s|$)/, cat: 'مصروفات عمومية وإدارية - اتصالات وإنترنت', score: 600 },
