@@ -37,3 +37,24 @@ User Management is a **polished UI shell over three stub endpoints, and the page
 4. **Minor UI bug noted [CODE]:** the role badge ([UserManagement.tsx:201](../../src/modules/UserManagement.tsx)) renders `accountant` as "مشاهد" (viewer) — only admin vs non-admin is distinguished; the "محاسب" (accountant) role is mislabeled in the badge (the dropdown is correct).
 
 These are security/RBAC-adjacent but touch no financial logic. Awaiting your go-ahead before any implementation.
+
+---
+
+## Update — Fix #1 (Reachability) outcome, 2026-06-21
+
+**Correction to the PRIMARY finding (honest):** the page is **NOT unreachable**. Live re-test proved it. The original "unreachable" conclusion was a **test-gap**: the User Management entry lives in the Settings **hover mega-menu** (`NewAppShell.tsx:202`, group `settings`), and my earlier automated DOM search/clicks never triggered the hover, so the item wasn't in the DOM when I looked. A real admin who **hovers** the «الإعدادات» top-nav sees «المستخدمون والصلاحيات» and clicking it routes correctly.
+
+**[LIVE] re-verification:**
+- Dispatched hover on «الإعدادات» → mega-menu opened, «المستخدمون والصلاحيات» present.
+- Clicked it → `UserManagement` rendered: heading «إدارة المستخدمين والصلاحيات», breadcrumb الرئيسية/الإعدادات/إدارة المستخدمين, **empty body below the header** (= the empty-list stub). Screenshot captured.
+- So `NewAppShell.tsx:202` wiring is **correct** (`handleNavClick('settings','user_management')`); there was **no wiring bug to fix** there.
+
+**The one genuine mismatch (fixed):** `CommandPalette.tsx:55` used `mode:'users'` while the render gate ([App.tsx:2459](../../src/App.tsx)) requires `appMode==='settings'`. Changed `mode:'users'` → `mode:'settings'`. **Caveat [LIVE]:** this is **inert today** — the command palette has **no open-trigger** anywhere in `src` (`setIsCommandPaletteOpen(true)` does not exist; its only Ctrl+K handler *closes* it), so the palette never opens. The fix is correctness/future-proofing, **not** a reachability change. Build passes (exit 0).
+
+**Real residual issues (not bugs in reachability, flagged for awareness):**
+- **Discoverability:** the page is reachable only by *hovering* «الإعدادات» — *clicking* «الإعدادات» goes to the Settings page (Company/Alerts/Security/Regional sub-tabs), which has **no** user-management entry. Hover-only discovery is a UX weakness, not a break.
+- **Dead command palette:** rendered but never opened (no trigger). Separate dead-code matter, out of this fix's scope.
+
+**Item D (non-admin gate) — still NOT testable live:** dev-auth hardcodes `role:'admin'` on both client (`getDevAuthProfile`) and server (dev-token branch). No valid non-admin session is obtainable without code changes; the "غير مصرح" screen and `requireAdmin` 403 remain unverified by live observation.
+
+**Net:** the page was already reachable (corrected); the only real wiring mismatch (CommandPalette mode) is fixed though inert; endpoints remain stubs (Fixes #2/#3/#4 deferred to a separate session as instructed).
