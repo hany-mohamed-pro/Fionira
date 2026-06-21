@@ -79,6 +79,7 @@ export const Settings: React.FC<SettingsProps> = ({ profile }) => {
     { id: 'company', label: 'إعدادات المنشأة', icon: Building2 },
     { id: 'notifications', label: 'التنبيهات والإشعارات', icon: Bell },
     { id: 'security', label: 'الأمان والصلاحيات', icon: Shield },
+    { id: 'users', label: 'المستخدمون والصلاحيات', icon: User },
     { id: 'regional', label: 'الإعدادات الإقليمية', icon: Globe },
   ];
 
@@ -391,6 +392,9 @@ export const Settings: React.FC<SettingsProps> = ({ profile }) => {
             </div>
           </Card>
         );
+      case 'users':
+        // Reuses the existing UserManagement module (self-gated to admins); no logic duplicated.
+        return <UserManagement />;
       default:
         return null;
     }
