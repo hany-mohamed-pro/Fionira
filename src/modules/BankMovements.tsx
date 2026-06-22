@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { useUI } from '../contexts/UIContext';
-import { ArrowDownLeft, ArrowUpRight, Layers, Users } from 'lucide-react';
+import { ArrowDownLeft, ArrowUpRight, Layers, Users, ChevronDown, ChevronLeft } from 'lucide-react';
 import { formatCurrency } from './VisualDashboard';
 
 // Bank-native "Account Movements" — replaces the expense chart-of-accounts view
@@ -14,6 +14,7 @@ export const BankMovements = ({ records = [] }: { records: any[] }) => {
   const isRTL = language === 'ar';
   const tr = (ar: string, en: string) => (isRTL ? ar : en);
   const [view, setView] = useState<View>('type');
+  const [openKey, setOpenKey] = useState<string | null>(null); // drill-down row
 
   const data = useMemo(() => {
     const txns = (records || []).filter((r: any) => r && r.moduleType === 'banks');
@@ -27,11 +28,12 @@ export const BankMovements = ({ records = [] }: { records: any[] }) => {
 
     let totalIn = 0, totalOut = 0;
     const build = (keyFn: (r: any) => string) => {
-      const m: Record<string, { debit: number; credit: number; count: number }> = {};
+      const m: Record<string, { debit: number; credit: number; count: number; txns: any[] }> = {};
       txns.forEach((r: any) => {
         const k = keyFn(r);
-        m[k] = m[k] || { debit: 0, credit: 0, count: 0 };
+        m[k] = m[k] || { debit: 0, credit: 0, count: 0, txns: [] };
         m[k].count++;
+        m[k].txns.push(r);
         const amt = Number(r.Total_Amount) || 0;
         if (dirOf(r) === 'credit') m[k].credit += amt; else m[k].debit += amt;
       });
@@ -81,10 +83,10 @@ export const BankMovements = ({ records = [] }: { records: any[] }) => {
         <div className="flex items-center justify-between mb-5 flex-wrap gap-3">
           <h3 className="text-base font-bold text-slate-800">{tr('حركة الحسابات البنكية', 'Bank Account Movements')}</h3>
           <div className="flex bg-slate-100 rounded-xl p-1">
-            <button onClick={() => setView('type')} className={`px-4 py-1.5 rounded-lg text-[13px] font-bold flex items-center gap-1.5 transition-all ${view === 'type' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500'}`}>
+            <button onClick={() => { setView('type'); setOpenKey(null); }} className={`px-4 py-1.5 rounded-lg text-[13px] font-bold flex items-center gap-1.5 transition-all ${view === 'type' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500'}`}>
               <Layers className="w-4 h-4" /> {tr('حسب نوع الحركة', 'By Type')}
             </button>
-            <button onClick={() => setView('counterparty')} className={`px-4 py-1.5 rounded-lg text-[13px] font-bold flex items-center gap-1.5 transition-all ${view === 'counterparty' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500'}`}>
+            <button onClick={() => { setView('counterparty'); setOpenKey(null); }} className={`px-4 py-1.5 rounded-lg text-[13px] font-bold flex items-center gap-1.5 transition-all ${view === 'counterparty' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500'}`}>
               <Users className="w-4 h-4" /> {tr('حسب الطرف المقابل', 'By Counterparty')}
             </button>
           </div>
@@ -103,20 +105,61 @@ export const BankMovements = ({ records = [] }: { records: any[] }) => {
               </tr>
             </thead>
             <tbody>
-              {rows.map((r) => (
-                <tr key={r.key} className="border-b border-slate-100 hover:bg-slate-50">
-                  <td className={`py-2.5 ${isRTL ? 'text-right' : 'text-left'} font-semibold text-slate-700 max-w-[280px] truncate`} title={r.key}>{r.key}</td>
-                  <td className="py-2.5 text-center text-slate-500">{r.count}</td>
-                  <td className={`py-2.5 ${isRTL ? 'text-left' : 'text-right'} text-emerald-600`}>{r.credit ? formatCurrency(r.credit) : '—'}</td>
-                  <td className={`py-2.5 ${isRTL ? 'text-left' : 'text-right'} text-rose-600`}>{r.debit ? formatCurrency(r.debit) : '—'}</td>
-                  <td className={`py-2.5 ${isRTL ? 'text-left' : 'text-right'} font-bold ${r.net >= 0 ? 'text-emerald-700' : 'text-rose-700'}`}>{formatCurrency(r.net)}</td>
-                  <td className="py-2.5">
-                    <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
-                      <div className="h-full bg-blue-400 rounded-full" style={{ width: `${Math.max(2, (r.volume / grandVolume) * 100)}%` }} />
-                    </div>
-                  </td>
-                </tr>
-              ))}
+              {rows.map((r) => {
+                const open = openKey === r.key;
+                return (
+                  <React.Fragment key={r.key}>
+                    <tr onClick={() => setOpenKey(open ? null : r.key)} className="border-b border-slate-100 hover:bg-blue-50/40 cursor-pointer">
+                      <td className={`py-2.5 ${isRTL ? 'text-right' : 'text-left'} font-semibold text-slate-700 max-w-[280px] truncate`} title={r.key}>
+                        <span className="inline-flex items-center gap-1.5">
+                          {open ? <ChevronDown className="w-3.5 h-3.5 text-slate-400" /> : <ChevronLeft className={`w-3.5 h-3.5 text-slate-400 ${isRTL ? '' : 'rotate-180'}`} />}
+                          {r.key}
+                        </span>
+                      </td>
+                      <td className="py-2.5 text-center text-slate-500">{r.count}</td>
+                      <td className={`py-2.5 ${isRTL ? 'text-left' : 'text-right'} text-emerald-600`}>{r.credit ? formatCurrency(r.credit) : '—'}</td>
+                      <td className={`py-2.5 ${isRTL ? 'text-left' : 'text-right'} text-rose-600`}>{r.debit ? formatCurrency(r.debit) : '—'}</td>
+                      <td className={`py-2.5 ${isRTL ? 'text-left' : 'text-right'} font-bold ${r.net >= 0 ? 'text-emerald-700' : 'text-rose-700'}`}>{formatCurrency(r.net)}</td>
+                      <td className="py-2.5">
+                        <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                          <div className="h-full bg-blue-400 rounded-full" style={{ width: `${Math.max(2, (r.volume / grandVolume) * 100)}%` }} />
+                        </div>
+                      </td>
+                    </tr>
+                    {open && (
+                      <tr>
+                        <td colSpan={6} className="p-0">
+                          <div className="bg-slate-50/70 px-4 py-3 overflow-x-auto">
+                            <table className="w-full text-[12px]">
+                              <thead>
+                                <tr className="text-slate-400">
+                                  <th className={`py-1 ${isRTL ? 'text-right' : 'text-left'}`}>{tr('التاريخ', 'Date')}</th>
+                                  <th className={`py-1 ${isRTL ? 'text-right' : 'text-left'}`}>{tr('التفاصيل', 'Details')}</th>
+                                  <th className={`py-1 ${isRTL ? 'text-right' : 'text-left'}`}>{tr('الطرف المقابل', 'Counterparty')}</th>
+                                  <th className={`py-1 ${isRTL ? 'text-left' : 'text-right'}`}>{tr('المبلغ', 'Amount')}</th>
+                                  <th className={`py-1 ${isRTL ? 'text-left' : 'text-right'}`}>{tr('الرصيد', 'Balance')}</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {r.txns.slice(0, 100).map((t: any) => (
+                                  <tr key={t.id} className="border-t border-slate-200/60">
+                                    <td className={`py-1.5 ${isRTL ? 'text-right' : 'text-left'} text-slate-500 whitespace-nowrap`}>{t.Invoice_Date || '—'}</td>
+                                    <td className={`py-1.5 ${isRTL ? 'text-right' : 'text-left'} text-slate-700`}>{t.Entity_Name || '—'}</td>
+                                    <td className={`py-1.5 ${isRTL ? 'text-right' : 'text-left'} text-slate-500 max-w-[260px] truncate`} title={t.Counterparty || t.Narrative || ''}>{t.Counterparty || t.Narrative || '—'}</td>
+                                    <td className={`py-1.5 ${isRTL ? 'text-left' : 'text-right'} font-semibold ${(t.Flow_Direction === 'credit' || (t.Category || '').includes('إيداع')) ? 'text-emerald-600' : 'text-rose-600'}`}>{formatCurrency(Number(t.Total_Amount) || 0)}</td>
+                                    <td className={`py-1.5 ${isRTL ? 'text-left' : 'text-right'} text-slate-500`}>{t.Running_Balance != null ? formatCurrency(Number(t.Running_Balance)) : '—'}</td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                            {r.txns.length > 100 && <p className="text-[11px] text-slate-400 mt-2">{tr(`عرض أول 100 من ${r.txns.length} حركة`, `Showing first 100 of ${r.txns.length}`)}</p>}
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </React.Fragment>
+                );
+              })}
               {rows.length === 0 && (
                 <tr><td colSpan={6} className="py-8 text-center text-slate-400">{tr('لا توجد حركات', 'No transactions')}</td></tr>
               )}

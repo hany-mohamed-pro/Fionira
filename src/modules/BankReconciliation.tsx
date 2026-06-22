@@ -1,7 +1,8 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useUI } from '../contexts/UIContext';
-import { ArrowDownLeft, ArrowUpRight, Scale, CheckCircle2, AlertTriangle, Wallet, ListChecks } from 'lucide-react';
+import { ArrowDownLeft, ArrowUpRight, Scale, CheckCircle2, AlertTriangle, Wallet, ListChecks, ChevronDown, ChevronLeft } from 'lucide-react';
 import { formatCurrency } from './VisualDashboard';
+import { glNature } from '../backend/core/processors/bank-classification';
 
 // Bank-native reconciliation — NOT an expense chart-of-accounts view.
 // A bank statement reconciles as: opening balance + credits − debits = closing
@@ -64,25 +65,45 @@ export const BankReconciliation = ({ records = [] }: { records: any[] }) => {
       if (Math.abs(expected - Number(cur.Running_Balance)) < 0.01) chainOk++;
     }
 
-    // Per-GL-account roll-up.
-    const glMap: Record<string, { debit: number; credit: number; count: number }> = {};
+    // Per-GL-account roll-up, then grouped under accounting natures with
+    // subtotals — the accountant's reading of the statement. Each account keeps
+    // its constituent transactions for drill-down.
+    const glMap: Record<string, { debit: number; credit: number; count: number; txns: any[] }> = {};
     txns.forEach((r: any) => {
       const k = glOf(r);
-      glMap[k] = glMap[k] || { debit: 0, credit: 0, count: 0 };
+      glMap[k] = glMap[k] || { debit: 0, credit: 0, count: 0, txns: [] };
       glMap[k].count++;
+      glMap[k].txns.push(r);
       const amt = Number(r.Total_Amount) || 0;
       if (dirOf(r) === 'credit') glMap[k].credit += amt; else glMap[k].debit += amt;
     });
-    const glRows = Object.entries(glMap)
-      .map(([account, v]) => ({ account, ...v, net: v.credit - v.debit }))
+    const accounts = Object.entries(glMap).map(([account, v]) => ({ account, ...v, net: v.credit - v.debit }));
+
+    const natureMap: Record<string, { accounts: typeof accounts; debit: number; credit: number; count: number }> = {};
+    accounts.forEach((a) => {
+      const nat = glNature(a.account);
+      natureMap[nat] = natureMap[nat] || { accounts: [], debit: 0, credit: 0, count: 0 };
+      natureMap[nat].accounts.push(a);
+      natureMap[nat].debit += a.debit;
+      natureMap[nat].credit += a.credit;
+      natureMap[nat].count += a.count;
+    });
+    const natureGroups = Object.entries(natureMap)
+      .map(([nature, v]) => ({
+        nature, ...v, net: v.credit - v.debit,
+        accounts: v.accounts.sort((a, b) => (b.debit + b.credit) - (a.debit + a.credit)),
+      }))
       .sort((a, b) => (b.debit + b.credit) - (a.debit + a.credit));
 
     return {
       count: txns.length, debitCount, creditCount, totalDebit, totalCredit, net,
       hasBalances, openingBalance, closingBalance, computedClosing, diff, reconciled,
-      chainChecked, chainOk, glRows,
+      chainChecked, chainOk, natureGroups,
     };
   }, [records, isRTL]);
+
+  // Drill-down: which GL account row is expanded to show its transactions.
+  const [openAccount, setOpenAccount] = useState<string | null>(null);
 
   const kpi = [
     { label: tr('عدد الحركات', 'Transactions'), value: String(recon.count), icon: ListChecks, color: 'text-slate-700 bg-slate-100' },
@@ -159,14 +180,15 @@ export const BankReconciliation = ({ records = [] }: { records: any[] }) => {
         )}
       </div>
 
-      {/* PER GL ACCOUNT */}
+      {/* RECONCILIATION BY GL NATURE → ACCOUNT → (drill-down) TRANSACTIONS */}
       <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
-        <h3 className="text-base font-bold text-slate-800 mb-4">{tr('المطابقة حسب الحساب المحاسبي (GL)', 'Reconciliation by GL Account')}</h3>
+        <h3 className="text-base font-bold text-slate-800 mb-1">{tr('المطابقة حسب طبيعة الحساب المحاسبي (GL)', 'Reconciliation by GL Account Nature')}</h3>
+        <p className="text-[12px] text-slate-400 mb-4">{tr('اضغط على أي حساب لعرض حركاته التفصيلية.', 'Click any account to drill into its transactions.')}</p>
         <div className="overflow-x-auto">
           <table className="w-full text-[13px]">
             <thead>
               <tr className="text-slate-500 border-b border-slate-200">
-                <th className={`py-2 ${isRTL ? 'text-right' : 'text-left'} font-bold`}>{tr('الحساب', 'Account')}</th>
+                <th className={`py-2 ${isRTL ? 'text-right' : 'text-left'} font-bold`}>{tr('الحساب / الطبيعة', 'Account / Nature')}</th>
                 <th className="py-2 text-center font-bold">{tr('عدد', 'Count')}</th>
                 <th className={`py-2 ${isRTL ? 'text-left' : 'text-right'} font-bold`}>{tr('مدين', 'Debit')}</th>
                 <th className={`py-2 ${isRTL ? 'text-left' : 'text-right'} font-bold`}>{tr('دائن', 'Credit')}</th>
@@ -174,16 +196,69 @@ export const BankReconciliation = ({ records = [] }: { records: any[] }) => {
               </tr>
             </thead>
             <tbody>
-              {recon.glRows.map((r) => (
-                <tr key={r.account} className="border-b border-slate-100 hover:bg-slate-50">
-                  <td className={`py-2.5 ${isRTL ? 'text-right' : 'text-left'} font-semibold text-slate-700`}>{r.account}</td>
-                  <td className="py-2.5 text-center text-slate-500">{r.count}</td>
-                  <td className={`py-2.5 ${isRTL ? 'text-left' : 'text-right'} text-rose-600`}>{r.debit ? formatCurrency(r.debit) : '—'}</td>
-                  <td className={`py-2.5 ${isRTL ? 'text-left' : 'text-right'} text-emerald-600`}>{r.credit ? formatCurrency(r.credit) : '—'}</td>
-                  <td className={`py-2.5 ${isRTL ? 'text-left' : 'text-right'} font-bold ${r.net >= 0 ? 'text-emerald-700' : 'text-rose-700'}`}>{formatCurrency(r.net)}</td>
-                </tr>
+              {recon.natureGroups.map((g) => (
+                <React.Fragment key={g.nature}>
+                  {/* NATURE SUBTOTAL ROW */}
+                  <tr className="bg-slate-50 border-b border-slate-200">
+                    <td className={`py-2.5 ${isRTL ? 'text-right' : 'text-left'} font-black text-slate-800`}>{g.nature}</td>
+                    <td className="py-2.5 text-center font-bold text-slate-500">{g.count}</td>
+                    <td className={`py-2.5 ${isRTL ? 'text-left' : 'text-right'} font-bold text-rose-600`}>{g.debit ? formatCurrency(g.debit) : '—'}</td>
+                    <td className={`py-2.5 ${isRTL ? 'text-left' : 'text-right'} font-bold text-emerald-600`}>{g.credit ? formatCurrency(g.credit) : '—'}</td>
+                    <td className={`py-2.5 ${isRTL ? 'text-left' : 'text-right'} font-black ${g.net >= 0 ? 'text-emerald-700' : 'text-rose-700'}`}>{formatCurrency(g.net)}</td>
+                  </tr>
+                  {g.accounts.map((a) => {
+                    const open = openAccount === a.account;
+                    return (
+                      <React.Fragment key={a.account}>
+                        <tr onClick={() => setOpenAccount(open ? null : a.account)} className="border-b border-slate-100 hover:bg-blue-50/40 cursor-pointer">
+                          <td className={`py-2.5 ${isRTL ? 'text-right pr-6' : 'text-left pl-6'} font-semibold text-slate-700`}>
+                            <span className="inline-flex items-center gap-1.5">
+                              {open ? <ChevronDown className="w-3.5 h-3.5 text-slate-400" /> : (isRTL ? <ChevronLeft className="w-3.5 h-3.5 text-slate-400" /> : <ChevronLeft className="w-3.5 h-3.5 text-slate-400 rotate-180" />)}
+                              {a.account}
+                            </span>
+                          </td>
+                          <td className="py-2.5 text-center text-slate-500">{a.count}</td>
+                          <td className={`py-2.5 ${isRTL ? 'text-left' : 'text-right'} text-rose-600`}>{a.debit ? formatCurrency(a.debit) : '—'}</td>
+                          <td className={`py-2.5 ${isRTL ? 'text-left' : 'text-right'} text-emerald-600`}>{a.credit ? formatCurrency(a.credit) : '—'}</td>
+                          <td className={`py-2.5 ${isRTL ? 'text-left' : 'text-right'} font-bold ${a.net >= 0 ? 'text-emerald-700' : 'text-rose-700'}`}>{formatCurrency(a.net)}</td>
+                        </tr>
+                        {open && (
+                          <tr>
+                            <td colSpan={5} className="p-0">
+                              <div className="bg-slate-50/70 px-4 py-3">
+                                <table className="w-full text-[12px]">
+                                  <thead>
+                                    <tr className="text-slate-400">
+                                      <th className={`py-1 ${isRTL ? 'text-right' : 'text-left'}`}>{tr('التاريخ', 'Date')}</th>
+                                      <th className={`py-1 ${isRTL ? 'text-right' : 'text-left'}`}>{tr('التفاصيل', 'Details')}</th>
+                                      <th className={`py-1 ${isRTL ? 'text-right' : 'text-left'}`}>{tr('الطرف المقابل', 'Counterparty')}</th>
+                                      <th className={`py-1 ${isRTL ? 'text-left' : 'text-right'}`}>{tr('المبلغ', 'Amount')}</th>
+                                      <th className={`py-1 ${isRTL ? 'text-left' : 'text-right'}`}>{tr('الرصيد', 'Balance')}</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    {a.txns.slice(0, 100).map((t: any) => (
+                                      <tr key={t.id} className="border-t border-slate-200/60">
+                                        <td className={`py-1.5 ${isRTL ? 'text-right' : 'text-left'} text-slate-500 whitespace-nowrap`}>{t.Invoice_Date || '—'}</td>
+                                        <td className={`py-1.5 ${isRTL ? 'text-right' : 'text-left'} text-slate-700`}>{t.Entity_Name || '—'}</td>
+                                        <td className={`py-1.5 ${isRTL ? 'text-right' : 'text-left'} text-slate-500 max-w-[260px] truncate`} title={t.Counterparty || t.Narrative || ''}>{t.Counterparty || t.Narrative || '—'}</td>
+                                        <td className={`py-1.5 ${isRTL ? 'text-left' : 'text-right'} font-semibold ${(t.Flow_Direction === 'credit' || (t.Category||'').includes('إيداع')) ? 'text-emerald-600' : 'text-rose-600'}`}>{formatCurrency(Number(t.Total_Amount) || 0)}</td>
+                                        <td className={`py-1.5 ${isRTL ? 'text-left' : 'text-right'} text-slate-500`}>{t.Running_Balance != null ? formatCurrency(Number(t.Running_Balance)) : '—'}</td>
+                                      </tr>
+                                    ))}
+                                  </tbody>
+                                </table>
+                                {a.txns.length > 100 && <p className="text-[11px] text-slate-400 mt-2">{tr(`عرض أول 100 من ${a.txns.length} حركة`, `Showing first 100 of ${a.txns.length}`)}</p>}
+                              </div>
+                            </td>
+                          </tr>
+                        )}
+                      </React.Fragment>
+                    );
+                  })}
+                </React.Fragment>
               ))}
-              {recon.glRows.length === 0 && (
+              {recon.natureGroups.length === 0 && (
                 <tr><td colSpan={5} className="py-8 text-center text-slate-400">{tr('لا توجد حركات', 'No transactions')}</td></tr>
               )}
             </tbody>

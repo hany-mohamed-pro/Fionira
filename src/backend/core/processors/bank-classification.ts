@@ -47,6 +47,34 @@ const TYPE_RULES: TypeRule[] = [
   { type: 'رصيد افتتاحي',          gl: 'رصيد افتتاحي', patterns: [/رصيد افتتاحي/, /opening balance/i] },
 ];
 
+// GL accounts roll up into accounting NATURES so reconciliation can be read the
+// way an accountant reads a statement: what increased cash, what reduced it, and
+// what is merely an intermediary/transfer movement vs. a real income/expense.
+export const GL_NATURES: { nature: string; accounts: string[] }[] = [
+  { nature: 'نقدية وما يعادلها', accounts: ['نقدية بالصندوق', 'نقدية بالبنك'] },
+  { nature: 'إيرادات ومقبوضات', accounts: ['إيرادات نقاط البيع', 'مقبوضات أخرى'] },
+  { nature: 'مصروفات ورسوم', accounts: ['مصروفات ورسوم بنكية', 'مشتريات ومدفوعات', 'مدفوعات أخرى'] },
+  { nature: 'ضرائب', accounts: ['ضريبة القيمة المضافة'] },
+  { nature: 'تحويلات وحسابات وسيطة', accounts: ['تحويلات وحوالات صادرة', 'تحويلات بين الحسابات'] },
+  { nature: 'رواتب وأجور', accounts: ['رواتب وأجور'] },
+  { nature: 'أرصدة افتتاحية', accounts: ['رصيد افتتاحي'] },
+];
+
+const GL_TO_NATURE: Record<string, string> = GL_NATURES.reduce((m, g) => {
+  g.accounts.forEach(a => { m[a] = g.nature; });
+  return m;
+}, {} as Record<string, string>);
+
+// Map a GL account label (or the legacy bank Category سحب/إيداع بنكي) to its
+// accounting nature. Unknown accounts roll up under "أخرى".
+export function glNature(glAccount: string): string {
+  if (!glAccount) return 'أخرى';
+  if (GL_TO_NATURE[glAccount]) return GL_TO_NATURE[glAccount];
+  if (/إيداع/.test(glAccount)) return 'إيرادات ومقبوضات';
+  if (/سحب/.test(glAccount)) return 'مصروفات ورسوم';
+  return 'أخرى';
+}
+
 function normalize(s: string): string {
   return (s || '')
     .toLowerCase()
