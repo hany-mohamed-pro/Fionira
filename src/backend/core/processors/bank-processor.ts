@@ -1,6 +1,7 @@
 import * as XLSX from 'xlsx';
 import { validateRecord, parseExcelDate } from './shared-processor';
 import { detectTabularHeader, makeScoredGetCol } from './header-detection';
+import { classifyBankTransaction } from './bank-classification';
 
 export function processBanks(buffer: ArrayBuffer, fileName: string) {
   const wb = XLSX.read(buffer, { type: 'array' });
@@ -35,9 +36,14 @@ export function processBanks(buffer: ArrayBuffer, fileName: string) {
   const debitCol = getCol([/debit/i, /مدين/i, /سحب/i, /withdrawal/i, /out/i, /مخرج/i]);
   const creditCol = getCol([/credit/i, /دائن/i, /إيداع/i, /deposit/i, /in/i, /مدخل/i]);
   const balanceCol = getCol([/balance/i, /رصيد/i]);
+  // "الوصف" (narrative) — the counterparty/purpose detail, distinct from
+  // "التفاصيل" (the movement nature captured by descCol). Excluded from descCol
+  // by the scored resolver because /تفاصيل/ wins col1 first.
+  const narrativeCol = getCol([/الوصف/i, /\bوصف/i, /narrative/i, /particulars/i], [/تفاصيل/i, /إضاف/i]);
   console.log({
     dateColumn: dateCol,
     descColumn: descCol,
+    narrativeColumn: narrativeCol,
     debitColumn: debitCol,
     creditColumn: creditCol,
     balanceColumn: balanceCol
@@ -102,6 +108,19 @@ export function processBanks(buffer: ArrayBuffer, fileName: string) {
     // by which column carries a value; the reported amount is its magnitude.
     const isDebit = debit !== 0;
     const amount = Math.abs(isDebit ? debit : credit);
+    const flow: 'debit' | 'credit' = isDebit ? 'debit' : 'credit';
+
+    // Bank-native classification: movement nature (from التفاصيل), counterparty
+    // (from الوصف), and the GL account it maps to. Source text stays intact.
+    const narrative = narrativeCol !== -1 && row[narrativeCol] != null ? String(row[narrativeCol]) : '';
+    const cls = isOpening
+      ? { transactionType: 'رصيد افتتاحي', glAccount: 'رصيد افتتاحي', counterparty: '—' }
+      : classifyBankTransaction(rawDesc, narrative, flow);
+
+    // Running balance as reported by the statement (الرصيد), when present.
+    const rawBalance = balanceCol !== -1 && row[balanceCol] != null ? String(row[balanceCol]) : '';
+    let runningBalance: number | null = rawBalance ? Number(rawBalance.replace(/[^\d.-]/g, '')) : null;
+    if (runningBalance !== null && isNaN(runningBalance)) runningBalance = null;
 
     let periodYear = null;
     if (rawDate) {
@@ -119,12 +138,20 @@ export function processBanks(buffer: ArrayBuffer, fileName: string) {
       Period_Year: periodYear,
       Entity_Name: rawDesc.trim(),
       Raw_Entity: rawDesc.trim(),
+      Narrative: narrative.trim(),
       Total_Amount: amount,
       VAT_Amount: 0,
       Taxable_Amount: amount,
       NonTaxable_Amount: 0,
       Net_Amount: amount,
+      // Direction (for cash-flow); kept on Category for backward compatibility.
+      Flow_Direction: flow,
       Category: isOpening ? 'رصيد افتتاحي' : (isDebit ? 'سحب بنكي' : 'إيداع بنكي'),
+      // Bank-native classification triad.
+      Transaction_Type: cls.transactionType,
+      GL_Account: cls.glAccount,
+      Counterparty: cls.counterparty,
+      Running_Balance: runningBalance,
       isOpeningBalance: isOpening,
       Confidence_Score: 100
     };
