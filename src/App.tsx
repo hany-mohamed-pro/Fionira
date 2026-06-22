@@ -48,6 +48,7 @@ import { PayrollExpenseAllocation } from './modules/PayrollExpenseAllocation';
 import { YearlyComparison } from './modules/YearlyComparison';
 import { AnomaliesReport } from './modules/AnomaliesReport';
 import { BankReconciliation } from './modules/BankReconciliation';
+import { BankMovements } from './modules/BankMovements';
 import { BalanceSheet } from './modules/BalanceSheet';
 import { AlertsReport } from './modules/AlertsReport';
 import { SmartInvoice } from './modules/SmartInvoice';
@@ -2625,10 +2626,14 @@ export default function App() {
             </div>
           )}
 
-          {activeTab === 'categories_summary' && (
+          {activeTab === 'categories_summary' && appMode === 'banks' && (
+            <BankMovements records={filteredRecords} />
+          )}
+
+          {activeTab === 'categories_summary' && appMode !== 'banks' && (
             <div className="space-y-4">
               <div className="overflow-x-auto">
-                <CategoriesSummary 
+                <CategoriesSummary
                   appMode={appMode as 'expenses' | 'revenues' | 'payroll' | 'banks' | 'reports'}
                   actLabel={actLabel}
                   entLabel={entLabel}
