@@ -47,6 +47,7 @@ import { MonthlyPayroll } from './modules/MonthlyPayroll';
 import { PayrollExpenseAllocation } from './modules/PayrollExpenseAllocation';
 import { YearlyComparison } from './modules/YearlyComparison';
 import { AnomaliesReport } from './modules/AnomaliesReport';
+import { BankReconciliation } from './modules/BankReconciliation';
 import { BalanceSheet } from './modules/BalanceSheet';
 import { AlertsReport } from './modules/AlertsReport';
 import { SmartInvoice } from './modules/SmartInvoice';
@@ -2083,7 +2084,7 @@ export default function App() {
     if (appMode === 'dashboard') type = 'GLOBAL_DASHBOARD';
     else if (activeTab === 'dashboard') type = 'MODULE_DASHBOARD';
     else if (['settings', 'user_management'].includes(activeTab as string)) type = 'SETTINGS_PAGE';
-    else if (['income_statement', 'owners_summary', 'visual_dashboard', 'yearly_comparison', 'balance_sheet', 'cash_flow'].includes(activeTab as string)) type = 'REPORT_PAGE';
+    else if (['income_statement', 'owners_summary', 'visual_dashboard', 'yearly_comparison', 'balance_sheet', 'cash_flow', 'bank_reconciliation'].includes(activeTab as string)) type = 'REPORT_PAGE';
     else if (['smart_invoice', 'quotations', 'welcome', 'alerts'].includes(activeTab as string)) type = 'FORM_PAGE';
     
     let breadcrumbLevel2 = t.workspace[appMode as keyof typeof t.workspace] || appMode;
@@ -2120,6 +2121,7 @@ export default function App() {
        else if (activeTab === 'owners_summary') { pageTitle = isRTL ? 'ملخص الملاك' : 'Owners Summary'; subtitle = isRTL ? 'ملخص مالي مباشر ومصمم خصيصاً للملاك ومتخذي القرار لعرض مؤشرات الأداء الحيوية للشركة.' : 'Live financial summary designed specifically for owners and decision-makers to display vital company KPIs.'; }
        else if (activeTab === 'yearly_comparison') { pageTitle = isRTL ? 'المقارنة السنوية' : 'Yearly Comparison'; subtitle = isRTL ? 'مقارنة الأداء المالي بين السنوات المختلفة لتحديد معدلات النمو والانحدار.' : 'Comparison of financial performance between different years to identify growth and decline rates.'; }
        else if (activeTab === 'visual_dashboard') { pageTitle = isRTL ? 'التحليل المرئي' : 'Visual Dashboard'; subtitle = isRTL ? 'مؤشرات ورسوم بيانية تفاعلية متقدمة لتحليل الأداء المالي.' : 'Advanced interactive charts and KPIs to analyze financial performance.'; }
+       else if (activeTab === 'bank_reconciliation') { pageTitle = isRTL ? 'مطابقة البنوك' : 'Bank Reconciliation'; subtitle = isRTL ? 'مطابقة الرصيد الافتتاحي والختامي مع حركة الحسابات، وتوزيع الحركات حسب الحساب المحاسبي.' : 'Reconcile opening/closing balances against movements, and break down by GL account.'; }
     } else if (type === 'FORM_PAGE') {
        if (activeTab === 'smart_invoice') { pageTitle = isRTL ? 'الفاتورة الذكية' : 'Smart Invoice'; subtitle = isRTL ? 'إصدار فواتير ذكية متوافقة مع متطلبات هيئة الزكاة والضريبة والجمارك.' : 'Issue smart invoices compliant with ZATCA requirements.'; }
        else if (activeTab === 'quotations') { pageTitle = isRTL ? 'عروض الأسعار' : 'Quotations'; subtitle = isRTL ? 'إدارة وتصدير عروض الأسعار للعملاء بطريقة احترافية.' : 'Manage and export professional quotations for customers.'; }
@@ -2820,8 +2822,12 @@ export default function App() {
              />
           )}
           
+          {activeTab === 'bank_reconciliation' && appMode === 'banks' && (
+            <BankReconciliation records={filteredRecords} />
+          )}
+
           {activeTab === 'anomalies_report' && profile?.role === 'admin' && (
-            <AnomaliesReport 
+            <AnomaliesReport
               expensesAnomalies={expensesAnomalies}
               revenuesAnomalies={revenuesAnomalies}
               payrollAnomalies={payrollAnomalies}

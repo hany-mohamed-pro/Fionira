@@ -38,7 +38,7 @@ export const BanksDashboard = ({ banksData, anomaliesCount, onNavigateToTab }: a
     { id: 'upload', icon: Upload, title: isRTL ? 'رفع كشف حساب' : 'Upload Statement', color: 'bg-emerald-50 text-emerald-600' },
     { id: 'grouped_purchases', icon: Users, title: isRTL ? 'قائمة الحسابات البنكية' : 'Bank Accounts List', color: 'bg-blue-50 text-blue-600' },
     { id: 'categories_summary', icon: Layers, title: isRTL ? 'حركة الحسابات' : 'Account Movements', color: 'bg-purple-50 text-purple-600' },
-    { id: 'anomalies_report', icon: ShieldAlert, title: isRTL ? 'مطابقة البنوك' : 'Bank Reconciliation', color: 'bg-orange-50 text-orange-600' },
+    { id: 'bank_reconciliation', icon: ShieldAlert, title: isRTL ? 'مطابقة البنوك' : 'Bank Reconciliation', color: 'bg-orange-50 text-orange-600' },
   ];
 
   return (

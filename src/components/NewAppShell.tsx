@@ -98,7 +98,7 @@ export function NewAppShell({
              items: [
                 { id: 'dashboard', label: isRTL ? 'لوحة البنوك' : 'Dashboard', icon: Activity, desc: isRTL ? 'ملخص الحسابات' : 'Accounts summary' },
                 { id: 'upload', label: isRTL ? 'رفع كشف الحساب' : 'Upload Statement', icon: Upload, desc: isRTL ? 'رفع ملفات البنوك' : 'Upload bank files' },
-                { id: 'anomalies_report', label: isRTL ? 'مطابقة البنوك' : 'Bank Reconciliation', icon: ShieldAlert, showBadge: true, desc: isRTL ? 'مراجعة أخطاء البنوك' : 'Review bank errors' },
+                { id: 'bank_reconciliation', label: isRTL ? 'مطابقة البنوك' : 'Bank Reconciliation', icon: Scale, desc: isRTL ? 'مطابقة الأرصدة وحركة الحسابات' : 'Reconcile balances & movements' },
              ]
           },
           {
