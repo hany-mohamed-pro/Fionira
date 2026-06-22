@@ -1,64 +1,34 @@
 import * as XLSX from 'xlsx';
-import { validateRecord } from './shared-processor';
+import { validateRecord, parseExcelDate } from './shared-processor';
+import { detectTabularHeader, makeScoredGetCol } from './header-detection';
 
 export function processBanks(buffer: ArrayBuffer, fileName: string) {
   const wb = XLSX.read(buffer, { type: 'array' });
   const ws = wb.Sheets[wb.SheetNames[0]];
-  const data = XLSX.utils.sheet_to_json(ws, { header: 1 });
-  
+  const data = XLSX.utils.sheet_to_json(ws, { header: 1 }) as any[][];
+
   const records = [];
   const skipped = [];
-  let headerRowIndex = -1;
-  const colMap = new Map();
 
-  for (let i = 0; i < Math.min(20, data.length); i++) {
-    const row = data[i] as any[];
-    if (!row || row.length === 0) continue;
-    
-    let stringCount = 0;
-    let numberCount = 0;
-    row.forEach(cell => {
-      if (typeof cell === 'string' && cell.trim() !== '') stringCount++;
-      if (typeof cell === 'number') numberCount++;
-    });
+  // Saudi bank exports prepend an arbitrary-length metadata preamble (account
+  // name, number, date range, transaction totals) before the real column
+  // header. Anchor on the transaction-column keywords so the preamble is
+  // skipped regardless of its length, instead of giving up after 20 rows.
+  const detected = detectTabularHeader(data, {
+    anchors: [/مدين/, /دائن/, /الوصف/, /المرجع/, /رصيد/, /debit/i, /credit/i],
+  });
 
-    if (stringCount > 3 && numberCount === 0) {
-      headerRowIndex = i;
-      row.forEach((col, idx) => {
-        if (typeof col === 'string') {
-          colMap.set(col.trim().toLowerCase(), idx);
-        }
-      });
-      break;
-    }
-  }
-
-  if (headerRowIndex === -1) {
+  if (!detected) {
     throw new Error("Could not detect structural header for banks.");
   }
 
-  const getCol = (patterns: RegExp[], excludePatterns: RegExp[] = []) => {
-    let foundCol = -1;
-    for (const [key, val] of colMap.entries()) {
-      for (const p of patterns) {
-        if (p.test(key)) {
-          let excluded = false;
-          for (const ex of excludePatterns) {
-            if (ex.test(key)) {
-               excluded = true;
-               break;
-            }
-          }
-          if (!excluded) {
-             foundCol = val;
-             break;
-          }
-        }
-      }
-      if (foundCol !== -1) break;
-    }
-    return foundCol;
-  };
+  const headerRowIndex = detected.headerRowIndex;
+  const dataStartIndex = detected.dataStartIndex;
+  const colMap = detected.colMap;
+
+  // Priority-scored resolver: prevents loose substrings (e.g. /in/ inside
+  // "processing date") from stealing a column from a higher-priority keyword.
+  const getCol = makeScoredGetCol(colMap);
 
   const dateCol = getCol([/date/i, /تاريخ/i]);
   const descCol = getCol([/desc/i, /تفاصيل/i, /بيان/i, /details/i, /particulars/i]);
@@ -73,7 +43,7 @@ export function processBanks(buffer: ArrayBuffer, fileName: string) {
     balanceColumn: balanceCol
   });
 
-  for (let i = headerRowIndex + 1; i < data.length; i++) {
+  for (let i = dataStartIndex; i < data.length; i++) {
     const row = data[i] as any[];
     if (!row || row.length === 0 || row.every(c => c === undefined || c === null || c === '')) continue;
 
@@ -108,9 +78,11 @@ export function processBanks(buffer: ArrayBuffer, fileName: string) {
        isOpening = true;
     }
 
-    const rawDate = row[dateCol] ? String(row[dateCol]) : '';
+    // Parse the date column. Saudi exports use an Excel date serial (e.g.
+    // 46124) in [SA]Processing Date; fall back to the raw string otherwise.
+    const rawDate = row[dateCol] != null ? (parseExcelDate(row[dateCol]) ?? String(row[dateCol])) : '';
     const rawDesc = row[descCol] ? String(row[descCol]) : 'حركة غير محددة';
-    
+
     let rawDebit = row[debitCol] || 0;
     let rawCredit = row[creditCol] || 0;
 
@@ -119,13 +91,18 @@ export function processBanks(buffer: ArrayBuffer, fileName: string) {
 
     if (isNaN(debit)) debit = 0;
     if (isNaN(credit)) credit = 0;
-    
+
     if (debit === 0 && credit === 0) {
        skipped.push({ index: i, reason: 'Structural: Empty movement', _sourceFile: fileName, rawData: row });
        continue;
     }
 
-    
+    // In this Saudi format debits are stored as NEGATIVE amounts in the مدين
+    // column and credits as positive in the دائن column. Direction is decided
+    // by which column carries a value; the reported amount is its magnitude.
+    const isDebit = debit !== 0;
+    const amount = Math.abs(isDebit ? debit : credit);
+
     let periodYear = null;
     if (rawDate) {
       const yearMatch = String(rawDate).match(/\b(20\d{2})\b/);
@@ -142,12 +119,12 @@ export function processBanks(buffer: ArrayBuffer, fileName: string) {
       Period_Year: periodYear,
       Entity_Name: rawDesc.trim(),
       Raw_Entity: rawDesc.trim(),
-      Total_Amount: debit > 0 ? debit : credit,
+      Total_Amount: amount,
       VAT_Amount: 0,
-      Taxable_Amount: debit > 0 ? debit : credit,
+      Taxable_Amount: amount,
       NonTaxable_Amount: 0,
-      Net_Amount: debit > 0 ? debit : credit,
-      Category: isOpening ? 'رصيد افتتاحي' : (debit > 0 ? 'سحب بنكي' : 'إيداع بنكي'),
+      Net_Amount: amount,
+      Category: isOpening ? 'رصيد افتتاحي' : (isDebit ? 'سحب بنكي' : 'إيداع بنكي'),
       isOpeningBalance: isOpening,
       Confidence_Score: 100
     };
