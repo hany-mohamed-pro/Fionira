@@ -221,6 +221,35 @@ implementation** (endpoints still stubbed — debt B3) — its own MAX-precision
 
 Same baseline-first, one-change-at-a-time, full-regression discipline as every track so far.
 
+### Strategic Roadmap — Multi-Branch/Multi-Activity Rollout (Planned, Not Started)
+
+**Context.** `branchId` is now established as a **central, system-wide dimension** (`dimensions.ts`,
+commit `b0df476`) with a zero-migration `'default'` — but it is **applied to the bank module ONLY**. No
+other module (expenses, revenues, payroll, inventory) yet carries or uses it. The user's strategic intent
+is to extend it broadly:
+- **Multiple branches / activities across every module** — each branch/activity with its own expenses,
+  revenues, payroll, and bank accounts, segmentable and filterable end-to-end (dashboards, reports,
+  financial statements) without ever blending where blending is wrong.
+- **Proposals for new modules/sections** that this dimension enables.
+- **Possible restructuring** of existing pages/architecture to make branch/activity a first-class lens.
+
+**Recommendation (professional opinion).** This is a **large strategic scope that needs its own dedicated,
+full session** — design → incremental, module-by-module implementation → **live testing per module** (the
+same evidence-based, one-module-at-a-time discipline proven on the bank module today). It must **NOT** be
+merged into, or bolted onto, any other task; doing it piecemeal alongside audits would compromise both.
+
+**Proposed sequencing — do these FIRST, before opening Multi-Branch Rollout:**
+1. **Critical restaurant-data verification** (see §7) — must complete first; gates any new engine work.
+2. **TaxDeclaration audit** — highest remaining financial sensitivity (ZATCA-facing).
+3. **D12 (deferred/unearned-revenue LIABILITY) + the real BalanceSheet structural fix** — i.e. the
+   chart-of-accounts-with-types / account-driven foundation.
+4. **Only then:** open **"Multi-Branch / Multi-Activity Rollout"** as a standalone, full phase of its own.
+
+**Status: PLANNED, NOT STARTED.** Nothing here is implemented; this entry exists so the strategic
+direction stays visible and is not lost. The reusable groundwork already in place: `branchId` +
+`withBranch()` in `dimensions.ts`, and the documented per-module adoption path in
+`system-wide-branch-dimension-and-bank-phase1.md` (§ Task 7).
+
 ## 7. Critical operational reminders for next session
 
 - **⚠️ VERIFICATION NEEDED (named, explicit — check FIRST in the practical-testing phase):** Compare the
