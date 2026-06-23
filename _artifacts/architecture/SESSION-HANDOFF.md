@@ -1,8 +1,14 @@
 # Fionira — Session Handoff
 
-> Resume point for any future session. HEAD = `892c4df`. Working tree clean except the three
-> long-standing untouched data/lock files (`data/erp_registry.json`, `data/uploads.json`,
-> `package-lock.json`). Evidence-based; pulled from live git + file state, not memory.
+> Resume point for any future session. HEAD = `74b3638`. Working tree clean except the
+> long-standing untouched runtime/state files (`data/erp_registry.json`, `data/uploads.json`,
+> and a few `data/**/staged-files/*.staged` left from live upload testing — all under the
+> git-ignored/runtime `data/` tree). Evidence-based; pulled from live git + file state, not memory.
+>
+> **Latest segment (2026-06-22): Bank module audited & hardened end-to-end** — parser robustness,
+> bank-native classification, dedicated reconciliation/movements pages, multi-account segmentation,
+> and `branchId` established as a system-wide dimension. See §2 (commits `f1e723a`→`74b3638`), the new
+> §3 "Bank Module" subsection, and §4 debt additions.
 
 ## 1. What this project is
 
@@ -11,7 +17,7 @@ to act as the **expert *for* a non-specialist user** — the owner does not need
 system classifies, validates, and governs the financials and surfaces plain-language decisions. It is
 **not** a traditional ERP and does not push accounting mechanics onto the user.
 
-## 2. Complete chronological commit ledger (root → HEAD, 42 commits)
+## 2. Complete chronological commit ledger (root → HEAD, 56 commits)
 
 This Claude Code session resumed at `12a0529`; commits `2aaa928` → `892c4df` are this session's work.
 Everything above `12a0529` was already in history at session start (security/UX/early-classification).
@@ -60,6 +66,20 @@ Everything above `12a0529` was already in history at session start (security/UX/
 | 40 | `9ed75b9` | [AUDIT] | Trial Balance deep audit — verdict: **sound** (real tenant-scoped journal entries; balance guaranteed by double-entry construction, not a plug); no fix needed |
 | 41 | `5a165ed` | [AUDIT] | Income Statement deep audit — verdict: **sound source**; found D2/D7 NOT actually in `cogsCategories` (corrects e46052f's overstated "under COGS" claim) |
 | 42 | `892c4df` | [FIX] | Income Statement `cogsCategories` — D2/D7 now genuinely end-to-end under COGS; zero regression on 730 real |
+| 43 | `b0a88ba` | [DOCS] | session handoff update — financial statement triad audit complete (BS flawed+labeled, TB sound, IS sound+D2/D7 fixed) |
+| 44 | `1c9cd92` | [AUDIT] | User Management live audit — page unreachable in UI + endpoints are no-op stubs (empty list, fake-success promote/delete); auth layer intact |
+| 45 | `3cece7f` | [FIX] | CommandPalette mode mismatch corrected; live-verified the page is in fact reachable (audit correction) — **palette is dead code (no open-trigger exists)**; endpoints remain stubbed |
+| 46 | `bc1e9ca` | [UX] | User Management discoverability — added as a Settings sub-tab (was hover-menu-only) |
+| 47 | `f322ed3` | [AUDIT] | Payroll Dashboard live audit — **zero payroll data existed at the time**; Deductions KPI reads a non-existent field (always 0) found by code; GOSI panel confirmed hardcoded placeholder; read-only aggregate, independent of the intelligence engine |
+| 48 | `f1e723a` | [FIX] | Payroll & Bank Excel parser robustness — real user files (`رواتب JANUARY 2025`, `Records_12042026-2.xlsx`) now parse; reconciled to the **riyal/halala** against the files' own printed control totals; fixed 3 latent bugs (negative-debit sign, Excel-serial dates, false `PAYROLL_WITH_VAT` flag). New `header-detection.ts` (sparse/multi-row headers + preamble skip) |
+| 49 | `f0031f0` | [FEAT] | Bank-native classification engine — transaction type + counterparty + GL account (`bank-classification.ts`), replacing expense-style categorization for bank records |
+| 50 | `9d4c76e` | [FEAT] | Dedicated Bank Reconciliation page — **was misrouted to the generic alerts/anomalies center**; opening/closing/running-balance + continuity, backward-compatible with legacy records |
+| 51 | `b282746` | [FEAT] | Bank Movements — bank-native view (by transaction type / by counterparty) with cash-flow KPIs, replacing the expense chart-of-accounts view |
+| 52 | `7b48c41` | [UX] | GL-nature grouping with per-nature subtotals + **universal drill-down** (account/type/counterparty → individual transactions with running balance) |
+| 53 | `676bebe` | [DOCS] | Rich classification activated via the real governance **replace-flow**; control totals unchanged, verified **to the halala** before/after |
+| 54 | `61347e8` | [AUDIT] | Multi-bank investigation — accounts had **NO identity captured**; multiple active bank files **silently merged** balances into one meaningless running balance (no warning); upload classifier account-blind (risk of false "replace" losing an entire account). Verdict: **actively misleading**, fix before Balance Sheet cash link |
+| 55 | `b0df476` | [FEAT] | **`branchId` defined as a system-wide central dimension** (`dimensions.ts`, zero-migration default). Bank accounts now identified (`Account_Number`/`Bank_Name` from preamble) and **segmented** — Reconciliation/Movements never merge across accounts; upload classifier account-aware (safety-biased to additive). Live-verified: the exact `61347e8` false-mismatch scenario now shows **2 independently-reconciled accounts, zero false diff** |
+| 56 | `74b3638` | [DOCS] | Architectural review — is bank account-segmentation generalizable? **Verdict: NO** — tied to running-balance semantics (order-dependent, stateful), unique to bank accounts today. `branchId` is the correct/sufficient generalization for the real "multiple sources" need elsewhere (payroll multi-entity, expenses/revenues multi-store — additive flows, not running balances). Bank code deliberately **left untouched** |
 
 ## 3. Current system state (factual, verified)
 
@@ -98,6 +118,41 @@ Statement both run on real data). The **one** flawed statement (Balance Sheet) i
 ratio-conversion layer** — it distorts good upstream data, it does **not** inherit bad data. So the fix
 surface is contained and well-understood, not a systemic data-integrity problem.
 
+### Bank Module — Audited & Hardened 2026-06-22
+
+The bank-module segment (commits `f1e723a`→`74b3638`) is **closed: hardened, live-tested, and
+architecturally reviewed**. Verified against the user's **real** files (`رواتب JANUARY 2025`,
+`Records_12042026-2.xlsx`), not synthetic stand-ins.
+
+- **Parser (`header-detection.ts`):** robust against sparse / non-contiguous header cells, two-row merged
+  headers (payroll), and arbitrary-length metadata **preambles** (the Saudi bank format's ~21-row
+  preamble). Both real files parse; reconciled **to the halala** against the files' own printed control
+  totals (bank: debit `671,818.18` / credit `671,882.98`; payroll net `38,657`).
+- **Classification:** bank-native **3-axis** — transaction type, counterparty, and **GL account/nature**
+  (`bank-classification.ts`) — replacing the expense chart-of-accounts lens that was previously (wrongly)
+  applied to bank records.
+- **Reconciliation / Movements:** dedicated bank pages (the "مطابقة البنوك" tab previously **misrouted to
+  the generic anomalies center**). Per-account opening/running/closing balance + continuity, GL-nature
+  subtotals, and a **universal drill-down** (account / type / counterparty → individual transactions with
+  running balance).
+- **Multi-account:** accounts are **identified** (`Account_Number`/`Bank_Name`/`Account_Key` from the
+  preamble) and **segmented — never merged**. The `61347e8` failure (two accounts silently merged into one
+  meaningless running balance with a false "فرق") is fixed: live test shows **2 accounts, each reconciled
+  independently, zero false diff**. The upload classifier is **account-aware**, safety-biased toward
+  *additive* (a different account is never offered as a "replace" of another).
+- **`branchId` (system-wide):** defined once in `dimensions.ts` with a zero-migration `'default'` — the
+  **reusable** dimension for OTHER modules' multiple-source needs (payroll multi-entity, expenses/revenues
+  multi-store). **Rollout path documented, NOT yet implemented** in those modules (their processors are
+  `@DO_NOT_MODIFY`).
+- **Generalization verdict (`74b3638`):** the bank *never-merge* logic is **NOT** generalized — it is tied
+  to running-balance semantics unique to banks today; `branchId` is the sufficient generalization. Bank
+  code left untouched (no refactor for theoretical purity). **Inventory** is noted as a *future* candidate
+  for running-balance segmentation **only if** it becomes a real perpetual-inventory ledger (not built
+  today, no current need).
+- Artifacts: `payroll-bank-parser-fix.md`, `bank-rich-classification-activation.md`,
+  `multi-bank-support-investigation.md`, `system-wide-branch-dimension-and-bank-phase1.md`,
+  `multi-source-segmentation-generalization-review.md`.
+
 ## 4. Open technical debt (live from `engine-technical-debt.md`)
 
 **RESOLVED — 10 items:** D1, D3, D4, D6, D8, D9 (Track 1) + **D5** (Track 2) + **D10** (Track A) +
@@ -120,6 +175,14 @@ fixed-asset are correct vendor hints that blunt separation discards). **Conclusi
 **per-keyword vendor-safety tagging FIRST** (declare per pattern whether it may match the vendor name),
 then field separation, then "ال" — see §6.
 
+**NEW debt found during the bank-module segment (2026-06-22):**
+
+| # | Description | Severity | Status |
+|---|---|---|---|
+| B1 | **Expenses/revenues 20-row preamble cap** — `expenses-processor.ts` & `revenues-processor.ts` cap header search at `Math.min(20, …)`. A >20-row preamble (the same shape that broke the bank parser) makes them fall back to row 0 and **silently emit garbage records** (null financials, "غير محدد"). Found & reproduced (test), **not fixed** — both files are `@DO_NOT_MODIFY`. | MEDIUM-HIGH | Needs user sign-off to fix (apply `detectTabularHeader` or raise the cap) |
+| B2 | **CommandPalette is dead code** — has **no open-trigger anywhere in `src`**; the mode-mismatch fix (`3cece7f`) was cosmetic, the palette itself remains unreachable. | LOW | Cosmetic; either wire a trigger or remove |
+| B3 | **UserManagement backend endpoints stubbed** — list/promote/delete are no-ops (empty list, fake-success). Page is now reachable via 2 paths (`bc1e9ca`); backend remains stubbed. | MEDIUM | Deferred to its own MAX-precision session (standing decision) |
+
 ## 5. Explicitly NOT started
 
 - **Bilingual parity** — flagged needs-human-review (~29 rules per the prior audit; see `17a598f`,
@@ -132,16 +195,21 @@ then field separation, then "ال" — see §6.
 
 ## 6. Recommended next-session priority (professional opinion)
 
-**Phase B continues — audit the remaining modules, in priority order by financial / user-trust
-sensitivity** (apply the SAME discipline used for the statement triad: read-only audit first, then
-label-or-fix **only after explicit confirmation**):
+**The Bank module segment is CLOSED** — hardened, live-tested, and architecturally sound
+(parser, 3-axis classification, multi-account segmentation, `branchId` dimension). Continue Phase B on the
+**remaining unaudited modules**, in priority order by financial / user-trust sensitivity (apply the SAME
+discipline: read-only audit first, then label-or-fix **only after explicit confirmation**):
 
-1. **TaxDeclaration** — ZATCA-facing, highest sensitivity (wrong VAT figures have regulatory consequence).
+1. **TaxDeclaration** — ZATCA-facing, **highest remaining financial sensitivity** (wrong VAT figures have
+   regulatory consequence).
 2. **OwnersSummary** — owner-equity / drawings view; trust-sensitive.
-3. **PayrollDashboard** — wages/GOSI; sensitive but mostly pass-through of payroll records.
-4. **BanksDashboard** — cash/bank movements.
-5. **SmartInvoice / QuotationManager** — outward-facing documents (customer-visible).
-6. **UserManagement** — lowest financial sensitivity, mostly admin CRUD.
+3. **SmartInvoice / QuotationManager** — outward-facing documents (customer-visible).
+
+**Already covered this segment (no longer top of queue):** PayrollDashboard (audited `f322ed3`) and
+BanksDashboard (fully hardened `f1e723a`→`74b3638`).
+
+**Separately, explicitly deferred (ready to scope when prioritized):** **UserManagement real backend
+implementation** (endpoints still stubbed — debt B3) — its own MAX-precision session per standing decision.
 
 **Still-open engine/accounting debt (tracked in §4, parallel to the module audits):**
 - **D12** (deferred/unearned-revenue LIABILITY) + **D11's** dedicated construction WIP/direct-cost
@@ -161,6 +229,11 @@ Same baseline-first, one-change-at-a-time, full-regression discipline as every t
   silent regression was introduced for that specific real-world dataset. The in-repo 730-record fixture
   showed **zero** regression at every step, but it is not guaranteed identical to the user's latest real
   file — so this is a distinct, mandatory check, not a vague caveat. Run it before any new engine work.
+  **STILL PENDING — and do NOT conflate it with the 2026-06-22 bank/payroll real-file work.** That work
+  exercised the **parser + bank classification** against real bank/payroll statements; it did **not** touch
+  `categorization-engine.ts` and did **not** re-run the user's previously-corrected **restaurant expense
+  classification** against the post-Track-1/2/A/B engine. The exact comparison described here
+  (engine output on the user's corrected restaurant data) has **not** been performed.
 - **Firebase service-account key:** `firebase-service-account.json` exists in the repo root; the prior
   checkpoint notes **key rotation/validity must be verified manually by the user** — do not assume the
   live Firebase environment is functional. Auth/RBAC and PATCH-7 enforcement are unverifiable from the
