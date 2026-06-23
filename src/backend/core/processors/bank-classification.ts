@@ -47,6 +47,45 @@ const TYPE_RULES: TypeRule[] = [
   { type: 'رصيد افتتاحي',          gl: 'رصيد افتتاحي', patterns: [/رصيد افتتاحي/, /opening balance/i] },
 ];
 
+// Bank account identity, extracted from the statement's metadata PREAMBLE (the
+// rows above the transaction header that detectTabularHeader skips). This is the
+// account dimension — distinct from the system-wide branchId. A branch may own
+// several bank accounts; this identifies WHICH account a statement belongs to,
+// so reconciliation never merges balances across accounts.
+export interface BankAccountMeta {
+  accountNumber: string;
+  bankName: string;
+  accountLabel: string;
+}
+
+const ACCOUNT_NUMBER_LABEL = /رقم\s*الحساب|\baccount\s*(?:no|number|#)/i;
+const BANK_NAME_LABEL = /اسم\s*البنك|\bbank\s*name|^\s*البنك\s*$/i;
+const ACCOUNT_NAME_LABEL = /اسم\s*الحساب|اسم\s*العميل|account\s*(?:name|title)|customer\s*name/i;
+const ANY_LABEL = /اسم|رقم|تاريخ|المرشحات|إجمالي|عدد|نطاق|ترتيب|دائن|مدين|من\s|إلى\s|وقت|نوع|الحالي|المستخدم/;
+
+function findLabeledValue(preamble: any[][], label: RegExp): string {
+  for (const row of preamble) {
+    if (!row || !row.some((c: any) => typeof c === 'string' && label.test(c))) continue;
+    // Value = first non-empty cell in the row that is NOT itself a label word.
+    for (const cell of row) {
+      if (cell === null || cell === undefined || String(cell).trim() === '') continue;
+      const s = String(cell).trim();
+      if (label.test(s)) continue;        // skip the label cell itself
+      if (ANY_LABEL.test(s) && s.length < 25) continue; // skip other metadata labels
+      return s;
+    }
+  }
+  return '';
+}
+
+export function extractBankAccountMeta(preamble: any[][]): BankAccountMeta {
+  return {
+    accountNumber: findLabeledValue(preamble || [], ACCOUNT_NUMBER_LABEL),
+    bankName: findLabeledValue(preamble || [], BANK_NAME_LABEL),
+    accountLabel: findLabeledValue(preamble || [], ACCOUNT_NAME_LABEL),
+  };
+}
+
 // GL accounts roll up into accounting NATURES so reconciliation can be read the
 // way an accountant reads a statement: what increased cash, what reduced it, and
 // what is merely an intermediary/transfer movement vs. a real income/expense.

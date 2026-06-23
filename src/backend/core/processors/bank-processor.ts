@@ -1,7 +1,8 @@
 import * as XLSX from 'xlsx';
 import { validateRecord, parseExcelDate } from './shared-processor';
 import { detectTabularHeader, makeScoredGetCol } from './header-detection';
-import { classifyBankTransaction } from './bank-classification';
+import { classifyBankTransaction, extractBankAccountMeta } from './bank-classification';
+import { DEFAULT_BRANCH_ID } from '../dimensions';
 
 export function processBanks(buffer: ArrayBuffer, fileName: string) {
   const wb = XLSX.read(buffer, { type: 'array' });
@@ -26,6 +27,14 @@ export function processBanks(buffer: ArrayBuffer, fileName: string) {
   const headerRowIndex = detected.headerRowIndex;
   const dataStartIndex = detected.dataStartIndex;
   const colMap = detected.colMap;
+
+  // Bank account identity from the metadata preamble (the rows above the header
+  // that header detection skipped). This is the ACCOUNT dimension — kept
+  // separate from the system-wide branchId. Account_Key is the stable grouping
+  // key reconciliation/movements use so balances are never merged across
+  // accounts; it falls back to the file name when the export omits the number.
+  const acct = extractBankAccountMeta(data.slice(0, headerRowIndex));
+  const accountKey = (acct.accountNumber || acct.accountLabel || acct.bankName || fileName || '').trim() || fileName;
 
   // Priority-scored resolver: prevents loose substrings (e.g. /in/ inside
   // "processing date") from stealing a column from a higher-priority keyword.
@@ -139,6 +148,13 @@ export function processBanks(buffer: ArrayBuffer, fileName: string) {
       Entity_Name: rawDesc.trim(),
       Raw_Entity: rawDesc.trim(),
       Narrative: narrative.trim(),
+      // System-wide branch dimension (defaults to the single implicit branch).
+      branchId: DEFAULT_BRANCH_ID,
+      // Bank ACCOUNT identity (separate dimension from branchId).
+      Account_Number: acct.accountNumber,
+      Bank_Name: acct.bankName,
+      Account_Label: acct.accountLabel,
+      Account_Key: accountKey,
       Total_Amount: amount,
       VAT_Amount: 0,
       Taxable_Amount: amount,

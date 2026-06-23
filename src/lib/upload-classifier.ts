@@ -20,10 +20,16 @@ export interface ClassificationOutcome {
   };
 }
 
+export interface AccountContext {
+  stagedAccountKeys: string[];
+  activeAccountKeys: string[];
+}
+
 export function classifyStagedUpload(
   stagedRecords: any[],
   activeFileDateRanges: { fileId: string; minDate: string; maxDate: string }[],
-  overlapAnalysis: any
+  overlapAnalysis: any,
+  accountContext?: AccountContext
 ): ClassificationOutcome {
   if (!stagedRecords || stagedRecords.length === 0) {
     return {
@@ -82,6 +88,26 @@ export function classifyStagedUpload(
 
   const hasRecordOverlap = overlapAnalysis && overlapAnalysis.recordsMatchingActiveBusinessKeys > 0;
   const overlapRatio = hasRecordOverlap ? (overlapAnalysis.recordsMatchingActiveBusinessKeys / stagedRecords.length) : 0;
+
+  // 2b. Account-identity guard (safety-biased toward additive).
+  // If the staged file carries a bank account identity that does NOT match any
+  // active account, it is a DIFFERENT account → it must be a new source, never a
+  // "corrected version" of another account, regardless of date/record overlap.
+  const staged = (accountContext?.stagedAccountKeys || []).filter(Boolean);
+  const active = new Set((accountContext?.activeAccountKeys || []).filter(Boolean));
+  const hasAccountIdentity = staged.length > 0 && active.size > 0;
+  const matchesAnActiveAccount = staged.some(k => active.has(k));
+  if (hasAccountIdentity && !matchesAnActiveAccount) {
+    return {
+      classification: 'NEW_PERIOD_SOURCE',
+      arabicLabel: 'حساب بنكي مختلف — مصدر بيانات جديد (لا يُستبدل بحساب آخر)',
+      confidence: 97,
+      overlapAnalysis,
+      dateRange,
+      recordsCount: stagedRecords.length,
+      financialTotals
+    };
+  }
 
   // 3. Classification Logic based strictly on primary evidence
   let classification: ClassificationResult = 'AMBIGUOUS_OVERLAP';

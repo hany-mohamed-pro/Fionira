@@ -1879,8 +1879,21 @@ app.post('/api/erp/dev/sync', express.json({limit: '50mb'}), async (req, res) =>
        });
     }
 
+    // Bank ACCOUNT context — so a different bank account (in an overlapping
+    // period) is never mistaken for a "corrected version" of another account.
+    const accountKeyOf = (r: any) => String(r.Account_Key || r.Account_Number || '').trim();
+    const stagedAccountKeys = new Set<string>();
+    parsedRecords.forEach((r: any) => { const k = accountKeyOf(r); if (k) stagedAccountKeys.add(k); });
+    const activeAccountKeys = new Set<string>();
+    tenantRecords
+      .filter((r: any) => activeFileIds.has(r.fileId) || activeFileIds.has(r._sourceFile) || activeFileIds.has(r.fileHash))
+      .forEach((r: any) => { const k = accountKeyOf(r); if (k) activeAccountKeys.add(k); });
+
     const overlapAnalysis = { recordsMatchingActiveBusinessKeys };
-    let classificationResult = classifyStagedUpload(parsedRecords, activeFileDateRanges, overlapAnalysis);
+    let classificationResult = classifyStagedUpload(parsedRecords, activeFileDateRanges, overlapAnalysis, {
+      stagedAccountKeys: Array.from(stagedAccountKeys),
+      activeAccountKeys: Array.from(activeAccountKeys),
+    });
 
     if (session.summary.criticalIssues > 0 || (session.rejectedRecords && session.rejectedRecords.length > 0)) {
        classificationResult = {
