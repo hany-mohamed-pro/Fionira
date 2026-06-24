@@ -221,6 +221,24 @@ implementation** (endpoints still stubbed — debt B3) — its own MAX-precision
 
 Same baseline-first, one-change-at-a-time, full-regression discipline as every track so far.
 
+### D11 — Full Construction Materials WIP (Job Costing): ESCALATED to top priority
+
+**ESCALATED from "deferred" to "planned with equal priority to TaxDeclaration"** — per the user's
+explicit strategic decision (2026-06-22): Fionira must build the complete, accounting-correct solution
+for every supported activity from the start, not a partial solution awaiting real-customer demand.
+(Today D11 routes construction materials to the existing COGS raw-materials account as a stopgap; the
+*dedicated* WIP/direct-cost infrastructure does not exist.)
+
+This requires its **OWN dedicated MAX-precision session** to design and implement proper
+work-in-progress cost tracking per project: material direct-cost accumulation, percentage-of-completion
+considerations, and the WIP-to-COGS transition on project completion — **not a quick patch**.
+
+**Sequencing:** follows the restaurant-data verification (done, commit `ca295fd`) and remains queued
+**alongside TaxDeclaration as a top-priority next session**, under the same rigor used throughout this
+session (live-tested, evidence-based, one verified step at a time). It shares the
+**chart-of-accounts-with-types / account-driven balance sheet** foundation with D12 and the real
+Balance Sheet fix.
+
 ### Strategic Roadmap — Multi-Branch/Multi-Activity Rollout (Planned, Not Started)
 
 **Context.** `branchId` is now established as a **central, system-wide dimension** (`dimensions.ts`,
