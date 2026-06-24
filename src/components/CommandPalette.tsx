@@ -15,10 +15,8 @@ export function CommandPalette({ isOpen, onClose, onNavigate, appMode }: Command
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'k' && (e.ctrlKey || e.metaKey)) {
-         e.preventDefault();
-         if (isOpen) onClose();
-      }
+      // Ctrl/Cmd+K toggle is owned by App (single source of truth). Here we
+      // only close on Escape to avoid a double-toggle race.
       if (e.key === 'Escape') {
          onClose();
       }

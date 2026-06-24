@@ -15,10 +15,11 @@ interface NewAppShellProps {
   totalAnomaliesCount: number;
   mainContent: React.ReactNode;
   contentHeader: React.ReactNode;
+  onOpenCommandPalette?: () => void;
 }
 
 export function NewAppShell({
-  user, profile, settings, logout, appMode, activeTab, handleNavClick, totalAnomaliesCount, mainContent, contentHeader
+  user, profile, settings, logout, appMode, activeTab, handleNavClick, totalAnomaliesCount, mainContent, contentHeader, onOpenCommandPalette
 }: NewAppShellProps) {
   const { language, setLanguage } = useUI();
   const t = getTranslation(language);
@@ -274,14 +275,18 @@ export function NewAppShell({
 
             {/* End (Left in RTL, Right in LTR) -> User controls */}
             <div className="flex items-center gap-4">
-               <div className="relative hidden md:flex items-center bg-slate-100 rounded-xl px-3 py-1.5 border border-transparent focus-within:border-[#1E3A8A]/30 focus-within:bg-white transition-all">
+               <button
+                  type="button"
+                  onClick={() => onOpenCommandPalette && onOpenCommandPalette()}
+                  title={isRTL ? 'بحث وتنقّل سريع (Ctrl+K)' : 'Quick search & navigate (Ctrl+K)'}
+                  className="relative hidden md:flex items-center gap-2 bg-slate-100 rounded-xl px-3 py-1.5 border border-transparent hover:border-[#1E3A8A]/30 hover:bg-white transition-all cursor-pointer text-right"
+               >
                   <Search className="w-4 h-4 text-[#64748B]" />
-                  <input 
-                     type="text" 
-                     placeholder={isRTL ? 'بحث شامل...' : 'Search...'} 
-                     className={`bg-transparent border-none text-sm text-[#0F172A] ${isRTL ? 'mr-2' : 'ml-2'} focus:outline-none w-[280px]`}
-                  />
-               </div>
+                  <span className={`text-sm text-[#64748B] ${isRTL ? 'mr-1' : 'ml-1'} w-[230px] ${isRTL ? 'text-right' : 'text-left'}`}>
+                     {isRTL ? 'بحث وتنقّل سريع...' : 'Quick search & navigate...'}
+                  </span>
+                  <kbd className="text-[10px] font-bold text-[#64748B] bg-white border border-slate-200 rounded px-1.5 py-0.5 shrink-0">Ctrl K</kbd>
+               </button>
                
                <button 
                  onClick={() => setLanguage(language === 'ar' ? 'en' : 'ar')} 

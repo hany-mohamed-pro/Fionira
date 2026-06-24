@@ -68,4 +68,60 @@ active reports untouched — engine runs at ingestion, not on stored records).
 
 ## PART B — CommandPalette reactivation
 
-_(see Part B section below — appended after live verification)_
+### B1 — Confirmed dead-code state
+`CommandPalette.tsx` defines **12 commands** across 6 groups (Purchases, Sales,
+Payroll, Banks, Reports, Admin, Structure). `isCommandPaletteOpen` existed in
+`App.tsx` (default `false`) and was **never set true** anywhere — and the palette
+was **rendered twice** (a duplicate-render bug). The component's own Ctrl+K only
+*closed* (it's unmounted when closed, so it could never open itself).
+
+### B2 — Real, professional open-triggers added
+- **Ctrl/Cmd+K** global toggle owned by `App.tsx` (single source of truth); the
+  palette now only handles **Escape** internally (removed its Ctrl+K branch to
+  avoid a double-toggle race).
+- **Visible, discoverable trigger**: the existing header search bar in
+  `NewAppShell` is now a real button ("بحث وتنقّل سريع… [Ctrl K]") that opens the
+  palette — discoverable for non-keyboard users, present on every page.
+- Removed the **duplicate** CommandPalette render in `App.tsx` (kept the single
+  top-level instance).
+
+### B3/B4 — EVERY command tested live (not sampled)
+Both triggers confirmed: **Ctrl+K opens ✓, header button opens ✓, Esc closes ✓,
+click-outside (backdrop) closes ✓.**
+
+| # | Command | Destination | Result |
+|---|---|---|---|
+| 1 | الاحصائيات والتحليل (المشتريات) | expenses/dashboard | ✅ لوحة المصروفات |
+| 2 | استيراد ورصد البيانات | expenses/upload | ✅ سجل المصروفات |
+| 3 | سجل الموردين المجمع | expenses/grouped_purchases | ✅ الموردون |
+| 4 | الاحصائيات والتحليل (المبيعات) | revenues/dashboard | ✅ لوحة الإيرادات |
+| 5 | استيراد البيانات | revenues/upload | ✅ سجل الإيرادات |
+| 6 | مولد الفاتورة الذكي | revenues/smart_invoice | ✅ الفاتورة الذكية |
+| 7 | التحليل المالي للرواتب | payroll/dashboard | ✅ لوحة الرواتب |
+| 8 | التدفقات النقدية (البنوك) | banks/dashboard | ✅ البنوك |
+| 9 | قائمة الدخل (P&L) | reports/income_statement | ✅ قائمة الدخل |
+| 10 | قائمة المركز المالي | reports/balance_sheet | ✅ الميزانية العمومية |
+| 11 | إدارة المستخدمين | settings/user_management | ✅ إدارة المستخدمين |
+| 12 | مراجعة الجاهزية المحاسبية | dashboard/migration_review | ✅ **(fixed — see below)** |
+
+**One broken command found and fixed (trivial routing, same standard as `mode:'users'`):**
+Command #12 used `mode:'dashboard'`, but `appMode==='dashboard'` unconditionally
+rendered the GlobalDashboard *over* the migration-review content and labeled the
+page "لوحة التحكم". Two-line fix in `App.tsx`: (a) gate the GlobalDashboard render
+with `activeTab !== 'migration_review'`, and (b) give `migration_review` its own
+page type + title ("مراجعة الجاهزية المحاسبية"). Re-verified live: it now renders
+the Accounting Readiness Review cleanly with the correct header, no overlap.
+
+### Console
+Only **pre-existing** dev errors: `settings` Firestore `permission-denied` (dev
+environment, present since boot, unrelated to the palette). No palette errors.
+
+> **Honest note (not introduced by this work):** during *rapid automated* loop
+> navigation, the Firebase Firestore SDK threw its known `INTERNAL ASSERTION
+> FAILED (ca9/b815)` from `<SmartInvoice>`'s `onSnapshot` listener (listener
+> churn faster than the SDK handles). It does **not** reproduce at human click
+> speed and is a Firestore-SDK/dev issue, not a CommandPalette defect — flagged
+> as separate pre-existing debt.
+
+### Files changed (Part B)
+`src/components/CommandPalette.tsx`, `src/components/NewAppShell.tsx`, `src/App.tsx`.
