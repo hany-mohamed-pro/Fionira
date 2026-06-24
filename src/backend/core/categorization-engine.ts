@@ -165,7 +165,14 @@ export const getExpenseCategory = (name: string, desc: string, amount: number = 
     { regex: /(\bdelivery\b|\bshipping\b|\bcourier\b|\btransport\b|(?:^|\s)(توصيل|نقل طلبية|شحن للعملاء|مندوب توصيل|رسوم توصيل|توصيل بضاعة|مرسول|جاهز|هنقرستيشن|شحنة بريد|نقل شحنة|اجرة ديانا)(?=\s|$))/, cat: 'مصروفات بيعية وتسويقية - نقل وتوصيل', score: 600 },
 
     // OPEX - Travel & Accommodation (merged: union of former duplicate blocks, scored once; canonical account name)
-    { regex: /(\btravel\b|\bflight\b|\bticket\b|\bhotel\b|\baccommodation\b|\btransportation\b|(?:^|\s)(طيران|تذاكر|تذكرة|تذاكر سفر|سفر|فندق|سكن|تأشيرة|فيزا|اقامة|إقامة|جزطيران|مواصلات|انتقالات|مرتبة للموظف|توصيل موظف|مرتبة)(?=\s|$))/, cat: 'مصروفات عمومية وإدارية - مصاريف سفر وانتقالات', score: 600 },
+    { regex: /(\btravel\b|\bflight\b|\bticket\b|\bhotel\b|\baccommodation\b|\btransportation\b|(?:^|\s)(طيران|تذاكر|تذكرة|تذاكر سفر|سفر|فندق|سكن|تأشيرة|فيزا|اقامة|إقامة|جزطيران|مواصلات|انتقالات)(?=\s|$))/, cat: 'مصروفات عمومية وإدارية - مصاريف سفر وانتقالات', score: 600 },
+
+    // OPEX - Transport & Logistics: moving goods / equipment / furniture that is
+    // NEITHER customer delivery (selling) NOR inbound material freight (COGS).
+    // User-confirmed (2026-06-23): an employee's mattress delivery, hauling a
+    // fridge, etc. = transport. Uses WB/WE so "/"-separated tokens (e.g.
+    // "مرتبة للموظف/توصيل") still match.
+    { regex: new RegExp(`${WB}(نقل عفش|نقل اثاث|نقل أثاث|نقل مرتبة|توصيل مرتبة|مرتبة للموظف|اجرة دينا|أجرة دينا|دينا نقل|اجرة نقل|أجرة نقل|رسوم نقل|نقل ثلاجة|نقل معدات|نقل أجهزة|نقل مكيف|عفش بري)${WE}`), cat: 'مصروفات عمومية وإدارية - نقل ومواصلات', score: 600 },
 
     // OPEX - Petty Cash
     { regex: /(?:^|\s)(عهدة|نثرية|سواق|أغراض)(?=\s|$)/, cat: 'مصروفات عمومية وإدارية - عهد ومصروفات نثرية', score: 600 },
@@ -328,16 +335,18 @@ export const getExpenseCategory = (name: string, desc: string, amount: number = 
       addScore('مصروفات أخرى - تبرعات ومساهمات مجتمعية', 4000);
   }
 
-  // 11. Transport/Freight Rentals (e.g. "اجرة دينا")
+  // 11. Transport/Freight Rentals (e.g. "اجرة دينا نقل ثلاجة")
+  //     User-confirmed (2026-06-23): hiring a truck to MOVE equipment/an item is a
+  //     transport cost, NOT maintenance — routed to the dedicated transport account.
   if (nTest(REGEX_TRANSPORT_RENTAL, allText) && nTest(REGEX_TRANSPORT_VEHICLE, allText)) {
       if (nTest(REGEX_TRANSPORT_EQUIPMENT, allText)) {
-          addScore('مصروفات عمومية وإدارية - صيانة وإصلاح', 4000); // Moving equipment is usually maintenance/setup
+          addScore('مصروفات عمومية وإدارية - نقل ومواصلات', 4000); // Moving equipment by a hired vehicle = transport
       } else {
           addScore('تكلفة المبيعات - شحن ونقل للداخل', 1500); // Default to inbound freight for transport rentals
       }
   } else if (nTest(REGEX_TRANSPORT_VEHICLE, allText)) {
       if (nTest(REGEX_TRANSPORT_EQUIPMENT, allText)) {
-          addScore('مصروفات عمومية وإدارية - صيانة وإصلاح', 4000);
+          addScore('مصروفات عمومية وإدارية - نقل ومواصلات', 4000); // Moving equipment = transport, not maintenance
       } else {
           addScore('تكلفة المبيعات - شحن ونقل للداخل', 1000); // "دينا" usually means transport, not buying a truck
       }
