@@ -30,7 +30,6 @@ export const AccountingDashboard = ({ incomeStatement, onNavigateToTab }: any) =
     { id: 'general_ledger', icon: BookOpen, title: isRTL ? 'دفتر الأستاذ' : 'General Ledger', color: 'bg-indigo-50 text-indigo-600' },
     { id: 'trial_balance', icon: Scale, title: isRTL ? 'ميزان المراجعة' : 'Trial Balance', color: 'bg-blue-50 text-blue-600' },
     { id: 'tax_declaration', icon: BookOpen, title: isRTL ? 'الإقرار الضريبي' : 'Tax Declaration', color: 'bg-orange-50 text-orange-600' },
-    { id: 'migration_review', icon: BookOpen, title: isRTL ? 'مراجعة الجاهزية المحاسبية' : 'Migration Review', color: 'bg-emerald-50 text-emerald-600' },
   ];
 
   return (

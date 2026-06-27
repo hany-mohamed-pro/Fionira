@@ -51,8 +51,6 @@ export function CommandPalette({ isOpen, onClose, onNavigate, appMode }: Command
     { id: 'rep_bal', group: 'التقارير', title: 'قائمة المركز المالي', subtitle: 'الميزانية العمومية', mode: 'reports', tab: 'balance_sheet', icon: BookOpen },
     
     { id: 'set_users', group: 'الإدارة', title: 'إدارة المستخدمين', subtitle: 'الصلاحيات والمشرفين', mode: 'settings', tab: 'user_management', icon: SettingsIcon },
-    
-    { id: 'mig_rev', group: 'الهيكلة', title: 'مراجعة الجاهزية المحاسبية', subtitle: 'استعراض التوحيد والفروقات', mode: 'dashboard', tab: 'migration_review', icon: Activity },
   ];
 
   const filtered = search.trim() === '' 
