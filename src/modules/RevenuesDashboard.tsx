@@ -1,5 +1,6 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { useUI } from '../contexts/UIContext';
+import { useAuth } from '../contexts/AuthProvider';
 import { getTranslation } from '../i18n/ui-text';
 import { TrendingUp, Users, FileText, AlertTriangle, Upload, Activity, Layers, Tag } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer } from 'recharts';
@@ -12,6 +13,31 @@ export const RevenuesDashboard = ({ incomeStatement, revenuesData, chartDataRaw,
   const totalVAT = revenuesData?.records?.reduce((sum: number, rec: any) => sum + (rec.taxAmount || 0), 0) || 0;
   const customersCount = revenuesData?.entities?.length || 0;
   const transactionsCount = revenuesData?.records?.length || 0;
+
+  // Branch segmentation (display): per-branch revenue breakdown so the combined
+  // total is never presented as a silent merge.
+  const { user } = useAuth();
+  const [branchMap, setBranchMap] = useState<Record<string, string>>({});
+  useEffect(() => {
+    (async () => {
+      if (!user) return;
+      try {
+        const token = await user.getIdToken();
+        const res = await fetch('/api/erp/settings', { headers: { 'Authorization': `Bearer ${token}` } });
+        const json = await res.json();
+        const map: Record<string, string> = {};
+        (json?.data?.branches || []).forEach((b: any) => { map[b.id] = b.name; });
+        setBranchMap(map);
+      } catch { /* no branches → single default */ }
+    })();
+  }, [user]);
+  const branchLabel = (id: string) => (id === 'default' ? 'الفرع الرئيسي' : (branchMap[id] || id));
+  const branchTotals = useMemo(() => {
+    const m: Record<string, number> = {};
+    (revenuesData?.records || []).forEach((r: any) => { const b = r.branchId || 'default'; m[b] = (m[b] || 0) + (Number(r.Net_Amount) || 0); });
+    return Object.entries(m).map(([id, total]) => ({ id, total })).sort((a, b) => b.total - a.total);
+  }, [revenuesData]);
+  const hasMultipleBranches = branchTotals.length > 1;
 
   // For charts
   const revenueChart = useMemo(() => {
@@ -28,6 +54,23 @@ export const RevenuesDashboard = ({ incomeStatement, revenuesData, chartDataRaw,
 
   return (
     <div className="space-y-4 w-full" dir={isRTL ? "rtl" : "ltr"}>
+      {/* BRANCH SEGMENTATION — per-branch revenue breakdown; never a silent merge */}
+      {hasMultipleBranches && (
+        <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-black text-slate-800">الإيرادات حسب الفرع</h3>
+            <span className="text-[11px] font-bold text-slate-500 bg-slate-100 px-2 py-1 rounded">كل الفروع (مجمّع)</span>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {branchTotals.map(bt => (
+              <div key={bt.id} className="px-3 py-2 rounded-xl text-sm font-bold bg-slate-50 text-slate-700 border border-slate-200">
+                {branchLabel(bt.id)} — {formatCurrency(bt.total)}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* SECTION B - KPI ROW */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-[16px] md:gap-[20px]">
         <div className="bg-white rounded-[16px] border border-slate-200 p-4 shadow-sm flex flex-col justify-between h-[145px] group hover:border-[#22C55E]/30 hover:shadow-md transition-all">

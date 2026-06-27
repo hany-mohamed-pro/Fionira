@@ -24,10 +24,26 @@ export const ACTIVITY_OPTIONS: { key: ActivityKey; label: string }[] = [
   { key: 'restaurant_fb', label: 'المطاعم وخدمات الأغذية' },
 ];
 
+/**
+ * A tenant branch / activity unit. `id` is a stable key (rides on every record as
+ * branchId); `name` is the Arabic display label. Tenants with no branches behave
+ * as a single implicit "الفرع الرئيسي" (the DEFAULT_BRANCH_ID), so existing
+ * single-branch tenants are unaffected (zero migration).
+ */
+export interface Branch {
+  id: string;
+  name: string;
+}
+
+/** Generate a stable, collision-resistant branch id from a name. */
+export const makeBranchId = (name: string): string =>
+  'br_' + (name || 'branch').trim().toLowerCase().replace(/\s+/g, '_').replace(/[^\wء-ي]/g, '').slice(0, 24) + '_' + Math.random().toString(36).slice(2, 7);
+
 export interface AppSettings {
   companyName: string;
   logo?: string;
   activity: ActivityKey | string; // stable enum key (legacy free-text tolerated, treated as unset)
+  branches?: Branch[]; // tenant branches; empty/undefined = single implicit "الفرع الرئيسي"
   taxId: string;
   address: string;
   website: string;
@@ -50,6 +66,7 @@ export interface AppSettings {
 const DEFAULT_SETTINGS: AppSettings = {
   companyName: '',
   activity: '', // unset by default = today's exact classification behavior
+  branches: [], // no branches → single implicit "الفرع الرئيسي" (zero migration)
   taxId: '',
   address: '',
   website: '',

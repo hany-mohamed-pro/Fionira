@@ -13,12 +13,14 @@ import {
   Phone,
   Lock,
   Eye,
-  EyeOff
+  EyeOff,
+  GitBranch,
+  Plus
 } from 'lucide-react';
 import { UserManagement } from '../modules/UserManagement';
 import { Card } from '../shared/Card';
 import { useUI } from '../contexts/UIContext';
-import { AppSettings, getSettings, saveSettings, ACTIVITY_OPTIONS } from '../lib/settings-service';
+import { AppSettings, getSettings, saveSettings, ACTIVITY_OPTIONS, makeBranchId } from '../lib/settings-service';
 
 interface SettingsProps {
   profile: any;
@@ -28,6 +30,7 @@ export const Settings: React.FC<SettingsProps> = ({ profile }) => {
   const { showAlert, notify } = useUI();
   const [activeTab, setActiveTab] = useState('company');
   const [loading, setLoading] = useState(false);
+  const [newBranchName, setNewBranchName] = useState('');
   const [companyInfo, setCompanyInfo] = useState<AppSettings>({
     companyName: '',
     activity: '',
@@ -75,8 +78,33 @@ export const Settings: React.FC<SettingsProps> = ({ profile }) => {
     }
   };
 
+  const handleAddBranch = async () => {
+    const name = newBranchName.trim();
+    if (!name) return;
+    if (!isAdmin) {
+      showAlert('تنبيه', 'لا تملك صلاحية إضافة فروع. يرجى التواصل مع المسؤول.', 'error');
+      return;
+    }
+    if (!profile?.tenantId) return;
+    const branches = [...(companyInfo.branches || []), { id: makeBranchId(name), name }];
+    const updated = { ...companyInfo, branches };
+    setCompanyInfo(updated);
+    setNewBranchName('');
+    setLoading(true);
+    try {
+      await saveSettings(profile.tenantId, updated);
+      notify('تم إضافة الفرع بنجاح');
+    } catch (error) {
+      console.error('Failed to add branch', error);
+      showAlert('خطأ في الحفظ', 'تعذّر حفظ الفرع. حاول مرة أخرى.', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const tabs = [
     { id: 'company', label: 'إعدادات المنشأة', icon: Building2 },
+    { id: 'branches', label: 'الفروع', icon: GitBranch },
     { id: 'notifications', label: 'التنبيهات والإشعارات', icon: Bell },
     { id: 'security', label: 'الأمان والصلاحيات', icon: Shield },
     { id: 'users', label: 'المستخدمون والصلاحيات', icon: User },
@@ -389,6 +417,54 @@ export const Settings: React.FC<SettingsProps> = ({ profile }) => {
                   حفظ الإعدادات الإقليمية
                 </button>
               </div>
+            </div>
+          </Card>
+        );
+      case 'branches':
+        return (
+          <Card className="p-8" id="settings-content">
+            <h3 className="text-xl font-black text-slate-900 mb-2 flex items-center gap-2">
+              <GitBranch className="w-6 h-6 text-indigo-500" /> الفروع
+            </h3>
+            <p className="text-sm text-slate-500 mb-6 leading-relaxed">
+              عرّف فروع منشأتك (مثل: فرع جدة، فرع الرياض). عند رفع ملف يمكنك إسناده لفرع، وتُعرض التقارير مجزّأة حسب الفرع.
+              بدون تعريف أي فرع، يعمل النظام بفرع واحد افتراضي هو «الفرع الرئيسي».
+            </p>
+
+            <div className="flex items-center gap-3 mb-6">
+              <input
+                type="text"
+                value={newBranchName}
+                onChange={e => setNewBranchName(e.target.value)}
+                onKeyDown={e => { if (e.key === 'Enter') handleAddBranch(); }}
+                placeholder="اسم الفرع الجديد"
+                className="flex-1 px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all font-medium"
+              />
+              <button
+                onClick={handleAddBranch}
+                disabled={loading || !newBranchName.trim()}
+                className="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-all disabled:opacity-50"
+              >
+                {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Plus className="w-5 h-5" />}
+                إضافة فرع
+              </button>
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100">
+                <span className="font-bold text-slate-700 flex items-center gap-2">
+                  <GitBranch className="w-4 h-4 text-slate-400" /> الفرع الرئيسي
+                </span>
+                <span className="text-[10px] font-bold text-slate-500 bg-slate-200 px-2 py-0.5 rounded">افتراضي</span>
+              </div>
+              {(companyInfo.branches || []).map(b => (
+                <div key={b.id} className="flex items-center justify-between p-3 bg-white rounded-xl border border-slate-200">
+                  <span className="font-bold text-slate-800 flex items-center gap-2">
+                    <GitBranch className="w-4 h-4 text-indigo-400" /> {b.name}
+                  </span>
+                  <span className="text-[10px] font-mono text-slate-400">{b.id}</span>
+                </div>
+              ))}
             </div>
           </Card>
         );

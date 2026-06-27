@@ -1,16 +1,23 @@
 import { ValidationSession } from './validation-session';
 import { processUploadBatch } from '../ingestion-engine';
 import { routeToDomainIntelligence } from '../financial-intelligence/domain-orchestrator';
+import { normalizeBranchId } from '../dimensions';
 
 export async function createValidationSession(
   files: { buffer: ArrayBuffer; name: string; fileHash?: string }[],
   moduleType: 'expenses' | 'revenues' | 'payroll' | 'banks' | 'inventory',
   onProgress?: (msg: string) => void,
-  activityProfile?: string
+  activityProfile?: string,
+  branchId?: string
 ): Promise<ValidationSession> {
   const session = await processUploadBatch(files, moduleType, onProgress);
-  
+
   const rawRecords = session.records;
+
+  // Tag every record with the branch it was uploaded for (default if unset).
+  // Additive, one place — no processor/engine touched. Persists through activation.
+  const resolvedBranchId = normalizeBranchId(branchId);
+  rawRecords.forEach((r: any) => { r.branchId = resolvedBranchId; });
   const warnings: any[] = [];
   const errors: any[] = [];
   const suggestions: any[] = [];

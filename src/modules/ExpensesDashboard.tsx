@@ -1,5 +1,6 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { useUI } from '../contexts/UIContext';
+import { useAuth } from '../contexts/AuthProvider';
 import { TrendingDown, Users, FileText, AlertTriangle, Activity, Tag, Layers, Upload, CheckCircle, Download, Search, Calendar, Filter, X, RefreshCw } from 'lucide-react';
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import ExcelJS from 'exceljs';
@@ -33,6 +34,24 @@ export const ExpensesDashboard = ({ incomeStatement, expensesData, chartDataRaw,
   const [periodFilter, setPeriodFilter] = useState('all');
   const [dateRange, setDateRange] = useState({ start: '', end: '' });
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Branch segmentation: filter + branch names (loaded from tenant settings).
+  const { user } = useAuth();
+  const [branchFilter, setBranchFilter] = useState('all');
+  const [branchMap, setBranchMap] = useState<Record<string, string>>({});
+  useEffect(() => {
+    (async () => {
+      if (!user) return;
+      try {
+        const token = await user.getIdToken();
+        const res = await fetch('/api/erp/settings', { headers: { 'Authorization': `Bearer ${token}` } });
+        const json = await res.json();
+        const map: Record<string, string> = {};
+        (json?.data?.branches || []).forEach((b: any) => { map[b.id] = b.name; });
+        setBranchMap(map);
+      } catch { /* no branches → single default */ }
+    })();
+  }, [user]);
 
   const navigateWithContext = (tab: string, arg2?: string, query?: string, mode?: string, skipDateFilterUpdate = false) => {
     if (updateGlobalDateFilter && !skipDateFilterUpdate) {
@@ -101,8 +120,23 @@ export const ExpensesDashboard = ({ incomeStatement, expensesData, chartDataRaw,
       result = result.filter(r => r.Invoice_Date >= dateRange.start && r.Invoice_Date <= dateRange.end);
     }
 
+    if (branchFilter !== 'all') result = result.filter((r: any) => (r.branchId || 'default') === branchFilter);
     return result;
-  }, [allRecords, searchQuery, periodFilter, dateRange]);
+  }, [allRecords, searchQuery, periodFilter, dateRange, branchFilter]);
+
+  // Branch segmentation: distinct branches present + per-branch totals (never silently merged).
+  const branchesInData = useMemo(() => {
+    const s = new Set<string>();
+    allRecords.forEach((r: any) => s.add(r.branchId || 'default'));
+    return Array.from(s);
+  }, [allRecords]);
+  const hasMultipleBranches = branchesInData.length > 1;
+  const branchLabel = (id: string) => (id === 'default' ? 'الفرع الرئيسي' : (branchMap[id] || id));
+  const branchTotals = useMemo(() => {
+    const m: Record<string, number> = {};
+    allRecords.forEach((r: any) => { const b = r.branchId || 'default'; m[b] = (m[b] || 0) + (Number(r.Net_Amount) || 0); });
+    return Object.entries(m).map(([id, total]) => ({ id, total })).sort((a, b) => b.total - a.total);
+  }, [allRecords]);
 
   // Insights: Categories Needing Review
   const previousPeriodRecords = useMemo(() => {
@@ -826,6 +860,35 @@ export const ExpensesDashboard = ({ incomeStatement, expensesData, chartDataRaw,
 
   return (
     <div ref={dashboardRef} className="space-y-4 w-full dashboard-print-container" dir={isRTL ? "rtl" : "ltr"}>
+      {/* BRANCH SEGMENTATION — only when real multiple branches exist; never a silent merge */}
+      {hasMultipleBranches && (
+        <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm print-hidden">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-black text-slate-800">المصروفات حسب الفرع</h3>
+            <span className="text-[11px] font-bold text-slate-500 bg-slate-100 px-2 py-1 rounded">
+              {branchFilter === 'all' ? 'العرض: كل الفروع (مجمّع)' : `العرض: ${branchLabel(branchFilter)}`}
+            </span>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => setBranchFilter('all')}
+              className={`px-3 py-2 rounded-xl text-sm font-bold border transition-all ${branchFilter === 'all' ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'}`}
+            >
+              كل الفروع (مجمّع) — {formatCurrency(branchTotals.reduce((s, b) => s + b.total, 0))}
+            </button>
+            {branchTotals.map(bt => (
+              <button
+                key={bt.id}
+                onClick={() => setBranchFilter(bt.id)}
+                className={`px-3 py-2 rounded-xl text-sm font-bold border transition-all ${branchFilter === bt.id ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-slate-700 border-slate-200 hover:border-indigo-300'}`}
+              >
+                {branchLabel(bt.id)} — {formatCurrency(bt.total)}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* PAGE ACTIONS */}
       <div className="flex justify-between items-center w-full print-hidden mb-2 relative z-20">
         <div className="flex flex-wrap items-center gap-2">

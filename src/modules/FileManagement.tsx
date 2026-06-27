@@ -50,6 +50,21 @@ export const FileManagement: React.FC<FileManagementProps> = ({ appMode, onUploa
   const [error, setError] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
+  // Branch dimension: load tenant branches; default upload to the main branch.
+  const [branches, setBranches] = useState<{ id: string; name: string }[]>([]);
+  const [selectedBranchId, setSelectedBranchId] = useState<string>('default');
+  useEffect(() => {
+    (async () => {
+      if (!user) return;
+      try {
+        const token = await user.getIdToken();
+        const res = await fetch('/api/erp/settings', { headers: { 'Authorization': `Bearer ${token}` } });
+        const json = await res.json();
+        if (Array.isArray(json?.data?.branches)) setBranches(json.data.branches);
+      } catch { /* settings unavailable → single default branch */ }
+    })();
+  }, [user]);
+
   // Validation Review session states
   const [activeValidationSession, setActiveValidationSession] = useState<any | null>(null);
   const [loadingSessionId, setLoadingSessionId] = useState<string | null>(null);
@@ -238,7 +253,8 @@ export const FileManagement: React.FC<FileManagementProps> = ({ appMode, onUploa
       const formData = new FormData();
       formData.append('file', file);
       formData.append('moduleType', appMode);
-      
+      formData.append('branchId', selectedBranchId);
+
       const res = await fetch('/api/erp/files/governance/staged-upload', {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` },
@@ -411,7 +427,22 @@ export const FileManagement: React.FC<FileManagementProps> = ({ appMode, onUploa
         </div>
 
         <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
-          <button 
+          {branches.length > 0 && (
+            <div className="flex flex-col gap-1 w-full sm:w-auto">
+              <label className="text-[11px] font-bold text-slate-500 px-1">الفرع</label>
+              <select
+                value={selectedBranchId}
+                onChange={e => setSelectedBranchId(e.target.value)}
+                disabled={uploading}
+                className="px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-700 outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-50 w-full sm:w-auto"
+                title="الفرع الذي سيُسنَد إليه الملف المرفوع"
+              >
+                <option value="default">الفرع الرئيسي</option>
+                {branches.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
+              </select>
+            </div>
+          )}
+          <button
             onClick={() => {
               setShowHistory(true);
               fetchHistory();
