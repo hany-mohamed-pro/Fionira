@@ -268,6 +268,26 @@ direction stays visible and is not lost. The reusable groundwork already in plac
 `withBranch()` in `dimensions.ts`, and the documented per-module adoption path in
 `system-wide-branch-dimension-and-bank-phase1.md` (§ Task 7).
 
+### Smart Branch Suggestion (Planned Enhancement, Not Started)
+
+Context: Real multi-branch support is now live (commit ae55d967) — the user explicitly assigns a branch at
+upload time via a dropdown, defaulting safely to 'الفرع الرئيسي' for single-branch tenants. This
+explicit-assignment design is DELIBERATE and CORRECT: branch/activity is an organizational decision the
+user makes BEFORE uploading, not a fact discoverable from file content. Auto-inferring branch from filename
+or in-file text would repeat the exact failure class fixed today in categorization-engine.ts (a generic
+word like 'مكتب' silently hijacking a category) — but applied to branch assignment, where a wrong silent
+guess could misroute large sums between branch reports.
+
+Planned future enhancement (additive, never replacing explicit choice): After the user uploads a file and
+has selected (or defaulted to) a branch, the system MAY analyze the file's content for repeated
+location/branch-name signals (e.g., 'جدة' appearing frequently in transaction descriptions) and offer a
+SUGGESTION — never a silent decision — through the same proven 'suggest, don't force' governance pattern
+already built for the 5 activity profiles (Phase 1-5) and the bank account-aware classifier. The user
+accepts or dismisses with one click; declining never blocks or alters the upload.
+
+This is explicitly NOT urgent and NOT scoped for the next session — documented here only so the idea isn't
+lost, per standing practice.
+
 ## 7. Critical operational reminders for next session
 
 - **⚠️ VERIFICATION NEEDED (named, explicit — check FIRST in the practical-testing phase):** Compare the
