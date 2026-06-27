@@ -12,27 +12,37 @@ interface TaxDeclarationProps {
 
 export const TaxDeclaration: React.FC<TaxDeclarationProps> = ({ revenuesRecords, expensesRecords, onNavigateToTab }) => {
   const taxData = useMemo(() => {
-    let totalSales = 0;
+    // ZATCA-correct breakdown: keep the standard-rated (taxable) base separate from
+    // the non-taxable (exempt / zero-rated) amount — the records already carry both
+    // fields distinctly. netVatDue is computed from the actual per-invoice VAT and is
+    // unaffected by this split.
+    let salesTaxable = 0;
+    let salesNonTaxable = 0;
     let totalSalesVat = 0;
-    let totalPurchases = 0;
+    let purchasesTaxable = 0;
+    let purchasesNonTaxable = 0;
     let totalPurchasesVat = 0;
 
     revenuesRecords.forEach(r => {
-      totalSales += (r.Taxable_Amount || 0) + (r.NonTaxable_Amount || 0);
+      salesTaxable += r.Taxable_Amount || 0;
+      salesNonTaxable += r.NonTaxable_Amount || 0;
       totalSalesVat += r.VAT_Amount || 0;
     });
 
     expensesRecords.forEach(r => {
-      totalPurchases += (r.Taxable_Amount || 0) + (r.NonTaxable_Amount || 0);
+      purchasesTaxable += r.Taxable_Amount || 0;
+      purchasesNonTaxable += r.NonTaxable_Amount || 0;
       totalPurchasesVat += r.VAT_Amount || 0;
     });
 
     const netVatDue = totalSalesVat - totalPurchasesVat;
 
     return {
-      totalSales,
+      salesTaxable,
+      salesNonTaxable,
       totalSalesVat,
-      totalPurchases,
+      purchasesTaxable,
+      purchasesNonTaxable,
       totalPurchasesVat,
       netVatDue
     };
@@ -55,13 +65,17 @@ export const TaxDeclaration: React.FC<TaxDeclarationProps> = ({ revenuesRecords,
           <Card className="p-6 border-emerald-100 bg-emerald-50/30">
             <h4 className="text-lg font-bold text-emerald-800 mb-4 border-b border-emerald-200 pb-2">المبيعات (الإيرادات)</h4>
             <div className="space-y-4">
-              <div 
+              <div
                 className="flex justify-between items-center cursor-pointer hover:bg-emerald-100/50 p-2 -mx-2 rounded transition-colors group"
                 onClick={() => onNavigateToTab?.('grouped_purchases', undefined, 'ضريبة', 'revenues')}
                 title="عرض الإيرادات ذات الصلة"
               >
-                <span className="text-slate-600 font-medium group-hover:text-emerald-700">إجمالي المبيعات الخاضعة للضريبة</span>
-                <span className="font-bold text-slate-800 ltr-text group-hover:text-emerald-900">{formatCurrency(taxData.totalSales, 'ر.س', true)}</span>
+                <span className="text-slate-600 font-medium group-hover:text-emerald-700">المبيعات الخاضعة للضريبة (القياسية)</span>
+                <span className="font-bold text-slate-800 ltr-text group-hover:text-emerald-900">{formatCurrency(taxData.salesTaxable, 'ر.س', true)}</span>
+              </div>
+              <div className="flex justify-between items-center p-2 -mx-2 rounded">
+                <span className="text-slate-500 font-medium">مبيعات غير خاضعة / معفاة / صفرية</span>
+                <span className="font-bold text-slate-600 ltr-text">{formatCurrency(taxData.salesNonTaxable, 'ر.س', true)}</span>
               </div>
               <div 
                 className="flex justify-between items-center bg-emerald-100/50 p-3 rounded-lg cursor-pointer hover:bg-emerald-200/50 transition-colors group"
@@ -82,8 +96,12 @@ export const TaxDeclaration: React.FC<TaxDeclarationProps> = ({ revenuesRecords,
                 onClick={() => onNavigateToTab?.('grouped_purchases', undefined, 'ضريبة', 'expenses')}
                 title="عرض المصروفات ذات الصلة"
               >
-                <span className="text-slate-600 font-medium group-hover:text-rose-700">إجمالي المشتريات الخاضعة للضريبة</span>
-                <span className="font-bold text-slate-800 ltr-text group-hover:text-rose-900">{formatCurrency(taxData.totalPurchases, 'ر.س', true)}</span>
+                <span className="text-slate-600 font-medium group-hover:text-rose-700">المشتريات الخاضعة للضريبة (القياسية)</span>
+                <span className="font-bold text-slate-800 ltr-text group-hover:text-rose-900">{formatCurrency(taxData.purchasesTaxable, 'ر.س', true)}</span>
+              </div>
+              <div className="flex justify-between items-center p-2 -mx-2 rounded">
+                <span className="text-slate-500 font-medium">مشتريات غير خاضعة / معفاة</span>
+                <span className="font-bold text-slate-600 ltr-text">{formatCurrency(taxData.purchasesNonTaxable, 'ر.س', true)}</span>
               </div>
               <div 
                 className="flex justify-between items-center bg-rose-100/50 p-3 rounded-lg cursor-pointer hover:bg-rose-200/50 transition-colors group"
@@ -118,7 +136,7 @@ export const TaxDeclaration: React.FC<TaxDeclarationProps> = ({ revenuesRecords,
         <div className="mt-6 flex items-start gap-3 p-4 bg-amber-50 text-amber-800 rounded-xl border border-amber-200 text-sm">
           <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
           <p className="leading-relaxed font-medium">
-            هذا الإقرار هو نموذج استرشادي مبني على البيانات المدخلة في النظام. يجب مراجعة جميع الفواتير والتأكد من مطابقتها لمتطلبات هيئة الزكاة والضريبة والجمارك (ZATCA) قبل تقديم الإقرار الرسمي.
+            هذا الإقرار هو نموذج استرشادي مبني على البيانات المدخلة في النظام. ضريبة المدخلات معروضة إجمالاً دون استبعاد البنود غير القابلة للخصم. يجب مراجعة جميع الفواتير والتأكد من مطابقتها لمتطلبات هيئة الزكاة والضريبة والجمارك (ZATCA) قبل تقديم الإقرار الرسمي.
           </p>
         </div>
       </div>

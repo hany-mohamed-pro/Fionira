@@ -91,7 +91,15 @@ the taxable-base labeling (taxable conflated with non-taxable) and missing stand
 separation.** Severity: **MEDIUM** (does not affect net VAT due, but misrepresents the taxable base on a
 regulator-facing screen). Recommend a targeted fix, not an estimate label.
 
-## TASK 5 — proposed fix (NOT implemented — awaiting confirmation)
+## ✅ RESOLVED — Option A implemented (user-confirmed)
+
+The taxable base is now split from the non-taxable amount on both the Sales and Purchases cards
+(standard-rated `Σ Taxable_Amount` vs exempt/zero-rated `Σ NonTaxable_Amount`), and the disclaimer now
+notes input VAT is shown gross. **Net VAT Due is unchanged by construction** (it is computed from the
+per-invoice `VAT_Amount`, never from the base split — an algebraic identity), and `src/` type-checks with
+**0 errors**. No other module touched.
+
+## TASK 5 — proposed fix (implemented as above — was: awaiting confirmation)
 
 Use the breakdown the data already has. Two options:
 
