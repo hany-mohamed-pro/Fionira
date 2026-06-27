@@ -187,21 +187,33 @@ export const subscribeToSettings = (tenantId: string, callback: (settings: AppSe
     window.addEventListener('ERP_SETTINGS_UPDATED', handleCustomEvent);
   }
 
+  // In dev / local (including dev-auth) there is no real Firebase session, so the Firestore
+  // onSnapshot below fails with permission-denied. Load from the dev API immediately so
+  // App-level state (branches, activity) is populated without waiting on Firestore.
+  if (IS_DEV) {
+    getSettings(tenantId).then(callback).catch(() => { /* dev API unavailable → keep defaults */ });
+  }
+
   const unsub = onSnapshot(doc(db, COLLECTION_NAME, tenantId), (docSnap) => {
     if (docSnap.exists()) {
       callback({ ...DEFAULT_SETTINGS, ...docSnap.data() } as AppSettings);
     } else {
       callback({ ...DEFAULT_SETTINGS, tenantId });
     }
-  }, (error) => {
-    if (error.message?.toLowerCase().includes('quota') || String(error).toLowerCase().includes('quota')) {
-       console.warn("[DEV SAFE] Settings subscription paused (Quota Limit). Using API fallback.");
-       if (IS_DEV) {
+  }, (error: any) => {
+    const isQuota = error?.message?.toLowerCase().includes('quota') || String(error).toLowerCase().includes('quota');
+    if (IS_DEV) {
+       // dev-auth has no Firebase session → permission-denied (or quota). The dev API is
+       // authoritative here, so fall back to polling it instead of surfacing an error.
+       console.warn("[DEV] Settings subscription using API fallback:", error?.code || (isQuota ? 'quota' : error?.message));
+       if (!fallbackInterval) {
           fallbackInterval = setInterval(async () => {
              const sets = await getSettings(tenantId);
              callback(sets);
           }, 3000);
        }
+    } else if (isQuota) {
+       console.warn("[DEV SAFE] Settings subscription paused (Quota Limit).");
     } else {
        console.error("Error subscribing to settings:", error);
     }

@@ -9,7 +9,7 @@ import {
   PieChart as PieChartIcon, Calendar as CalendarIcon, ShoppingCart, 
   Wallet, FolderOpen, AlertTriangle, AlertCircle, BookOpen, LineChart as LineChartIcon,
   Briefcase, LogOut, Shield, Sparkles, Scale, Coins, X, ArrowRight, Calculator,
-  Database, Box
+  Database, Box, GitBranch
 } from 'lucide-react';
 import { exportReportPDF } from './lib/pdf-engine';
 import { formatCurrency, isDateInRange, formatMonthName, isSimilarName, CATEGORY_ORDER, buildHierarchy, flattenHierarchyForExcel } from './lib/financial-utils';
@@ -24,6 +24,7 @@ import { IncomeStatement } from './modules/IncomeStatement';
 import { TrialBalance } from './modules/TrialBalance';
 import { GeneralLedger } from './modules/GeneralLedger';
 import { OwnersSummary } from './modules/OwnersSummary';
+import { BranchComparison } from './modules/BranchComparison';
 import { VisualDashboard } from './modules/VisualDashboard';
 import { ExpensesDashboard } from './modules/ExpensesDashboard';
 import { RevenuesDashboard } from './modules/RevenuesDashboard';
@@ -63,6 +64,7 @@ import { db } from './firebase';
 import { collection, getDoc, query, where, writeBatch, doc, deleteDoc, setDoc, orderBy } from 'firebase/firestore';
 import { handleFirestoreError, OperationType } from './lib/firestore-errors';
 import { subscribeToSettings, AppSettings } from './lib/settings-service';
+import { computePnLCore } from './lib/pnl-core';
 import { logout } from './firebase';
 import { getActiveFiles, getDisplayFileName, filterRecordsByActiveFiles } from './lib/active-file-registry';
 
@@ -888,6 +890,19 @@ export default function App() {
     setDateFilter({ month, year: '', start: '', end: '', sourceMode: appMode });
   };
 
+  // ── Global branch scope ───────────────────────────────────────────────
+  // A consolidated branch lens applied to the P&L (Income Statement, GlobalDashboard,
+  // OwnersSummary, Reports). Default 'all' = today's behavior (every record), so
+  // single-branch tenants are unaffected. The branch list comes from tenant settings.
+  const branchList = useMemo(() => (settings?.branches || []), [settings]);
+  const hasBranches = branchList.length > 0;
+  const [branchScope, setBranchScope] = useState<string>('all');
+  const scopeByBranch = (records: any[]) =>
+    branchScope === 'all' ? records : (Array.isArray(records) ? records.filter((r: any) => (r.branchId || 'default') === branchScope) : []);
+  const scopedExpenses = useMemo(() => scopeByBranch(plFilteredExpenses), [plFilteredExpenses, branchScope]);
+  const scopedRevenues = useMemo(() => scopeByBranch(plFilteredRevenues), [plFilteredRevenues, branchScope]);
+  const scopedPayroll = useMemo(() => scopeByBranch(plFilteredPayroll), [plFilteredPayroll, branchScope]);
+
   const totalAnomaliesCount = useMemo(() => {
     const expAnomalies = plFilteredExpenses.filter(r => r.Anomalies && r.Anomalies.length > 0).length;
     const revAnomalies = plFilteredRevenues.filter(r => r.Anomalies && r.Anomalies.length > 0).length;
@@ -902,79 +917,14 @@ export default function App() {
   const banksAnomalies = useMemo(() => plFilteredBanks.filter(r => r.Anomalies && r.Anomalies.length > 0), [plFilteredBanks]);
 
   const incomeStatement = useMemo(() => {
-      const cogsCategories = [
-          'تكلفة المبيعات - مواد خام ومكونات',
-          'تكلفة المبيعات - مواد تعبئة وتغليف',
-          'تكلفة المبيعات - مستهلكات تشغيلية',
-          'تكلفة المبيعات - شحن ونقل للداخل',
-          'تكلفة المبيعات - هدر وتلف إنتاج',   // D2 — production wastage (added so it aggregates under COGS)
-          'تكلفة المبيعات - هالك وعجز مخزون'   // D7 — inventory shrinkage
-      ];
-      const capexCategories = [
-          'أصول ثابتة - أجهزة ومعدات',
-          'أصول ثابتة - أثاث وتركيبات',
-          'أصول ثابتة - أجهزة حاسب آلي',
-          'أصول ثابتة - سيارات ووسائل نقل',
-          'أصول غير ملموسة - برمجيات وتطبيقات'
-      ];
-      
-      let totalRevenue = 0;
-      let revBreakdown: Record<string, number> = {};
-      let totalRevenuesVAT = 0;
-      let totalRevenuesGross = 0;
-
-      plFilteredRevenues.forEach((r: any) => {
-          totalRevenue += (r.Net_Amount || 0);
-          totalRevenuesVAT += (r.VAT_Amount || 0);
-          totalRevenuesGross += (r.Total_Amount || 0);
-          revBreakdown[r.Category] = (revBreakdown[r.Category] || 0) + (r.Net_Amount || 0);
-      });
-
-      let totalCOGS = 0;
-      let totalOPEX = 0;
-      let totalCAPEX = 0;
-      let totalExpensesVAT = 0;
-      let totalExpensesGross = 0;
-      let cogsBreakdown: Record<string, number> = {};
-      let opexBreakdown: Record<string, number> = {};
-      
-      let totalPayroll = 0;
-      
-      plFilteredExpenses.forEach((r: any) => {
-          const cat = r.Category || 'غير مصنف';
-          const isPayrollCategory = cat.includes('رواتب') || cat.includes('أجور') || cat.includes('بدلات');
-          const amt = isPayrollCategory ? (r.Total_Amount || 0) : (r.Net_Amount || 0);
-          
-          if (isPayrollCategory) totalPayroll += amt;
-          
-          totalExpensesVAT += (r.VAT_Amount || 0);
-          totalExpensesGross += (r.Total_Amount || 0);
-
-          if (cogsCategories.includes(cat)) {
-              totalCOGS += amt;
-              cogsBreakdown[cat] = (cogsBreakdown[cat] || 0) + amt;
-          } else if (capexCategories.includes(cat)) {
-              totalCAPEX += amt;
-          } else {
-              totalOPEX += amt;
-              const displayCat = isPayrollCategory && !cat.includes('(صافي)') ? `${cat} (صافي)` : cat;
-              opexBreakdown[displayCat] = (opexBreakdown[displayCat] || 0) + amt;
-          }
-      });
-
-      plFilteredPayroll.forEach((r: any) => {
-          const netExpense = (r.Total_Amount || 0);
-          if (netExpense > 0) {
-              totalOPEX += netExpense;
-              totalPayroll += netExpense;
-              opexBreakdown['رواتب وأجور وبدلات (صافي)'] = (opexBreakdown['رواتب وأجور وبدلات (صافي)'] || 0) + netExpense;
-          }
-      });
-
-      const grossProfit = totalRevenue - totalCOGS;
-      const grossMargin = totalRevenue > 0 ? (grossProfit / totalRevenue) * 100 : 0;
-      const netOperatingIncome = grossProfit - totalOPEX;
-      const netMargin = totalRevenue > 0 ? (netOperatingIncome / totalRevenue) * 100 : 0;
+      // Core P&L reduction — shared with the per-branch comparison (src/lib/pnl-core.ts)
+      // so both compute identical figures. Inputs are branch-scoped below.
+      const {
+          totalRevenue, totalRevenuesVAT, totalRevenuesGross, revBreakdown,
+          totalCOGS, totalOPEX, totalCAPEX, totalPayroll,
+          totalExpensesVAT, totalExpensesGross, cogsBreakdown, opexBreakdown,
+          grossProfit, grossMargin, netOperatingIncome, netMargin
+      } = computePnLCore(scopedExpenses, scopedRevenues, scopedPayroll);
 
       // Filter breakdowns based on appMode for the dashboard (if not in reports mode)
       let dashboardRevBreakdown = Object.entries(revBreakdown);
@@ -1009,7 +959,7 @@ export default function App() {
       let largestValue = 0;
 
       if (appMode === 'revenues') {
-          plFilteredRevenues.forEach(r => {
+          scopedRevenues.forEach(r => {
               totalTaxable += (r.Taxable_Amount || 0);
               totalNonTaxable += (r.NonTaxable_Amount || 0);
               totalNet += (r.Net_Amount || 0);
@@ -1017,9 +967,9 @@ export default function App() {
               totalGross += (r.Total_Amount || 0);
               if ((r.Total_Amount || 0) > largestValue) largestValue = (r.Total_Amount || 0);
           });
-          entityCount = new Set((Array.isArray(plFilteredRevenues) ? plFilteredRevenues : []).map(r => r.Entity_ID)).size;
+          entityCount = new Set((Array.isArray(scopedRevenues) ? scopedRevenues : []).map(r => r.Entity_ID)).size;
       } else if (appMode === 'expenses') {
-          plFilteredExpenses.forEach(r => {
+          scopedExpenses.forEach(r => {
               totalTaxable += (r.Taxable_Amount || 0);
               totalNonTaxable += (r.NonTaxable_Amount || 0);
               totalNet += (r.Net_Amount || 0);
@@ -1027,9 +977,9 @@ export default function App() {
               totalGross += (r.Total_Amount || 0);
               if ((r.Total_Amount || 0) > largestValue) largestValue = (r.Total_Amount || 0);
           });
-          entityCount = new Set((Array.isArray(plFilteredExpenses) ? plFilteredExpenses : []).map(r => r.Entity_ID)).size;
+          entityCount = new Set((Array.isArray(scopedExpenses) ? scopedExpenses : []).map(r => r.Entity_ID)).size;
       } else if (appMode === 'payroll') {
-          plFilteredPayroll.forEach(r => {
+          scopedPayroll.forEach(r => {
               totalTaxable += (r.Taxable_Amount || 0);
               totalNonTaxable += (r.NonTaxable_Amount || 0);
               totalNet += (r.Net_Amount || 0);
@@ -1037,7 +987,7 @@ export default function App() {
               totalGross += (r.Total_Amount || 0);
               if ((r.Total_Amount || 0) > largestValue) largestValue = (r.Total_Amount || 0);
           });
-          entityCount = new Set((Array.isArray(plFilteredPayroll) ? plFilteredPayroll : []).map(r => r.Entity_ID)).size;
+          entityCount = new Set((Array.isArray(scopedPayroll) ? scopedPayroll : []).map(r => r.Entity_ID)).size;
       } else if (appMode === 'banks') {
           plFilteredBanks.forEach(r => {
               if ((r as any).Direction === 'In') {
@@ -1075,13 +1025,13 @@ export default function App() {
           fullCogsBreakdown: Object.entries(cogsBreakdown).sort((a,b)=>b[1]-a[1]),
           fullOpexBreakdown: Object.entries(opexBreakdown).sort((a,b)=>a[1]-b[1]).reverse()
       };
-  }, [plFilteredRevenues, plFilteredExpenses, plFilteredPayroll, appMode, activeTab]);
+  }, [scopedRevenues, scopedExpenses, scopedPayroll, plFilteredBanks, appMode, activeTab]);
 
   const chartDataRaw = useMemo(() => {
       const map: Record<string, any> = {};
       
       // Find most common month across all records to use as fallback
-      const allRecords = [...plFilteredRevenues, ...plFilteredExpenses, ...plFilteredPayroll];
+      const allRecords = [...scopedRevenues, ...scopedExpenses, ...scopedPayroll];
       const mCounts: Record<string, number> = {};
       let mCommon = '';
       let mMax = 0;
@@ -1097,9 +1047,9 @@ export default function App() {
           mCommon = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
       }
 
-      const filteredRevenues = (activeTab === 'dashboard' && appMode !== 'revenues' && appMode !== 'reports') ? [] : plFilteredRevenues;
-      const filteredExpenses = (activeTab === 'dashboard' && appMode !== 'expenses' && appMode !== 'reports') ? [] : plFilteredExpenses;
-      const filteredPayroll = (activeTab === 'dashboard' && appMode !== 'payroll' && appMode !== 'reports') ? [] : plFilteredPayroll;
+      const filteredRevenues = (activeTab === 'dashboard' && appMode !== 'revenues' && appMode !== 'reports') ? [] : scopedRevenues;
+      const filteredExpenses = (activeTab === 'dashboard' && appMode !== 'expenses' && appMode !== 'reports') ? [] : scopedExpenses;
+      const filteredPayroll = (activeTab === 'dashboard' && appMode !== 'payroll' && appMode !== 'reports') ? [] : scopedPayroll;
       const filteredBanks = (activeTab === 'dashboard' && appMode !== 'banks' && appMode !== 'reports') ? [] : plFilteredBanks;
 
       filteredRevenues.forEach(r => {
@@ -1143,7 +1093,35 @@ export default function App() {
           ...d,
           هامش_الربح: d.الإيرادات > 0 ? parseFloat(((d.الربح / d.الإيرادات) * 100).toFixed(1)) : 0
       })).sort((a: any, b: any) => a.rawMonth.localeCompare(b.rawMonth));
-  }, [plFilteredRevenues, plFilteredExpenses, plFilteredPayroll, appMode, activeTab]);
+  }, [scopedRevenues, scopedExpenses, scopedPayroll, plFilteredBanks, appMode, activeTab]);
+
+  // Per-branch P&L for the dedicated "مقارنة الفروع" view. Compares ALL branches
+  // side-by-side (independent of the global branchScope lens), using the same
+  // computePnLCore math as the consolidated Income Statement. Period-filtered.
+  const branchComparison = useMemo(() => {
+      const groups: Record<string, { exp: any[]; rev: any[]; pay: any[] }> = {};
+      const ensure = (id: string) => { if (!groups[id]) groups[id] = { exp: [], rev: [], pay: [] }; return groups[id]; };
+      (Array.isArray(plFilteredExpenses) ? plFilteredExpenses : []).forEach((r: any) => ensure(r.branchId || 'default').exp.push(r));
+      (Array.isArray(plFilteredRevenues) ? plFilteredRevenues : []).forEach((r: any) => ensure(r.branchId || 'default').rev.push(r));
+      (Array.isArray(plFilteredPayroll) ? plFilteredPayroll : []).forEach((r: any) => ensure(r.branchId || 'default').pay.push(r));
+
+      // Column order: implicit main branch first, then configured branches, then any
+      // branch id that appears only in data (never silently drop a branch with records).
+      const ids: string[] = ['default'];
+      branchList.forEach((b: any) => { if (!ids.includes(b.id)) ids.push(b.id); });
+      Object.keys(groups).forEach(id => { if (!ids.includes(id)) ids.push(id); });
+      const nameOf = (id: string) => id === 'default' ? 'الفرع الرئيسي' : (branchList.find((b: any) => b.id === id)?.name || id);
+
+      return ids.map(id => {
+          const g = groups[id] || { exp: [], rev: [], pay: [] };
+          return {
+              id,
+              name: nameOf(id),
+              recordCount: g.exp.length + g.rev.length + g.pay.length,
+              ...computePnLCore(g.exp, g.rev, g.pay)
+          };
+      });
+  }, [plFilteredExpenses, plFilteredRevenues, plFilteredPayroll, branchList]);
 
   const categoriesArray = useMemo(() => {
       const map: Record<string, any> = {};
@@ -2098,7 +2076,7 @@ export default function App() {
     if (appMode === 'dashboard') type = 'GLOBAL_DASHBOARD';
     else if (activeTab === 'dashboard') type = 'MODULE_DASHBOARD';
     else if (['settings', 'user_management'].includes(activeTab as string)) type = 'SETTINGS_PAGE';
-    else if (['income_statement', 'owners_summary', 'visual_dashboard', 'yearly_comparison', 'balance_sheet', 'cash_flow', 'bank_reconciliation'].includes(activeTab as string)) type = 'REPORT_PAGE';
+    else if (['income_statement', 'owners_summary', 'branch_comparison', 'visual_dashboard', 'yearly_comparison', 'balance_sheet', 'cash_flow', 'bank_reconciliation'].includes(activeTab as string)) type = 'REPORT_PAGE';
     else if (['smart_invoice', 'quotations', 'welcome', 'alerts'].includes(activeTab as string)) type = 'FORM_PAGE';
     
     let breadcrumbLevel2 = t.workspace[appMode as keyof typeof t.workspace] || appMode;
@@ -2133,6 +2111,7 @@ export default function App() {
        else if (activeTab === 'balance_sheet') { pageTitle = isRTL ? 'الميزانية العمومية' : 'Balance Sheet'; subtitle = isRTL ? 'عرض تقديري للأصول والالتزامات وحقوق الملكية بناءً على البيانات المتوفرة في النظام.' : 'Estimated view of assets, liabilities, and equity based on available system data.'; }
        else if (activeTab === 'cash_flow') { pageTitle = isRTL ? 'التدفقات النقدية' : 'Cash Flow'; subtitle = isRTL ? 'تحليل حركة السيولة النقدية الداخلة والخارجة من النشاط خلال الفترة المحددة.' : 'Analysis of cash inflows and outflows during the specified period.'; }
        else if (activeTab === 'owners_summary') { pageTitle = isRTL ? 'ملخص الملاك' : 'Owners Summary'; subtitle = isRTL ? 'ملخص مالي مباشر ومصمم خصيصاً للملاك ومتخذي القرار لعرض مؤشرات الأداء الحيوية للشركة.' : 'Live financial summary designed specifically for owners and decision-makers to display vital company KPIs.'; }
+       else if (activeTab === 'branch_comparison') { pageTitle = isRTL ? 'مقارنة الفروع' : 'Branch Comparison'; subtitle = isRTL ? 'مقارنة الأداء المالي لكل فرع جنباً إلى جنب — من نفس حسابات قائمة الدخل.' : 'Side-by-side financial performance per branch — from the same Income Statement math.'; }
        else if (activeTab === 'yearly_comparison') { pageTitle = isRTL ? 'المقارنة السنوية' : 'Yearly Comparison'; subtitle = isRTL ? 'مقارنة الأداء المالي بين السنوات المختلفة لتحديد معدلات النمو والانحدار.' : 'Comparison of financial performance between different years to identify growth and decline rates.'; }
        else if (activeTab === 'visual_dashboard') { pageTitle = isRTL ? 'التحليل المرئي' : 'Visual Dashboard'; subtitle = isRTL ? 'مؤشرات ورسوم بيانية تفاعلية متقدمة لتحليل الأداء المالي.' : 'Advanced interactive charts and KPIs to analyze financial performance.'; }
        else if (activeTab === 'bank_reconciliation') { pageTitle = isRTL ? 'مطابقة البنوك' : 'Bank Reconciliation'; subtitle = isRTL ? 'مطابقة الرصيد الافتتاحي والختامي مع حركة الحسابات، وتوزيع الحركات حسب الحساب المحاسبي.' : 'Reconcile opening/closing balances against movements, and break down by GL account.'; }
@@ -2330,7 +2309,22 @@ export default function App() {
                       </select>
                    </div>
                  )}
- 
+
+                 {hasBranches && (type === 'GLOBAL_DASHBOARD' || type === 'REPORT_PAGE') && activeTab !== 'branch_comparison' && (
+                   <div className="flex items-center bg-indigo-50 rounded-lg px-3 py-2 border border-indigo-200 shadow-sm min-w-[170px]" title={isRTL ? 'نطاق الفرع' : 'Branch scope'}>
+                      <GitBranch className="w-4 h-4 ml-2 text-indigo-600 shrink-0" />
+                      <select
+                        value={branchScope}
+                        onChange={e => setBranchScope(e.target.value)}
+                        className="bg-transparent outline-none cursor-pointer text-sm text-indigo-900 font-bold w-full truncate"
+                      >
+                        <option value="all">{isRTL ? 'كل الفروع (مجمّع)' : 'All branches'}</option>
+                        <option value="default">{isRTL ? 'الفرع الرئيسي' : 'Main branch'}</option>
+                        {branchList.map((b: any) => <option key={b.id} value={b.id}>{b.name}</option>)}
+                      </select>
+                   </div>
+                 )}
+
                  {showDatePicker && (
                    <>
                      <div className={`flex items-center bg-white rounded-lg px-3 py-2 border shadow-sm transition-colors ${dateFilter.year ? 'border-amber-400' : 'border-slate-300'} ${activeTab === 'yearly_comparison' ? 'opacity-50 cursor-not-allowed' : ''}`}>
@@ -2802,6 +2796,10 @@ export default function App() {
 
           {activeTab === 'owners_summary' && (
             <OwnersSummary incomeStatement={incomeStatement} />
+          )}
+
+          {activeTab === 'branch_comparison' && (
+            <BranchComparison branchComparison={branchComparison} />
           )}
 
           {activeTab === 'trial_balance' && (

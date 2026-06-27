@@ -1,6 +1,6 @@
 import React from 'react';
 import { useUI } from '../contexts/UIContext';
-import { FileText, Coins, Scale, Calendar, AlertTriangle, ArrowRight, PieChart, Activity } from 'lucide-react';
+import { FileText, Coins, Scale, Calendar, AlertTriangle, ArrowRight, PieChart, Activity, GitBranch } from 'lucide-react';
 
 export const ReportsDashboard = ({ incomeStatement, onNavigateToTab }: any) => {
   const { language } = useUI();
@@ -15,6 +15,7 @@ export const ReportsDashboard = ({ incomeStatement, onNavigateToTab }: any) => {
     { id: 'balance_sheet', icon: Scale, title: isRTL ? 'الميزانية العمومية' : 'Balance Sheet', desc: isRTL ? 'الأصول والخصوم وحقوق الملكية' : 'Assets, liabilities and equity', color: 'bg-blue-50 text-blue-600' },
     { id: 'cash_flow', icon: Coins, title: isRTL ? 'التدفقات النقدية' : 'Cash Flow', desc: isRTL ? 'حركة النقد الداخل والخارج' : 'Cash inflows and outflows', color: 'bg-purple-50 text-purple-600' },
     { id: 'owners_summary', icon: PieChart, title: isRTL ? 'ملخص الملاك' : 'Owners Summary', desc: isRTL ? 'ملخص الأداء المالي لمتخذي القرار' : 'Financial performance summary for decision makers', color: 'bg-pink-50 text-pink-600' },
+    { id: 'branch_comparison', icon: GitBranch, title: isRTL ? 'مقارنة الفروع' : 'Branch Comparison', desc: isRTL ? 'أداء كل فرع جنباً إلى جنب' : 'Side-by-side performance per branch', color: 'bg-indigo-50 text-indigo-600' },
     { id: 'visual_dashboard', icon: Activity, title: isRTL ? 'التحليل الرسومي' : 'Visual Analytics', desc: isRTL ? 'مؤشرات ورسوم بيانية تفاعلية' : 'Interactive charts and KPIs', color: 'bg-cyan-50 text-cyan-600' },
     { id: 'yearly_comparison', icon: Calendar, title: isRTL ? 'المقارنة السنوية' : 'Yearly Comparison', desc: isRTL ? 'مقارنة الأداء بين السنوات المالية' : 'Performance comparison across years', color: 'bg-orange-50 text-orange-600' },
   ];
@@ -24,7 +25,7 @@ export const ReportsDashboard = ({ incomeStatement, onNavigateToTab }: any) => {
       {/* SECTION B - REPORTS LIST */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-[16px] md:gap-[20px]">
         {reports.map((rep, idx) => {
-          const hoverColors = ['hover:border-emerald-500/30', 'hover:border-blue-500/30', 'hover:border-purple-500/30', 'hover:border-pink-500/30', 'hover:border-cyan-500/30', 'hover:border-orange-500/30'];
+          const hoverColors = ['hover:border-emerald-500/30', 'hover:border-blue-500/30', 'hover:border-purple-500/30', 'hover:border-pink-500/30', 'hover:border-indigo-500/30', 'hover:border-cyan-500/30', 'hover:border-orange-500/30'];
           
           let hasData = false;
           if (incomeStatement && (incomeStatement.totalRevenue > 0 || incomeStatement.totalOPEX > 0)) {

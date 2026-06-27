@@ -84,7 +84,39 @@ This fully explains the user's "no clear way to see results by branch": the two 
 
 ---
 
+---
+
+## PART 2 — IMPLEMENTED (complete solution, user-confirmed) ✅
+
+The user chose the **complete (world-class)** option. Built additively — **no `categorization-engine.ts` / `erp-engine.ts` change**, no change to classification or P&L math.
+
+### What shipped
+1. **Single source of truth for P&L math** — extracted the core profitability reduction into `src/lib/pnl-core.ts` (`computePnLCore`). The consolidated Income Statement (`App.tsx`) now delegates to it, and so does the new comparison — so both compute **identical** figures (no drift).
+2. **Dedicated "مقارنة الفروع" view** (`src/modules/BranchComparison.tsx`) — branches as columns × P&L rows + a consolidated "كل الفروع (مجمّع)" column. First-class & discoverable: a card in the Reports hub (`ReportsDashboard.tsx`) and a routed report page (`activeTab === 'branch_comparison'`). Shows a friendly "define 2+ branches" empty state for single-branch tenants.
+3. **Global branch scope** (`App.tsx`) — a `branchScope` lens applied to the consolidated P&L (`incomeStatement`) and the monthly chart (`chartDataRaw`) via `scopedExpenses/Revenues/Payroll`. A branch `<select>` ("كل الفروع / الفرع الرئيسي / …") appears in the page toolbar on the **GlobalDashboard** and **report pages** (not the comparison page itself), only when branches exist. Default "all" = today's behaviour → zero change for single-branch tenants.
+4. **Settings-read fix (required for the above to work in dev):** `subscribeToSettings` relied on Firestore `onSnapshot`, which in dev-auth fails with `permission-denied` and previously only fell back to the dev API on *quota* errors — so App-level `settings.branches`/`activity` never loaded in dev. Now in dev it loads from the dev API immediately and polls it on any subscription error. (Same production-safe pattern as the Part 1 save fix; production `onSnapshot` path unchanged.)
+
+### Live verification (dev server :3100, 2 branches: فرع جدة, فرع الرياض)
+- **Behaviour preserved (critical — central P&L was refactored):** Expenses dashboard still 96,900 before-VAT / 14,535 input VAT / 111,435 total; Income Statement COGS 33,900 / OPEX 63,000 — **identical** to pre-refactor.
+- **Global scope works:** Income Statement COGS — scope «الفرع الرئيسي» → **33,900**, scope «فرع جدة» → **0** (no Jeddah-tagged data), scope «كل الفروع» → 33,900.
+- **Comparison view works:** columns الفرع الرئيسي (50 سجل) · فرع جدة (0) · فرع الرياض (0) · كل الفروع (50); COGS 33,900 / OPEX 63,000 / صافي −96,900 on the main branch, 0 on the empty branches, مجمّع reconciles. Margins guarded (0% at revenue=0). Numbers reconcile exactly with the Income Statement (same `computePnLCore`).
+- **No console errors.** `tsc` 0 errors; `vite build` passes.
+
+### Diagnosis → fix mapping
+- (C) no comparison destination → **dedicated مقارنة الفروع page** + Reports-hub card.
+- (B) incomplete coverage → **global branch scope** now reaches the GlobalDashboard, Income Statement, OwnersSummary, and the monthly chart.
+- (A) discoverability → branch scope surfaced in the page toolbar; comparison is a first-class report.
+
+---
+
 ## Status
-- ✅ **Part 1: committed** (fix + this doc).
-- ⏸️ **Part 2: awaiting confirmation** on scope before any implementation.
-- 🧹 Test data cleaned: `data/erp_registry.json` reverted, stray `.staged` removed, working tree clean apart from the Part 1 fix.
+- ✅ **Part 1: committed** (`5482b2ae`) — settings save fix.
+- ✅ **Part 2: implemented & live-verified** (complete solution, user-confirmed) — committed alongside this doc update.
+- 🧹 Test data clean: no `data/erp_registry.json` pollution, no stray `.staged`; only feature source files changed.
+
+### Files (Part 2)
+- `src/lib/pnl-core.ts` (new) — shared P&L core
+- `src/modules/BranchComparison.tsx` (new) — comparison view
+- `src/App.tsx` — delegate to pnl-core, branch scope + scoped records, branchComparison memo, routing, toolbar selector
+- `src/modules/ReportsDashboard.tsx` — comparison card
+- `src/lib/settings-service.ts` — dev settings-read fallback
