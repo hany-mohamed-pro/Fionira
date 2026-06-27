@@ -122,22 +122,40 @@ export const getSettings = async (tenantId: string): Promise<AppSettings> => {
 
 export const saveSettings = async (tenantId: string, settings: AppSettings): Promise<void> => {
   if (!tenantId) throw new Error("tenantId is required to save settings");
-  
+
   if (IS_DEV) {
-    try {
-      await fetch('/api/erp/settings', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer fake-token-for-dev`
-        },
-        body: JSON.stringify(settings)
-      });
-    } catch(e) {
-      console.warn("Dev settings save failed", e);
+    // In dev / local (including dev-auth), the dev API + devMemoryDb is the AUTHORITATIVE store.
+    // There is no real Firebase session in dev-auth, so a direct Firestore write is rejected with
+    // `permission-denied` — that is EXPECTED, not a save failure. So: determine success from the dev
+    // API call, and treat the Firestore mirror as best-effort (never fatal in dev). This removes the
+    // false "خطأ في الحفظ" the user saw while the data had actually persisted to the dev store.
+    const res = await fetch('/api/erp/settings', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer fake-token-for-dev`
+      },
+      body: JSON.stringify(settings)
+    });
+    if (!res.ok) {
+      // A genuine dev-store failure SHOULD surface — we are not hiding real errors.
+      throw new Error(`DEV settings save failed (HTTP ${res.status})`);
     }
+
+    // Best-effort mirror to Firestore if a real session ever exists; its absence is normal in dev-auth.
+    try {
+      await setDoc(doc(db, COLLECTION_NAME, tenantId), { ...settings, tenantId }, { merge: true });
+    } catch (err: any) {
+      console.warn("[DEV] Firestore mirror skipped (no authenticated session — expected in dev-auth):", err?.code || err?.message || err);
+    }
+
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('ERP_SETTINGS_UPDATED', { detail: settings }));
+    }
+    return;
   }
 
+  // Production: Firestore is the authoritative store; real auth is present, so write errors are real.
   const docRef = doc(db, COLLECTION_NAME, tenantId);
   try {
     await setDoc(docRef, { ...settings, tenantId }, { merge: true });
@@ -148,7 +166,7 @@ export const saveSettings = async (tenantId: string, settings: AppSettings): Pro
       throw err;
     }
   }
-  
+
   if (typeof window !== 'undefined') {
     window.dispatchEvent(new CustomEvent('ERP_SETTINGS_UPDATED', { detail: settings }));
   }
