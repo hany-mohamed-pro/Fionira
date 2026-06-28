@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { useUI } from '../contexts/UIContext';
 import { ArrowDownLeft, ArrowUpRight, Scale, CheckCircle2, AlertTriangle, Wallet, ListChecks, ChevronDown, ChevronLeft, Landmark } from 'lucide-react';
 import { formatCurrency } from './VisualDashboard';
-import { glNature } from '../backend/core/processors/bank-classification';
+import { computeAccount, dirOf } from '../lib/bank-cashflow-core';
 
 // Bank-native reconciliation — segmented PER BANK ACCOUNT.
 // A bank statement reconciles as: opening balance + credits − debits = closing
@@ -11,65 +11,9 @@ import { glNature } from '../backend/core/processors/bank-classification';
 // balance — each account reconciles independently. A single-account dataset
 // renders exactly one account section (identical to the prior behaviour).
 
-const dirOf = (r: any): 'debit' | 'credit' =>
-  r.Flow_Direction === 'credit' || r.Flow_Direction === 'debit'
-    ? r.Flow_Direction
-    : (typeof r.Category === 'string' && r.Category.includes('إيداع') ? 'credit' : 'debit');
-
-function computeAccount(txns: any[], unclassified: string) {
-  const glOf = (r: any): string => r.GL_Account || r.Category || unclassified;
-  const signed = (r: any) => (dirOf(r) === 'credit' ? 1 : -1) * (Number(r.Total_Amount) || 0);
-
-  let totalDebit = 0, totalCredit = 0;
-  txns.forEach((r: any) => {
-    const amt = Number(r.Total_Amount) || 0;
-    if (dirOf(r) === 'credit') totalCredit += amt; else totalDebit += amt;
-  });
-  const net = totalCredit - totalDebit;
-
-  const sorted = [...txns].sort((a, b) => {
-    const da = String(a.Invoice_Date || ''), db = String(b.Invoice_Date || '');
-    if (da !== db) return da < db ? -1 : 1;
-    return (b._originalRowIndex || 0) - (a._originalRowIndex || 0);
-  });
-  const hasBalances = sorted.some((r: any) => r.Running_Balance != null);
-  const earliest = sorted[0], latest = sorted[sorted.length - 1];
-  const closingBalance = hasBalances && latest?.Running_Balance != null ? Number(latest.Running_Balance) : null;
-  const openingBalance = hasBalances && earliest?.Running_Balance != null ? Number(earliest.Running_Balance) - signed(earliest) : null;
-  const computedClosing = openingBalance != null ? openingBalance + net : null;
-  const diff = (computedClosing != null && closingBalance != null) ? computedClosing - closingBalance : null;
-  const reconciled = diff != null && Math.abs(diff) < 0.01;
-
-  let chainChecked = 0, chainOk = 0;
-  for (let i = 1; i < sorted.length; i++) {
-    const prev = sorted[i - 1], cur = sorted[i];
-    if (prev.Running_Balance == null || cur.Running_Balance == null) continue;
-    chainChecked++;
-    const expected = Number(prev.Running_Balance) + signed(cur);
-    if (Math.abs(expected - Number(cur.Running_Balance)) < 0.01) chainOk++;
-  }
-
-  const glMap: Record<string, { debit: number; credit: number; count: number; txns: any[] }> = {};
-  txns.forEach((r: any) => {
-    const k = glOf(r);
-    glMap[k] = glMap[k] || { debit: 0, credit: 0, count: 0, txns: [] };
-    glMap[k].count++; glMap[k].txns.push(r);
-    const amt = Number(r.Total_Amount) || 0;
-    if (dirOf(r) === 'credit') glMap[k].credit += amt; else glMap[k].debit += amt;
-  });
-  const accts = Object.entries(glMap).map(([account, v]) => ({ account, ...v, net: v.credit - v.debit }));
-  const natureMap: Record<string, { accounts: typeof accts; debit: number; credit: number; count: number }> = {};
-  accts.forEach((a) => {
-    const nat = glNature(a.account);
-    natureMap[nat] = natureMap[nat] || { accounts: [], debit: 0, credit: 0, count: 0 };
-    natureMap[nat].accounts.push(a); natureMap[nat].debit += a.debit; natureMap[nat].credit += a.credit; natureMap[nat].count += a.count;
-  });
-  const natureGroups = Object.entries(natureMap)
-    .map(([nature, v]) => ({ nature, ...v, net: v.credit - v.debit, accounts: v.accounts.sort((a, b) => (b.debit + b.credit) - (a.debit + a.credit)) }))
-    .sort((a, b) => (b.debit + b.credit) - (a.debit + a.credit));
-
-  return { count: txns.length, totalDebit, totalCredit, net, hasBalances, openingBalance, closingBalance, computedClosing, diff, reconciled, chainChecked, chainOk, natureGroups };
-}
+// Reconciliation math (computeAccount) and the credit/debit resolver (dirOf) now
+// live in ../lib/bank-cashflow-core — the single source shared with the Cash Flow
+// Statement so the cash position can never drift between the two pages.
 
 const AccountSection = ({ acc, isRTL, tr }: any) => {
   const [openGl, setOpenGl] = useState<string | null>(null);

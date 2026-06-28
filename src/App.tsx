@@ -902,6 +902,7 @@ export default function App() {
   const scopedExpenses = useMemo(() => scopeByBranch(plFilteredExpenses), [plFilteredExpenses, branchScope]);
   const scopedRevenues = useMemo(() => scopeByBranch(plFilteredRevenues), [plFilteredRevenues, branchScope]);
   const scopedPayroll = useMemo(() => scopeByBranch(plFilteredPayroll), [plFilteredPayroll, branchScope]);
+  const scopedBanks = useMemo(() => scopeByBranch(plFilteredBanks), [plFilteredBanks, branchScope]);
 
   const totalAnomaliesCount = useMemo(() => {
     const expAnomalies = plFilteredExpenses.filter(r => r.Anomalies && r.Anomalies.length > 0).length;
@@ -2729,19 +2730,9 @@ export default function App() {
           )}
 
           {activeTab === 'cash_flow' && (
-            <CashFlow 
-              data={{
-                revenues: incomeStatement.totalRevenue,
-                expenses: (incomeStatement.totalOPEX || 0) + (incomeStatement.totalCOGS || 0),
-                payroll: incomeStatement.totalPayroll || 0
-              }} 
-              tenantId={profile?.tenantId}
-              allRecords={[
-                ...plFilteredRevenues.map(r => ({ ...r, __Type: 'Revenue' })),
-                ...plFilteredExpenses.map(r => ({ ...r, __Type: 'Expense' })),
-                ...plFilteredPayroll.map(r => ({ ...r, __Type: 'Payroll' }))
-              ]}
-              onNavigateToTab={handleNavigateToTabWithAnchor}
+            <CashFlow
+              bankRecords={scopedBanks}
+              branchScoped={branchScope !== 'all'}
             />
           )}
 
