@@ -99,14 +99,13 @@ export function NewAppShell({
              items: [
                 { id: 'dashboard', label: isRTL ? 'لوحة البنوك' : 'Dashboard', icon: Activity, desc: isRTL ? 'ملخص الحسابات' : 'Accounts summary' },
                 { id: 'upload', label: isRTL ? 'رفع كشف الحساب' : 'Upload Statement', icon: Upload, desc: isRTL ? 'رفع ملفات البنوك' : 'Upload bank files' },
-                { id: 'bank_reconciliation', label: isRTL ? 'مطابقة البنوك' : 'Bank Reconciliation', icon: Scale, desc: isRTL ? 'مطابقة الأرصدة وحركة الحسابات' : 'Reconcile balances & movements' },
+                { id: 'bank_reconciliation', label: isRTL ? 'مطابقة وحركة البنوك' : 'Bank Accounts', icon: Scale, desc: isRTL ? 'مطابقة الأرصدة وتحليل الحركات (نوع/طرف)' : 'Reconcile balances & analyse movements' },
              ]
           },
           {
              title: isRTL ? 'الحسابات البنكية' : 'Bank Accounts',
              items: [
                 { id: 'grouped_purchases', label: isRTL ? 'قائمة الحسابات' : 'Banks List', icon: Users, desc: isRTL ? 'بيانات البنوك' : 'Banks information' },
-                { id: 'categories_summary', label: isRTL ? 'حركة الحسابات' : 'Account Movements', icon: Layers, desc: isRTL ? 'تقرير الحركات' : 'Movements report' },
              ]
           },
           {
@@ -159,7 +158,6 @@ export function NewAppShell({
                items: [
                  { id: 'dashboard', label: isRTL ? 'لوحة التقارير' : 'Dashboard', icon: Activity, desc: isRTL ? 'مركز التقارير الموحد' : 'Unified reports center' },
                  { id: 'owners_summary', label: isRTL ? 'ملخص الملاك' : 'Owners Summary', icon: PieChart, desc: isRTL ? 'أداء ملاك الأعمال' : 'Business owners performance' },
-                 { id: 'visual_dashboard', label: isRTL ? 'التحليل الرسومي' : 'Visual Analytics', icon: Activity, desc: isRTL ? 'أداء مرئي تفصيلي' : 'Detailed visual performance' },
                ]
             },
             {

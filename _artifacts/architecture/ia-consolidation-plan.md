@@ -164,12 +164,12 @@ Per the user correction, each proposed change is re-checked: does it **risk hidi
 6. **Bank merge** — the `categories_summary && appMode==='banks'` branch in `App.tsx` (~2631) and its non-banks counterpart share an id; the merge must not disturb the non-banks `categories_summary` (Auto Chart of Accounts) path.
 
 **C) Safe implementation ORDER (low-risk/high-value first):**
-1. **Bank pages merge** (TASK 3) — self-contained, two components into one tabbed wrapper, no cross-cutting data changes. Lowest risk, immediate clarity win. *(Touches: new wrapper, `NewAppShell` banks menu, `App.tsx` banks routing, CommandPalette `bnk_*`.)*
-2. **Visual Analytics renest** (TASK 4) — label/placement only, no logic. Trivial.
-3. **Owner Home evolution** (TASK 1) — refine `GlobalDashboard` (plain-language band + cash card via `scopedBanks` prop); WelcomePage → first-run-only. Medium risk (home is high-traffic), but isolated to one component + one prop wire.
-4. **Owners Summary retire → fold into Owner Home** (TASK 2) — do AFTER Owner Home exists (so its content has a destination). **Precondition (additive principle): first relocate the Profitability Waterfall to Owner Home/Income Statement; only then retire the tab.** Update `REPORT_PAGE`, ReportsDashboard cards, CommandPalette, page-title block.
-5. **Budget vs Actual + the rest of its build** (TASK 5 + design e0fde690) — last, landing into the now-consolidated structure.
-6. **(Future, gated)** real Owners' Equity statement — only after owner-contribution/drawing capture + chart-of-accounts foundation exist.
+1. ✅ **EXECUTED — Bank pages merge** (TASK 3) — `BankAccountsView` tabbed wrapper (مطابقة الأرصدة / الحركة حسب النوع / الحركة حسب الطرف); both original components preserved unchanged; branch scoping now functional. Live-verified (2-account never-merge, drill-down, all tabs, console clean). See `ia-execution-phase1-bank-merge-visual-renest.md`.
+2. ✅ **EXECUTED — Visual Analytics retire** (TASK 4) — confirmed strict duplicate of GlobalDashboard (live + code); page/route/nav/hub-card removed; `VisualDashboard.tsx` file kept (its `formatCurrency` export is shared). Removed a pre-existing double-render bug. Reports hub now 6 cards. Live-verified.
+3. ⏳ PENDING — **Owner Home evolution** (TASK 1) — refine `GlobalDashboard` (plain-language band + cash card via `scopedBanks` prop); WelcomePage → first-run-only. Medium risk (home is high-traffic), but isolated to one component + one prop wire.
+4. ⏳ PENDING — **Owners Summary retire → fold into Owner Home** (TASK 2) — do AFTER Owner Home exists (so its content has a destination). **Precondition (additive principle): first relocate the Profitability Waterfall to Owner Home/Income Statement; only then retire the tab.** Update `REPORT_PAGE`, ReportsDashboard cards, CommandPalette, page-title block.
+5. ⏳ PENDING — **Budget vs Actual + the rest of its build** (TASK 5 + design e0fde690) — last, landing into the now-consolidated structure.
+6. ⏳ PENDING (Future, gated) — real Owners' Equity statement — only after owner-contribution/drawing capture + chart-of-accounts foundation exist.
 
 Each step: live-test, confirm zero console errors, confirm CommandPalette + nav still resolve, commit, push.
 

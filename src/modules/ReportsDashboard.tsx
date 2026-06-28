@@ -16,7 +16,6 @@ export const ReportsDashboard = ({ incomeStatement, onNavigateToTab }: any) => {
     { id: 'cash_flow', icon: Coins, title: isRTL ? 'التدفقات النقدية' : 'Cash Flow', desc: isRTL ? 'حركة النقد الداخل والخارج' : 'Cash inflows and outflows', color: 'bg-purple-50 text-purple-600' },
     { id: 'owners_summary', icon: PieChart, title: isRTL ? 'ملخص الملاك' : 'Owners Summary', desc: isRTL ? 'ملخص الأداء المالي لمتخذي القرار' : 'Financial performance summary for decision makers', color: 'bg-pink-50 text-pink-600' },
     { id: 'branch_comparison', icon: GitBranch, title: isRTL ? 'مقارنة الفروع' : 'Branch Comparison', desc: isRTL ? 'أداء كل فرع جنباً إلى جنب' : 'Side-by-side performance per branch', color: 'bg-indigo-50 text-indigo-600' },
-    { id: 'visual_dashboard', icon: Activity, title: isRTL ? 'التحليل الرسومي' : 'Visual Analytics', desc: isRTL ? 'مؤشرات ورسوم بيانية تفاعلية' : 'Interactive charts and KPIs', color: 'bg-cyan-50 text-cyan-600' },
     { id: 'yearly_comparison', icon: Calendar, title: isRTL ? 'المقارنة السنوية' : 'Yearly Comparison', desc: isRTL ? 'مقارنة الأداء بين السنوات المالية' : 'Performance comparison across years', color: 'bg-orange-50 text-orange-600' },
   ];
 

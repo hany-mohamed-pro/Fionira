@@ -14,8 +14,9 @@ const dirOf = (r: any): 'debit' | 'credit' =>
     ? r.Flow_Direction
     : (typeof r.Category === 'string' && r.Category.includes('إيداع') ? 'credit' : 'debit');
 
-const AccountMovements = ({ txns, isRTL, tr, header }: any) => {
-  const [view, setView] = useState<View>('type');
+const AccountMovements = ({ txns, isRTL, tr, header, forcedView }: any) => {
+  const [internalView, setView] = useState<View>('type');
+  const view: View = forcedView || internalView;
   const [openKey, setOpenKey] = useState<string | null>(null);
 
   const data = useMemo(() => {
@@ -60,10 +61,12 @@ const AccountMovements = ({ txns, isRTL, tr, header }: any) => {
 
         <div className="flex items-center justify-between flex-wrap gap-3">
           <h4 className="text-[14px] font-bold text-slate-800">{tr('حركة الحساب', 'Account Movements')}</h4>
+          {!forcedView && (
           <div className="flex bg-slate-100 rounded-xl p-1">
             <button onClick={() => { setView('type'); setOpenKey(null); }} className={`px-4 py-1.5 rounded-lg text-[13px] font-bold flex items-center gap-1.5 ${view === 'type' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500'}`}><Layers className="w-4 h-4" /> {tr('حسب نوع الحركة', 'By Type')}</button>
             <button onClick={() => { setView('counterparty'); setOpenKey(null); }} className={`px-4 py-1.5 rounded-lg text-[13px] font-bold flex items-center gap-1.5 ${view === 'counterparty' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500'}`}><Users className="w-4 h-4" /> {tr('حسب الطرف المقابل', 'By Counterparty')}</button>
           </div>
+          )}
         </div>
 
         <div className="overflow-x-auto">
@@ -131,7 +134,7 @@ const AccountMovements = ({ txns, isRTL, tr, header }: any) => {
   );
 };
 
-export const BankMovements = ({ records = [] }: { records: any[] }) => {
+export const BankMovements = ({ records = [], forcedView }: { records: any[]; forcedView?: 'type' | 'counterparty' }) => {
   const { language } = useUI();
   const isRTL = language === 'ar';
   const tr = (ar: string, en: string) => (isRTL ? ar : en);
@@ -158,7 +161,7 @@ export const BankMovements = ({ records = [] }: { records: any[] }) => {
           {tr(`يوجد ${accounts.length} حسابات بنكية — حركة كل حساب معروضة على حدة.`, `${accounts.length} bank accounts — each account's movements shown separately.`)}
         </div>
       )}
-      {accounts.map((a) => <AccountMovements key={a.accountKey} txns={a.txns} isRTL={isRTL} tr={tr} header={a} />)}
+      {accounts.map((a) => <AccountMovements key={a.accountKey} txns={a.txns} isRTL={isRTL} tr={tr} header={a} forcedView={forcedView} />)}
       {accounts.length === 0 && (<div className="bg-white rounded-2xl border border-slate-200 p-10 text-center text-slate-400">{tr('لا توجد حركات بنكية', 'No bank transactions')}</div>)}
     </div>
   );

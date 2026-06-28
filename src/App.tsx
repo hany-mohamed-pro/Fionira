@@ -25,7 +25,6 @@ import { TrialBalance } from './modules/TrialBalance';
 import { GeneralLedger } from './modules/GeneralLedger';
 import { OwnersSummary } from './modules/OwnersSummary';
 import { BranchComparison } from './modules/BranchComparison';
-import { VisualDashboard } from './modules/VisualDashboard';
 import { ExpensesDashboard } from './modules/ExpensesDashboard';
 import { RevenuesDashboard } from './modules/RevenuesDashboard';
 import { PayrollDashboard } from './modules/PayrollDashboard';
@@ -48,8 +47,7 @@ import { MonthlyPayroll } from './modules/MonthlyPayroll';
 import { PayrollExpenseAllocation } from './modules/PayrollExpenseAllocation';
 import { YearlyComparison } from './modules/YearlyComparison';
 import { AnomaliesReport } from './modules/AnomaliesReport';
-import { BankReconciliation } from './modules/BankReconciliation';
-import { BankMovements } from './modules/BankMovements';
+import { BankAccountsView } from './modules/BankAccountsView';
 import { BalanceSheet } from './modules/BalanceSheet';
 import { AlertsReport } from './modules/AlertsReport';
 import { SmartInvoice } from './modules/SmartInvoice';
@@ -2077,7 +2075,7 @@ export default function App() {
     if (appMode === 'dashboard') type = 'GLOBAL_DASHBOARD';
     else if (activeTab === 'dashboard') type = 'MODULE_DASHBOARD';
     else if (['settings', 'user_management'].includes(activeTab as string)) type = 'SETTINGS_PAGE';
-    else if (['income_statement', 'owners_summary', 'branch_comparison', 'visual_dashboard', 'yearly_comparison', 'balance_sheet', 'cash_flow', 'bank_reconciliation'].includes(activeTab as string)) type = 'REPORT_PAGE';
+    else if (['income_statement', 'owners_summary', 'branch_comparison', 'yearly_comparison', 'balance_sheet', 'cash_flow', 'bank_reconciliation'].includes(activeTab as string)) type = 'REPORT_PAGE';
     else if (['smart_invoice', 'quotations', 'welcome', 'alerts'].includes(activeTab as string)) type = 'FORM_PAGE';
     
     let breadcrumbLevel2 = t.workspace[appMode as keyof typeof t.workspace] || appMode;
@@ -2114,8 +2112,7 @@ export default function App() {
        else if (activeTab === 'owners_summary') { pageTitle = isRTL ? 'ملخص الملاك' : 'Owners Summary'; subtitle = isRTL ? 'ملخص مالي مباشر ومصمم خصيصاً للملاك ومتخذي القرار لعرض مؤشرات الأداء الحيوية للشركة.' : 'Live financial summary designed specifically for owners and decision-makers to display vital company KPIs.'; }
        else if (activeTab === 'branch_comparison') { pageTitle = isRTL ? 'مقارنة الفروع' : 'Branch Comparison'; subtitle = isRTL ? 'مقارنة الأداء المالي لكل فرع جنباً إلى جنب — من نفس حسابات قائمة الدخل.' : 'Side-by-side financial performance per branch — from the same Income Statement math.'; }
        else if (activeTab === 'yearly_comparison') { pageTitle = isRTL ? 'المقارنة السنوية' : 'Yearly Comparison'; subtitle = isRTL ? 'مقارنة الأداء المالي بين السنوات المختلفة لتحديد معدلات النمو والانحدار.' : 'Comparison of financial performance between different years to identify growth and decline rates.'; }
-       else if (activeTab === 'visual_dashboard') { pageTitle = isRTL ? 'التحليل المرئي' : 'Visual Dashboard'; subtitle = isRTL ? 'مؤشرات ورسوم بيانية تفاعلية متقدمة لتحليل الأداء المالي.' : 'Advanced interactive charts and KPIs to analyze financial performance.'; }
-       else if (activeTab === 'bank_reconciliation') { pageTitle = isRTL ? 'مطابقة البنوك' : 'Bank Reconciliation'; subtitle = isRTL ? 'مطابقة الرصيد الافتتاحي والختامي مع حركة الحسابات، وتوزيع الحركات حسب الحساب المحاسبي.' : 'Reconcile opening/closing balances against movements, and break down by GL account.'; }
+       else if (activeTab === 'bank_reconciliation') { pageTitle = isRTL ? 'مطابقة وحركة البنوك' : 'Bank Accounts'; subtitle = isRTL ? 'مطابقة الأرصدة، وتحليل الحركات حسب النوع والطرف المقابل — في صفحة واحدة.' : 'Reconcile balances and analyse movements by type and counterparty — in one page.'; }
     } else if (type === 'FORM_PAGE') {
        if (activeTab === 'smart_invoice') { pageTitle = isRTL ? 'الفاتورة الذكية' : 'Smart Invoice'; subtitle = isRTL ? 'إصدار فواتير ذكية متوافقة مع متطلبات هيئة الزكاة والضريبة والجمارك.' : 'Issue smart invoices compliant with ZATCA requirements.'; }
        else if (activeTab === 'quotations') { pageTitle = isRTL ? 'عروض الأسعار' : 'Quotations'; subtitle = isRTL ? 'إدارة وتصدير عروض الأسعار للعملاء بطريقة احترافية.' : 'Manage and export professional quotations for customers.'; }
@@ -2136,7 +2133,7 @@ export default function App() {
        }
     }
 
-    let allowExport = ['DATA_PAGE', 'REPORT_PAGE'].includes(type) && !['visual_dashboard'].includes(activeTab as string);
+    let allowExport = ['DATA_PAGE', 'REPORT_PAGE'].includes(type);
     
     let showToolbar = false;
     let showDatePicker = false;
@@ -2629,7 +2626,7 @@ export default function App() {
           )}
 
           {activeTab === 'categories_summary' && appMode === 'banks' && (
-            <BankMovements records={filteredRecords} />
+            <BankAccountsView records={scopeByBranch(filteredRecords)} defaultMode="type" />
           )}
 
           {activeTab === 'categories_summary' && appMode !== 'banks' && (
@@ -2736,28 +2733,6 @@ export default function App() {
             />
           )}
 
-          {activeTab === 'visual_dashboard' && (
-             <VisualDashboard 
-                tenantId={profile?.tenantId}
-                appMode={appMode} 
-                chartDataRaw={chartDataRaw}
-                revPieData={revPieData}
-                expPieData={expPieData}
-                expBarData={expBarData}
-                topEntitiesData={topEntitiesData}
-                topSuppliers={topSuppliers}
-                topCustomers={topCustomers}
-                topEmployees={topEmployees}
-                incomeStatement={incomeStatement}
-                anomaliesCount={totalAnomaliesCount}
-                anomaliesSummary={anomaliesSummary}
-                onMonthClick={handleMonthClick}
-                onResetFilter={resetFilter}
-                dateFilter={{ ...(dateFilter || {}), searchQuery: searchQuery || '' }}
-                onNavigateToTab={handleNavigateToTabWithAnchor}
-             />
-          )}
-
           {activeTab === 'tax_declaration' && (
             <TaxDeclaration 
               revenuesRecords={plFilteredRevenues}
@@ -2801,30 +2776,8 @@ export default function App() {
             <GeneralLedger />
           )}
 
-          {activeTab === 'visual_dashboard' && (
-             <VisualDashboard 
-                tenantId={profile?.tenantId}
-                appMode={appMode} 
-                chartDataRaw={chartDataRaw}
-                revPieData={revPieData}
-                expPieData={expPieData}
-                expBarData={expBarData}
-                topEntitiesData={topEntitiesData}
-                topSuppliers={topSuppliers}
-                topCustomers={topCustomers}
-                topEmployees={topEmployees}
-                incomeStatement={incomeStatement}
-                anomaliesCount={totalAnomaliesCount}
-                anomaliesSummary={anomaliesSummary}
-                onMonthClick={handleMonthClick}
-                onResetFilter={resetFilter}
-                dateFilter={{ ...(dateFilter || {}), searchQuery: searchQuery || '' }}
-                onNavigateToTab={handleNavigateToTabWithAnchor}
-             />
-          )}
-          
           {activeTab === 'bank_reconciliation' && appMode === 'banks' && (
-            <BankReconciliation records={filteredRecords} />
+            <BankAccountsView records={scopeByBranch(filteredRecords)} defaultMode="reconciliation" />
           )}
 
           {activeTab === 'anomalies_report' && profile?.role === 'admin' && (
