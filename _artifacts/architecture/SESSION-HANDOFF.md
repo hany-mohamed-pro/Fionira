@@ -1,5 +1,37 @@
 # Fionira — Session Handoff
 
+## 0. Latest segment (2026-06-28): IA CONSOLIDATION COMPLETE (Phases 1–3) + new financial statements
+
+This segment delivered the financial-statement triad completion + the full Information-Architecture
+consolidation. **This is a natural, complete stopping point — today's IA consolidation goal is fully achieved.**
+
+**A) Financial capabilities built this segment (all live-verified):**
+- **Real Cash Flow Statement** (`8bfaaf64`) — direct-method, reconciled to the **actual bank closing balance** (shared `bank-cashflow-core.ts`); branch-aware. Investing/Financing honestly labelled, not fabricated.
+- **Settings save fix** (`5482b2ae`) — dev-auth Firestore `permission-denied` no longer surfaced as a false save error (strictly a dev artifact; production unaffected).
+- **Per-branch visibility** (`7bf4614b`) — `computePnLCore` single P&L source + `مقارنة الفروع` view + global branch scope.
+
+**B) IA Consolidation Plan (`75cc6b0d`, corrected additive-only `a94f3d70`) — EXECUTED in 3 phases:**
+- **Phase 1** (`acb0d8b7`) — Bank pages merged into one tabbed page (`BankAccountsView`: مطابقة / حسب النوع / حسب الطرف); Visual Analytics retired (strict GlobalDashboard duplicate). Zero info loss; multi-account never-merge re-verified.
+- **Phase 2** (`2c26bdb5`) — **Owner Home** additive band (ربحك / النقدية لديك via reconciled cash / ما يحتاج انتباهك) above the *preserved* GlobalDashboard; **Profitability Waterfall relocated** to Income Statement (`ProfitabilityWaterfall.tsx`) and verified BEFORE **OwnersSummary retired** (gate honoured).
+- **Phase 3** (`726af371`) — **Budget vs Actual** (`BudgetVsActual.tsx`): Reports tab after Income Statement + Owner Home one-line; budgets in `AppSettings.budgets`; Excel template + in-app editor; **Actual sourced exclusively from `computePnLCore` (zero drift)**; sign-aware variance; branch-aware. MVP = annual section-level.
+
+Binding principle enforced throughout (`a94f3d70` "WHAT WE WILL NEVER DO"): **no existing KPI card, chart, or unique visualization was hidden, collapsed, demoted, or lost** — every consolidation was structural (fewer entry points) or additive, never a reduction of information.
+
+**C) Deferred-items registry — RE-CONFIRMED INTACT for the next session (every open item):**
+1. **D11** — full construction-materials WIP / job-costing (own dedicated session).
+2. **D12** — deferred/unearned-revenue LIABILITY (needs chart-of-accounts-with-types).
+3. **D13** — "ال"/vendor-leakage tokenization (highest risk; per-keyword vendor-safety tagging first).
+4. **20-row preamble cap** on expenses/revenues parsing (bank parser already anchor-based).
+5. **UserManagement real backend** (endpoints stubbed — debt B3).
+6. **Balance Sheet structural fix** — replace estimated/labelled-"تقديري" equity with real chart-of-accounts-driven statement.
+7. **Cash Flow Investing/Financing** — separable only after fixed-asset (D10) + owner-capital tagging (documented in `cash-flow-statement-build.md`).
+8. **Smart branch suggestion** — suggest-don't-force branch inference at upload (planned, not started; §6).
+9. **4 remaining activity profiles** — beyond the 5 done (insight-only rules).
+10. **Bilingual parity (~29 rules)** — English coverage for classification rules flagged in `2e6349a`.
+11. **NEW — Real Owners' Equity statement** (from Phase 2/3 scoping) — needs NEW data capture (owner contributions/drawings) + the chart-of-accounts-with-types foundation (shared with #6 Balance Sheet + D12). The ONLY remaining IA-roadmap item; a separate future milestone.
+
+None of the above was touched/altered by this segment — all remain open and accurately stated.
+
 > Resume point for any future session. HEAD = `74b3638`. Working tree clean except the
 > long-standing untouched runtime/state files (`data/erp_registry.json`, `data/uploads.json`,
 > and a few `data/**/staged-files/*.staged` left from live upload testing — all under the
