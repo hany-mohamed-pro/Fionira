@@ -41,6 +41,19 @@ All items below are **keyword-collision / tie-break** issues in the scoring engi
   legitimate signal from leakage either. **Reverted** (engine unchanged from Track A; D5 not regressed).
   D13's real fix needs **per-keyword vendor-safety tagging FIRST**, then field separation, then "ال" —
   a larger separately-scoped effort. See `engine-fix-trackB-combined-d13.md`.
+- **D13 combined resolution (2026-06-29) — RE-ATTEMPTED with a hybrid, MEASURED unsafe again, STILL OPEN.**
+  Re-ran the full two-layer plan on an 867-record corpus (802 real + 65 synthetic, all 5 activity sets).
+  (1) **Field-separation (hybrid: description full score + vendor name at 0.3× hint)** — lowered the blast
+  radius to **1 record** (vs Track B's 8) but did **not** fix the core issue: that 1 record is the
+  `معدات المخابز` / `قالب إنتاج` case (`group=tools_high_value`, 6,900 SAR) — a *legitimate* fixed-asset
+  vendor signal wrongly pushed to consumables. Confirms: a uniform low-score vendor pass cannot separate
+  legitimate strong vendor signal from leakage. (2) **ال-normalization (description-only)** — independently
+  unsafe: **root-word breakage** (`ألوان`→`وان`, loses raw-materials) and **descOnly exposure**
+  (`المكتب`→`مكتب`→rent, hijacks telecom/utility bills into rent). The two unsafeties are **separable** —
+  field-separation does NOT make ال safe. **Reverted; no forced fix.** Sharper prerequisite re-confirmed:
+  per-keyword vendor-safety tagging, then a guarded ال-mechanism (root-word guard + descOnly disambiguation).
+  D5's ال-prefixed form (`الترجمة`) rides on this same future work; its bare form stays on the narrow patch.
+  See `engine-fix-d13-combined-resolution.md`.
 - **Chart-of-accounts additions — D2 & D7 RESOLVED (end-to-end), D12 still DEFERRED.** Added two new
   COGS accounts (`تكلفة المبيعات - هدر وتلف إنتاج` for D2; `تكلفة المبيعات - هالك وعجز مخزون` for D7) to
   `CATEGORY_ORDER` + two new Stage-3 routing rules; they display under COGS in the Income Statement.
