@@ -157,7 +157,6 @@ export function NewAppShell({
                title: isRTL ? 'التقارير الإدارية' : 'Management',
                items: [
                  { id: 'dashboard', label: isRTL ? 'لوحة التقارير' : 'Dashboard', icon: Activity, desc: isRTL ? 'مركز التقارير الموحد' : 'Unified reports center' },
-                 { id: 'owners_summary', label: isRTL ? 'ملخص الملاك' : 'Owners Summary', icon: PieChart, desc: isRTL ? 'أداء ملاك الأعمال' : 'Business owners performance' },
                ]
             },
             {

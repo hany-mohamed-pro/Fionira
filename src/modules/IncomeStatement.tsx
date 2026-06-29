@@ -8,6 +8,7 @@ import { Layers, ChevronUp, ChevronDown, Search, X, AlertCircle, CheckCircle2, A
 import { formatCurrency, buildHierarchy, HierarchyNode } from '../lib/financial-utils';
 import { formatAmount } from '../lib/formatters';
 import { TraceModal } from '../modules/TraceModal';
+import { ProfitabilityWaterfall } from './ProfitabilityWaterfall';
 
 interface IncomeStatementProps {
   incomeStatement: any;
@@ -305,7 +306,10 @@ export const IncomeStatement: React.FC<IncomeStatementProps> = ({ incomeStatemen
             </div>
         )}
 
-        <TraceModal 
+        {/* Profitability Waterfall — relocated from the retired OwnersSummary (IA Phase 2). */}
+        <ProfitabilityWaterfall incomeStatement={incomeStatement} />
+
+        <TraceModal
           show={showTraceModal}
           data={traceData}
           title={traceTitle}

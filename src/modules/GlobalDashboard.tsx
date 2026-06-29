@@ -1,6 +1,6 @@
 import React from 'react';
 import { useUI } from '../contexts/UIContext';
-import { Activity, Upload, FileText, ArrowUpRight, ArrowDownRight, TrendingUp, AlertTriangle, Users, CheckCircle, BarChart2, PieChart, AlertCircle } from 'lucide-react';
+import { Activity, Upload, FileText, ArrowUpRight, ArrowDownRight, TrendingUp, AlertTriangle, Users, CheckCircle, BarChart2, PieChart, AlertCircle, Wallet, ArrowLeft } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer } from 'recharts';
 import { formatCurrency } from '../lib/formatters';
 export const GlobalDashboard = ({
@@ -10,7 +10,9 @@ export const GlobalDashboard = ({
   chartDataRaw,
   revenuesData,
   expensesData,
-  stagedFilesCount = 0
+  stagedFilesCount = 0,
+  cashClosing = null,
+  cashHasData = false
 }: any) => {
   const { language } = useUI();
   const isRTL = language === 'ar';
@@ -36,8 +38,59 @@ export const GlobalDashboard = ({
     }));
   }, [chartDataRaw]);
 
+  const profitMargin = totalRevenue > 0 ? Math.round((netProfit / totalRevenue) * 100) : null;
+  const attentionItems: string[] = [];
+  if (stagedFilesCount > 0) attentionItems.push(`${stagedFilesCount} ملف بانتظار الاعتماد`);
+  if (totalAnomaliesCount > 0) attentionItems.push(`${totalAnomaliesCount} ملاحظة تحتاج مراجعة`);
+
   return (
     <div className="space-y-4 w-full" dir={isRTL ? "rtl" : "ltr"}>
+      {/* OWNER HOME — plain-language summary band (ADDITIVE: all existing KPIs/chart/cards remain below, unchanged) */}
+      {isRTL && (
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-[16px] md:gap-[20px]">
+        {/* ربحك هذا الشهر */}
+        <button onClick={() => handleNavClick('reports', 'income_statement')} className="text-right bg-white rounded-[18px] border border-slate-200 p-5 shadow-sm hover:shadow-md hover:border-emerald-300 transition-all relative overflow-hidden">
+          <div className={`absolute top-0 right-0 w-1.5 h-full ${netProfit >= 0 ? 'bg-emerald-500' : 'bg-rose-500'}`}></div>
+          <p className="text-[13px] font-bold text-slate-500 mb-2">ربحك هذا الشهر</p>
+          <h3 className={`text-[26px] leading-none font-black tracking-tight mb-2 ${netProfit >= 0 ? 'text-emerald-600' : 'text-rose-600'}`} dir="ltr">{formatCurrency(netProfit)}</h3>
+          <p className="text-[12px] font-medium text-slate-500 leading-relaxed">
+            {netProfit >= 0
+              ? `ربحت ${formatCurrency(netProfit)} هذا الشهر${profitMargin != null ? ` بهامش ${profitMargin}%` : ''}.`
+              : `خسرت ${formatCurrency(Math.abs(netProfit))} هذا الشهر — راجع المصروفات.`}
+          </p>
+        </button>
+
+        {/* النقدية لديك */}
+        <button onClick={() => handleNavClick('reports', 'cash_flow')} className="text-right bg-white rounded-[18px] border border-slate-200 p-5 shadow-sm hover:shadow-md hover:border-indigo-300 transition-all relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-1.5 h-full bg-indigo-500"></div>
+          <div className="flex items-center gap-2 mb-2"><Wallet className="w-4 h-4 text-indigo-500" /><p className="text-[13px] font-bold text-slate-500">النقدية لديك</p></div>
+          <h3 className="text-[26px] leading-none font-black tracking-tight text-slate-800 mb-2" dir="ltr">{cashHasData && cashClosing != null ? formatCurrency(cashClosing) : '—'}</h3>
+          <p className="text-[12px] font-medium text-slate-500 leading-relaxed">
+            {cashHasData ? 'الرصيد النقدي الفعلي وفق كشوف البنوك المطابَقة.' : 'ارفع كشف حساب بنكي لعرض رصيدك النقدي الفعلي.'}
+          </p>
+        </button>
+
+        {/* ما يحتاج انتباهك */}
+        <button onClick={() => handleNavClick('expenses', 'upload')} className="text-right bg-white rounded-[18px] border border-slate-200 p-5 shadow-sm hover:shadow-md hover:border-amber-300 transition-all relative overflow-hidden">
+          <div className={`absolute top-0 right-0 w-1.5 h-full ${attentionItems.length > 0 ? 'bg-amber-500' : 'bg-emerald-500'}`}></div>
+          <div className="flex items-center gap-2 mb-2">{attentionItems.length > 0 ? <AlertTriangle className="w-4 h-4 text-amber-500" /> : <CheckCircle className="w-4 h-4 text-emerald-500" />}<p className="text-[13px] font-bold text-slate-500">ما يحتاج انتباهك</p></div>
+          {attentionItems.length > 0 ? (
+            <div className="space-y-1.5 mt-1">
+              {attentionItems.map((it, i) => (
+                <p key={i} className="text-[13px] font-bold text-slate-700 flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>{it}</p>
+              ))}
+              <p className="text-[11px] text-indigo-600 font-bold flex items-center gap-1 pt-1">عرض التفاصيل <ArrowLeft className="w-3 h-3" /></p>
+            </div>
+          ) : (
+            <>
+              <h3 className="text-[20px] leading-none font-black tracking-tight text-emerald-600 mb-2">كل شيء على ما يرام</h3>
+              <p className="text-[12px] font-medium text-slate-500">لا يوجد ما يحتاج انتباهك حالياً.</p>
+            </>
+          )}
+        </button>
+      </div>
+      )}
+
       {stagedFilesCount > 0 && (
         <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4" dir="rtl">
           <div className="flex items-center gap-4">

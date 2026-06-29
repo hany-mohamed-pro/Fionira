@@ -23,7 +23,6 @@ import { Audit } from './modules/Audit';
 import { IncomeStatement } from './modules/IncomeStatement';
 import { TrialBalance } from './modules/TrialBalance';
 import { GeneralLedger } from './modules/GeneralLedger';
-import { OwnersSummary } from './modules/OwnersSummary';
 import { BranchComparison } from './modules/BranchComparison';
 import { ExpensesDashboard } from './modules/ExpensesDashboard';
 import { RevenuesDashboard } from './modules/RevenuesDashboard';
@@ -48,6 +47,7 @@ import { PayrollExpenseAllocation } from './modules/PayrollExpenseAllocation';
 import { YearlyComparison } from './modules/YearlyComparison';
 import { AnomaliesReport } from './modules/AnomaliesReport';
 import { BankAccountsView } from './modules/BankAccountsView';
+import { computePortfolioCashFlow } from './lib/bank-cashflow-core';
 import { BalanceSheet } from './modules/BalanceSheet';
 import { AlertsReport } from './modules/AlertsReport';
 import { SmartInvoice } from './modules/SmartInvoice';
@@ -890,7 +890,7 @@ export default function App() {
 
   // ── Global branch scope ───────────────────────────────────────────────
   // A consolidated branch lens applied to the P&L (Income Statement, GlobalDashboard,
-  // OwnersSummary, Reports). Default 'all' = today's behavior (every record), so
+  // Reports). Default 'all' = today's behavior (every record), so
   // single-branch tenants are unaffected. The branch list comes from tenant settings.
   const branchList = useMemo(() => (settings?.branches || []), [settings]);
   const hasBranches = branchList.length > 0;
@@ -901,6 +901,8 @@ export default function App() {
   const scopedRevenues = useMemo(() => scopeByBranch(plFilteredRevenues), [plFilteredRevenues, branchScope]);
   const scopedPayroll = useMemo(() => scopeByBranch(plFilteredPayroll), [plFilteredPayroll, branchScope]);
   const scopedBanks = useMemo(() => scopeByBranch(plFilteredBanks), [plFilteredBanks, branchScope]);
+  // Real cash position for the Owner Home band (reuses the reconciled cash-flow core).
+  const ownerCash = useMemo(() => computePortfolioCashFlow(scopedBanks), [scopedBanks]);
 
   const totalAnomaliesCount = useMemo(() => {
     const expAnomalies = plFilteredExpenses.filter(r => r.Anomalies && r.Anomalies.length > 0).length;
@@ -2075,7 +2077,7 @@ export default function App() {
     if (appMode === 'dashboard') type = 'GLOBAL_DASHBOARD';
     else if (activeTab === 'dashboard') type = 'MODULE_DASHBOARD';
     else if (['settings', 'user_management'].includes(activeTab as string)) type = 'SETTINGS_PAGE';
-    else if (['income_statement', 'owners_summary', 'branch_comparison', 'yearly_comparison', 'balance_sheet', 'cash_flow', 'bank_reconciliation'].includes(activeTab as string)) type = 'REPORT_PAGE';
+    else if (['income_statement', 'branch_comparison', 'yearly_comparison', 'balance_sheet', 'cash_flow', 'bank_reconciliation'].includes(activeTab as string)) type = 'REPORT_PAGE';
     else if (['smart_invoice', 'quotations', 'welcome', 'alerts'].includes(activeTab as string)) type = 'FORM_PAGE';
     
     let breadcrumbLevel2 = t.workspace[appMode as keyof typeof t.workspace] || appMode;
@@ -2109,7 +2111,6 @@ export default function App() {
        if (activeTab === 'income_statement') { pageTitle = isRTL ? 'قائمة الدخل' : 'Income Statement'; subtitle = isRTL ? 'تدمج هذه القائمة بين المبيعات والمشتريات لاستخراج صافي الربح التشغيلي وفقاً للمعايير المحاسبية.' : 'This statement merges Sales and Purchases to extract net operating profit according to accounting standards.'; }
        else if (activeTab === 'balance_sheet') { pageTitle = isRTL ? 'الميزانية العمومية' : 'Balance Sheet'; subtitle = isRTL ? 'عرض تقديري للأصول والالتزامات وحقوق الملكية بناءً على البيانات المتوفرة في النظام.' : 'Estimated view of assets, liabilities, and equity based on available system data.'; }
        else if (activeTab === 'cash_flow') { pageTitle = isRTL ? 'التدفقات النقدية' : 'Cash Flow'; subtitle = isRTL ? 'تحليل حركة السيولة النقدية الداخلة والخارجة من النشاط خلال الفترة المحددة.' : 'Analysis of cash inflows and outflows during the specified period.'; }
-       else if (activeTab === 'owners_summary') { pageTitle = isRTL ? 'ملخص الملاك' : 'Owners Summary'; subtitle = isRTL ? 'ملخص مالي مباشر ومصمم خصيصاً للملاك ومتخذي القرار لعرض مؤشرات الأداء الحيوية للشركة.' : 'Live financial summary designed specifically for owners and decision-makers to display vital company KPIs.'; }
        else if (activeTab === 'branch_comparison') { pageTitle = isRTL ? 'مقارنة الفروع' : 'Branch Comparison'; subtitle = isRTL ? 'مقارنة الأداء المالي لكل فرع جنباً إلى جنب — من نفس حسابات قائمة الدخل.' : 'Side-by-side financial performance per branch — from the same Income Statement math.'; }
        else if (activeTab === 'yearly_comparison') { pageTitle = isRTL ? 'المقارنة السنوية' : 'Yearly Comparison'; subtitle = isRTL ? 'مقارنة الأداء المالي بين السنوات المختلفة لتحديد معدلات النمو والانحدار.' : 'Comparison of financial performance between different years to identify growth and decline rates.'; }
        else if (activeTab === 'bank_reconciliation') { pageTitle = isRTL ? 'مطابقة وحركة البنوك' : 'Bank Accounts'; subtitle = isRTL ? 'مطابقة الأرصدة، وتحليل الحركات حسب النوع والطرف المقابل — في صفحة واحدة.' : 'Reconcile balances and analyse movements by type and counterparty — in one page.'; }
@@ -2542,6 +2543,8 @@ export default function App() {
                   revenuesData={revenuesData}
                   expensesData={expensesData}
                   stagedFilesCount={stagedFilesCount}
+                  cashClosing={ownerCash.closingBalance}
+                  cashHasData={ownerCash.accountCount > 0}
                 />
               )}
             </div>
@@ -2758,10 +2761,6 @@ export default function App() {
 
           {activeTab === 'raw_data' && profile?.role === 'admin' && (
             <RawDataInspector appMode={appMode as any} searchQuery={searchQuery} />
-          )}
-
-          {activeTab === 'owners_summary' && (
-            <OwnersSummary incomeStatement={incomeStatement} />
           )}
 
           {activeTab === 'branch_comparison' && (

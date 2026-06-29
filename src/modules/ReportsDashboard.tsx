@@ -14,7 +14,6 @@ export const ReportsDashboard = ({ incomeStatement, onNavigateToTab }: any) => {
     { id: 'income_statement', icon: FileText, title: isRTL ? 'قائمة الدخل' : 'Income Statement', desc: isRTL ? 'إجمالي الإيرادات والمصروفات وصافي الربح' : 'Total revenues, expenses and net profit', color: 'bg-emerald-50 text-emerald-600' },
     { id: 'balance_sheet', icon: Scale, title: isRTL ? 'الميزانية العمومية' : 'Balance Sheet', desc: isRTL ? 'الأصول والخصوم وحقوق الملكية' : 'Assets, liabilities and equity', color: 'bg-blue-50 text-blue-600' },
     { id: 'cash_flow', icon: Coins, title: isRTL ? 'التدفقات النقدية' : 'Cash Flow', desc: isRTL ? 'حركة النقد الداخل والخارج' : 'Cash inflows and outflows', color: 'bg-purple-50 text-purple-600' },
-    { id: 'owners_summary', icon: PieChart, title: isRTL ? 'ملخص الملاك' : 'Owners Summary', desc: isRTL ? 'ملخص الأداء المالي لمتخذي القرار' : 'Financial performance summary for decision makers', color: 'bg-pink-50 text-pink-600' },
     { id: 'branch_comparison', icon: GitBranch, title: isRTL ? 'مقارنة الفروع' : 'Branch Comparison', desc: isRTL ? 'أداء كل فرع جنباً إلى جنب' : 'Side-by-side performance per branch', color: 'bg-indigo-50 text-indigo-600' },
     { id: 'yearly_comparison', icon: Calendar, title: isRTL ? 'المقارنة السنوية' : 'Yearly Comparison', desc: isRTL ? 'مقارنة الأداء بين السنوات المالية' : 'Performance comparison across years', color: 'bg-orange-50 text-orange-600' },
   ];
