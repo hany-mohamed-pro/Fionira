@@ -39,7 +39,7 @@ correctly. Engine is byte-identical to its last known-good state (no D13 code sh
 `engine-fix-d13-combined-resolution.md` + `engine-technical-debt.md`.
 
 **C) DEFINITIVE DEFERRED-ITEMS REGISTRY — the complete, unified list (supersedes all fragmented prior mentions):**
-1. **D11 — Construction WIP / job-costing** — escalated to top priority; needs its own dedicated session (material direct-cost accumulation, %-completion, WIP→COGS on completion). Today materials route to the existing COGS raw-materials account as a stopgap.
+1. ✅ **D11 — Construction WIP / job-costing — RESOLVED (2026-06-30).** Per-project WIP cost accumulation with completed-contract COGS transition: active-project direct costs are deferred from the P&L (`pnlExpenses` partition before `computePnLCore`) and recognized as COGS on completion; «تكلفة المشاريع» view + Settings «المشاريع» management (create + mark-complete trigger); branch-aware; `categorization-engine.ts` untouched; zero regression (inert without active projects). Verified deterministically (defer→recognize→restore, exact numbers) AND live (COGS 33,900 deferred → 73,900 on completion; WIP 60,000 in the costing view). See `d11-construction-wip-job-costing.md`. *Remaining linked future work:* the formal balance-sheet WIP **asset** line + revenue-side deferral (D12), both gated on the chart-of-accounts-with-types foundation (#6).
 2. **D12 — Unearned / advance revenue (liability)** — needs a liability account model; gated on the Balance Sheet structural fix (chart-of-accounts-with-types). Activity-insight layer already surfaces it.
 3. **D13 — ال-prefix + vendor-name leakage** — sharper diagnosis above (§0-B2). Two separable unsafe mechanisms; NEW prerequisite = per-keyword vendor-safety tagging FIRST, then guarded field-separation + a root-word/descOnly-guarded ال-mechanism.
 4. **Expenses/revenues 20-row preamble cap** — parser caps preamble scan at 20 rows (the bank parser is already anchor-based and unaffected); found, not fixed; touches @DO_NOT_MODIFY files — needs sign-off.
@@ -56,8 +56,9 @@ None of the above was touched/altered by this session — all remain open and ac
 
 ## Session closing summary (definitive stopping point)
 Across this body of work, Fionira reached: **full security hardening**; a **complete UX flow**; **5 activity-aware
-intelligence profiles** (insight-only, engine frozen); **10 of 13 engine debt items resolved** with a full
-audit trail (D13 re-measured and honestly left open with a sharper diagnosis); a **complete, honestly-labelled
+intelligence profiles** (insight-only, engine frozen); **11 of 13 engine debt items resolved** with a full
+audit trail (D11 now resolved via WIP/job-costing; D13 re-measured and honestly left open with a sharper
+diagnosis); a **complete, honestly-labelled
 four-statement financial suite** — Income Statement, Trial Balance, Balance Sheet (labelled "تقديري"), and a
 real bank-reconciled Cash Flow; **real multi-bank and multi-branch support**; and a **3-phase IA consolidation**
 (bank-pages merge + Visual retire → Owner Home + waterfall relocation + Owners Summary retire → Budget vs Actual).

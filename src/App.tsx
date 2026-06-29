@@ -23,6 +23,7 @@ import { Audit } from './modules/Audit';
 import { IncomeStatement } from './modules/IncomeStatement';
 import { TrialBalance } from './modules/TrialBalance';
 import { GeneralLedger } from './modules/GeneralLedger';
+import { ProjectCosting } from './modules/ProjectCosting';
 import { BranchComparison } from './modules/BranchComparison';
 import { ExpensesDashboard } from './modules/ExpensesDashboard';
 import { RevenuesDashboard } from './modules/RevenuesDashboard';
@@ -905,6 +906,36 @@ export default function App() {
   // Real cash position for the Owner Home band (reuses the reconciled cash-flow core).
   const ownerCash = useMemo(() => computePortfolioCashFlow(scopedBanks), [scopedBanks]);
 
+  // ── D11: Construction WIP / job costing (completed-contract) ──────────────
+  // A direct cost is attributed to a project by project-name match in its text
+  // (the same signal Phase 5's project-link insight surfaces). Costs of an ACTIVE
+  // project accumulate as WIP and are DEFERRED from the P&L; on completion they
+  // flow to COGS. Zero effect when no projects exist (restaurant/others unchanged).
+  const projectList = useMemo(() => (settings?.projects || []), [settings]);
+  const projNorm = (s: string) => String(s || '').replace(/[أإآ]/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي').replace(/\s+/g, ' ').toLowerCase().trim();
+  const projectOfCost = (r: any) => {
+    if (!projectList.length) return null;
+    const t = projNorm(`${r.Item_Description || ''} ${r.Entity_Name || ''} ${r.Raw_Entity || ''}`);
+    return projectList.find((p: any) => p.name && t.includes(projNorm(p.name))) || null;
+  };
+  const isActiveWipCost = (r: any) => { const p = projectOfCost(r); return !!(p && p.status === 'active'); };
+  const hasActiveProjects = projectList.some((p: any) => p.status === 'active');
+  // Expenses fed to the P&L EXCLUDE active-project WIP costs (deferred until completion).
+  const pnlExpenses = useMemo(
+    () => (hasActiveProjects ? scopedExpenses.filter((r: any) => !isActiveWipCost(r)) : scopedExpenses),
+    [scopedExpenses, projectList]
+  );
+  const projectCosting = useMemo(() => projectList.map((p: any) => {
+    const n = projNorm(p.name);
+    const inProj = (r: any) => projNorm(`${r.Item_Description || ''} ${r.Entity_Name || ''} ${r.Raw_Entity || ''}`).includes(n);
+    const costs = scopedExpenses.filter(inProj);
+    const revs = scopedRevenues.filter(inProj);
+    const cost = costs.reduce((s: number, r: any) => s + (r.Net_Amount || 0), 0);
+    const revenue = revs.reduce((s: number, r: any) => s + (r.Net_Amount || 0), 0);
+    return { ...p, cost, revenue, profit: revenue - cost, costCount: costs.length, revCount: revs.length };
+  }), [projectList, scopedExpenses, scopedRevenues]);
+  const wipTotal = useMemo(() => projectCosting.filter((p: any) => p.status === 'active').reduce((s: number, p: any) => s + p.cost, 0), [projectCosting]);
+
   const totalAnomaliesCount = useMemo(() => {
     const expAnomalies = plFilteredExpenses.filter(r => r.Anomalies && r.Anomalies.length > 0).length;
     const revAnomalies = plFilteredRevenues.filter(r => r.Anomalies && r.Anomalies.length > 0).length;
@@ -926,7 +957,7 @@ export default function App() {
           totalCOGS, totalOPEX, totalCAPEX, totalPayroll,
           totalExpensesVAT, totalExpensesGross, cogsBreakdown, opexBreakdown,
           grossProfit, grossMargin, netOperatingIncome, netMargin
-      } = computePnLCore(scopedExpenses, scopedRevenues, scopedPayroll);
+      } = computePnLCore(pnlExpenses, scopedRevenues, scopedPayroll);
 
       // Filter breakdowns based on appMode for the dashboard (if not in reports mode)
       let dashboardRevBreakdown = Object.entries(revBreakdown);
@@ -1027,7 +1058,7 @@ export default function App() {
           fullCogsBreakdown: Object.entries(cogsBreakdown).sort((a,b)=>b[1]-a[1]),
           fullOpexBreakdown: Object.entries(opexBreakdown).sort((a,b)=>a[1]-b[1]).reverse()
       };
-  }, [scopedRevenues, scopedExpenses, scopedPayroll, plFilteredBanks, appMode, activeTab]);
+  }, [scopedRevenues, pnlExpenses, scopedExpenses, scopedPayroll, plFilteredBanks, appMode, activeTab]);
 
   // Budget-vs-actual summary for the Owner Home one-line surfacing (additive).
   // Net actual from incomeStatement (same source as Income Statement); budget from
@@ -2093,7 +2124,7 @@ export default function App() {
     if (appMode === 'dashboard') type = 'GLOBAL_DASHBOARD';
     else if (activeTab === 'dashboard') type = 'MODULE_DASHBOARD';
     else if (['settings', 'user_management'].includes(activeTab as string)) type = 'SETTINGS_PAGE';
-    else if (['income_statement', 'budget_vs_actual', 'branch_comparison', 'yearly_comparison', 'balance_sheet', 'cash_flow', 'bank_reconciliation'].includes(activeTab as string)) type = 'REPORT_PAGE';
+    else if (['income_statement', 'budget_vs_actual', 'branch_comparison', 'yearly_comparison', 'balance_sheet', 'cash_flow', 'bank_reconciliation', 'project_costing'].includes(activeTab as string)) type = 'REPORT_PAGE';
     else if (['smart_invoice', 'quotations', 'welcome', 'alerts'].includes(activeTab as string)) type = 'FORM_PAGE';
     
     let breadcrumbLevel2 = t.workspace[appMode as keyof typeof t.workspace] || appMode;
@@ -2126,6 +2157,7 @@ export default function App() {
     } else if (type === 'REPORT_PAGE') {
        if (activeTab === 'income_statement') { pageTitle = isRTL ? 'قائمة الدخل' : 'Income Statement'; subtitle = isRTL ? 'تدمج هذه القائمة بين المبيعات والمشتريات لاستخراج صافي الربح التشغيلي وفقاً للمعايير المحاسبية.' : 'This statement merges Sales and Purchases to extract net operating profit according to accounting standards.'; }
        else if (activeTab === 'budget_vs_actual') { pageTitle = isRTL ? 'الموازنة مقابل الفعلي' : 'Budget vs Actual'; subtitle = isRTL ? 'قارن خطتك (الموازنة) بالأداء الفعلي من قائمة الدخل — انحراف لكل قسم، لكل فرع وفترة.' : 'Compare your plan against actuals from the Income Statement — variance per section, branch and period.'; }
+       else if (activeTab === 'project_costing') { pageTitle = isRTL ? 'تكلفة المشاريع' : 'Project Costing'; subtitle = isRTL ? 'تتبّع تكلفة كل مشروع إنشائي كأعمال تحت التنفيذ (WIP) مؤجَّلة عن قائمة الدخل، وتُعترف كتكلفة عند الإغلاق.' : 'Per-project WIP cost tracking, deferred from the Income Statement and recognized as cost on completion.'; }
        else if (activeTab === 'balance_sheet') { pageTitle = isRTL ? 'الميزانية العمومية' : 'Balance Sheet'; subtitle = isRTL ? 'عرض تقديري للأصول والالتزامات وحقوق الملكية بناءً على البيانات المتوفرة في النظام.' : 'Estimated view of assets, liabilities, and equity based on available system data.'; }
        else if (activeTab === 'cash_flow') { pageTitle = isRTL ? 'التدفقات النقدية' : 'Cash Flow'; subtitle = isRTL ? 'تحليل حركة السيولة النقدية الداخلة والخارجة من النشاط خلال الفترة المحددة.' : 'Analysis of cash inflows and outflows during the specified period.'; }
        else if (activeTab === 'branch_comparison') { pageTitle = isRTL ? 'مقارنة الفروع' : 'Branch Comparison'; subtitle = isRTL ? 'مقارنة الأداء المالي لكل فرع جنباً إلى جنب — من نفس حسابات قائمة الدخل.' : 'Side-by-side financial performance per branch — from the same Income Statement math.'; }
@@ -2801,6 +2833,10 @@ export default function App() {
 
           {activeTab === 'general_ledger' && (
             <GeneralLedger />
+          )}
+
+          {activeTab === 'project_costing' && (
+            <ProjectCosting projects={projectCosting} wipTotal={wipTotal} branchScoped={branchScope !== 'all'} />
           )}
 
           {activeTab === 'bank_reconciliation' && appMode === 'banks' && (

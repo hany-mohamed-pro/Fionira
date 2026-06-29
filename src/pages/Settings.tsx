@@ -15,12 +15,13 @@ import {
   Eye,
   EyeOff,
   GitBranch,
-  Plus
+  Plus,
+  HardHat
 } from 'lucide-react';
 import { UserManagement } from '../modules/UserManagement';
 import { Card } from '../shared/Card';
 import { useUI } from '../contexts/UIContext';
-import { AppSettings, getSettings, saveSettings, ACTIVITY_OPTIONS, makeBranchId } from '../lib/settings-service';
+import { AppSettings, getSettings, saveSettings, ACTIVITY_OPTIONS, makeBranchId, makeProjectId, Project } from '../lib/settings-service';
 
 interface SettingsProps {
   profile: any;
@@ -31,6 +32,7 @@ export const Settings: React.FC<SettingsProps> = ({ profile }) => {
   const [activeTab, setActiveTab] = useState('company');
   const [loading, setLoading] = useState(false);
   const [newBranchName, setNewBranchName] = useState('');
+  const [newProjectName, setNewProjectName] = useState('');
   const [companyInfo, setCompanyInfo] = useState<AppSettings>({
     companyName: '',
     activity: '',
@@ -102,9 +104,38 @@ export const Settings: React.FC<SettingsProps> = ({ profile }) => {
     }
   };
 
+  const persistProjects = async (projects: Project[], msg: string) => {
+    if (!isAdmin) { showAlert('تنبيه', 'لا تملك صلاحية إدارة المشاريع. يرجى التواصل مع المسؤول.', 'error'); return; }
+    if (!profile?.tenantId) return;
+    const updated = { ...companyInfo, projects };
+    setCompanyInfo(updated);
+    setLoading(true);
+    try { await saveSettings(profile.tenantId, updated); notify(msg); }
+    catch (error) { console.error('Failed to save projects', error); showAlert('خطأ في الحفظ', 'تعذّر حفظ المشروع. حاول مرة أخرى.', 'error'); }
+    finally { setLoading(false); }
+  };
+
+  const handleAddProject = async () => {
+    const name = newProjectName.trim();
+    if (!name) return;
+    const branchId = companyInfo.branches && companyInfo.branches.length === 1 ? companyInfo.branches[0].id : 'default';
+    const project: Project = { id: makeProjectId(name), name, status: 'active', branchId, startDate: new Date().toISOString().split('T')[0] };
+    setNewProjectName('');
+    await persistProjects([...(companyInfo.projects || []), project], 'تم إضافة المشروع');
+  };
+
+  const handleToggleProjectStatus = async (id: string) => {
+    const projects = (companyInfo.projects || []).map(p =>
+      p.id === id ? { ...p, status: (p.status === 'active' ? 'completed' : 'active') as 'active' | 'completed' } : p
+    );
+    const p = projects.find(x => x.id === id);
+    await persistProjects(projects, p?.status === 'completed' ? 'تم إغلاق المشروع — تُعترف تكاليفه الآن كتكلفة مبيعات' : 'تمت إعادة فتح المشروع (WIP)');
+  };
+
   const tabs = [
     { id: 'company', label: 'إعدادات المنشأة', icon: Building2 },
     { id: 'branches', label: 'الفروع', icon: GitBranch },
+    { id: 'projects', label: 'المشاريع', icon: HardHat },
     { id: 'notifications', label: 'التنبيهات والإشعارات', icon: Bell },
     { id: 'security', label: 'الأمان والصلاحيات', icon: Shield },
     { id: 'users', label: 'المستخدمون والصلاحيات', icon: User },
@@ -463,6 +494,60 @@ export const Settings: React.FC<SettingsProps> = ({ profile }) => {
                     <GitBranch className="w-4 h-4 text-indigo-400" /> {b.name}
                   </span>
                   <span className="text-[10px] font-mono text-slate-400">{b.id}</span>
+                </div>
+              ))}
+            </div>
+          </Card>
+        );
+      case 'projects':
+        return (
+          <Card className="p-8" id="settings-content">
+            <h3 className="text-xl font-black text-slate-900 mb-2 flex items-center gap-2">
+              <HardHat className="w-6 h-6 text-indigo-500" /> المشاريع (أعمال تحت التنفيذ)
+            </h3>
+            <p className="text-sm text-slate-500 mb-6 leading-relaxed">
+              عرّف مشاريعك الإنشائية. تتراكم تكاليف المشروع <b>النشط</b> كأعمال تحت التنفيذ (WIP) وتُؤجَّل عن قائمة الدخل؛
+              وعند تحديده <b>مكتملاً</b> تُعترف تكاليفه كتكلفة مبيعات (طريقة العقد المكتمل). تُنسَب التكاليف للمشروع عبر ورود اسمه في وصف العملية.
+            </p>
+
+            <div className="flex items-center gap-3 mb-6">
+              <input
+                type="text"
+                value={newProjectName}
+                onChange={e => setNewProjectName(e.target.value)}
+                onKeyDown={e => { if (e.key === 'Enter') handleAddProject(); }}
+                placeholder="اسم المشروع الجديد (مثل: مشروع فيلا الياسمين)"
+                className="flex-1 px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all font-medium"
+              />
+              <button
+                onClick={handleAddProject}
+                disabled={loading || !newProjectName.trim()}
+                className="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-all disabled:opacity-50"
+              >
+                {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Plus className="w-5 h-5" />}
+                إضافة مشروع
+              </button>
+            </div>
+
+            <div className="space-y-2">
+              {(companyInfo.projects || []).length === 0 && (
+                <div className="p-4 text-center text-slate-400 text-sm border border-dashed border-slate-200 rounded-xl">لا توجد مشاريع بعد.</div>
+              )}
+              {(companyInfo.projects || []).map(p => (
+                <div key={p.id} className="flex items-center justify-between p-3 bg-white rounded-xl border border-slate-200">
+                  <span className="font-bold text-slate-800 flex items-center gap-2">
+                    <HardHat className="w-4 h-4 text-indigo-400" /> {p.name}
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${p.status === 'active' ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'}`}>
+                      {p.status === 'active' ? 'نشط (WIP)' : 'مكتمل'}
+                    </span>
+                  </span>
+                  <button
+                    onClick={() => handleToggleProjectStatus(p.id)}
+                    disabled={loading}
+                    className={`text-xs font-bold px-3 py-1.5 rounded-lg border transition-all disabled:opacity-50 ${p.status === 'active' ? 'border-emerald-300 text-emerald-700 hover:bg-emerald-50' : 'border-amber-300 text-amber-700 hover:bg-amber-50'}`}
+                  >
+                    {p.status === 'active' ? 'تحديد كمكتمل' : 'إعادة فتح'}
+                  </button>
                 </div>
               ))}
             </div>

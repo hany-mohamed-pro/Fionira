@@ -54,12 +54,35 @@ export interface BudgetEntry {
   opex: number;
 }
 
+/**
+ * A construction/job-costing PROJECT (D11). Direct costs attributed to an
+ * `active` project accumulate as WIP (أعمال تحت التنفيذ) and are DEFERRED from the
+ * P&L; on `completed` they are recognized as COGS (completed-contract method).
+ * Stored in AppSettings (config store, NOT the financial registry). Branch-aware.
+ * Cost attribution is by project-name match in the cost description (the same
+ * signal Phase 5's project-link insight already surfaces) — transparent and
+ * user-controlled (the user defines the project and marks it complete).
+ */
+export interface Project {
+  id: string;
+  name: string;
+  startDate?: string;
+  expectedCompletion?: string;
+  status: 'active' | 'completed';
+  branchId: string; // 'default' or a branch id
+}
+
+/** Generate a stable, collision-resistant project id from a name. */
+export const makeProjectId = (name: string): string =>
+  'prj_' + (name || 'project').trim().toLowerCase().replace(/\s+/g, '_').replace(/[^\wء-ي]/g, '').slice(0, 24) + '_' + Math.random().toString(36).slice(2, 7);
+
 export interface AppSettings {
   companyName: string;
   logo?: string;
   activity: ActivityKey | string; // stable enum key (legacy free-text tolerated, treated as unset)
   branches?: Branch[]; // tenant branches; empty/undefined = single implicit "الفرع الرئيسي"
   budgets?: BudgetEntry[]; // section-level annual budget plan (IA Phase 3); empty = no budget set
+  projects?: Project[]; // construction/job-costing projects (D11); empty = none
   taxId: string;
   address: string;
   website: string;
@@ -84,6 +107,7 @@ const DEFAULT_SETTINGS: AppSettings = {
   activity: '', // unset by default = today's exact classification behavior
   branches: [], // no branches → single implicit "الفرع الرئيسي" (zero migration)
   budgets: [], // no budget set by default
+  projects: [], // no construction projects by default (D11)
   taxId: '',
   address: '',
   website: '',

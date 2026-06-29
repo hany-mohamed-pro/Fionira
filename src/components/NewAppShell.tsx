@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Bell, Settings as SettingsIcon, LogOut, Grid, ChevronRight, Home, Briefcase, FileText, ShieldAlert, Users, Layers, Activity, BookOpen, ChevronDown, ChevronLeft, PieChart, Calendar, Box, Upload, Scale, Coins, AlertTriangle, CheckCircle, Target } from 'lucide-react';
+import { Search, Bell, Settings as SettingsIcon, LogOut, Grid, ChevronRight, Home, Briefcase, FileText, ShieldAlert, Users, Layers, Activity, BookOpen, ChevronDown, ChevronLeft, PieChart, Calendar, Box, Upload, Scale, Coins, AlertTriangle, CheckCircle, Target, HardHat } from 'lucide-react';
 import { AppConfig } from '../config/appConfig';
 import { useUI } from '../contexts/UIContext';
 import { getTranslation, Language } from '../i18n/ui-text';
@@ -189,6 +189,7 @@ export function NewAppShell({
                items: [
                   { id: 'general_ledger', label: isRTL ? 'دفتر الأستاذ' : 'General Ledger', icon: BookOpen, desc: isRTL ? 'تسجيلات الحسابات المجمعة' : 'Account registers' },
                   { id: 'trial_balance', label: isRTL ? 'ميزان المراجعة' : 'Trial Balance', icon: Scale, desc: isRTL ? 'موازين الحسابات الختامية' : 'Accounts balances' },
+                  { id: 'project_costing', label: isRTL ? 'تكلفة المشاريع' : 'Project Costing', icon: HardHat, desc: isRTL ? 'أعمال تحت التنفيذ وتكلفة المشاريع' : 'WIP & job costing' },
                ]
             }
           ];

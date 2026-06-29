@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useUI } from '../contexts/UIContext';
 import { useAuth } from '../contexts/AuthProvider';
-import { BookOpen, Scale, AlertTriangle, ArrowRight } from 'lucide-react';
+import { BookOpen, Scale, AlertTriangle, ArrowRight, HardHat } from 'lucide-react';
 import { formatCurrency } from './VisualDashboard';
 
 export const AccountingDashboard = ({ incomeStatement, onNavigateToTab }: any) => {
@@ -30,6 +30,7 @@ export const AccountingDashboard = ({ incomeStatement, onNavigateToTab }: any) =
     { id: 'general_ledger', icon: BookOpen, title: isRTL ? 'دفتر الأستاذ' : 'General Ledger', color: 'bg-indigo-50 text-indigo-600' },
     { id: 'trial_balance', icon: Scale, title: isRTL ? 'ميزان المراجعة' : 'Trial Balance', color: 'bg-blue-50 text-blue-600' },
     { id: 'tax_declaration', icon: BookOpen, title: isRTL ? 'الإقرار الضريبي' : 'Tax Declaration', color: 'bg-orange-50 text-orange-600' },
+    { id: 'project_costing', icon: HardHat, title: isRTL ? 'تكلفة المشاريع' : 'Project Costing', color: 'bg-amber-50 text-amber-600' },
   ];
 
   return (
