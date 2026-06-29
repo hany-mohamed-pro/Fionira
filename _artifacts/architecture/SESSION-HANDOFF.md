@@ -17,20 +17,52 @@ consolidation. **This is a natural, complete stopping point — today's IA conso
 
 Binding principle enforced throughout (`a94f3d70` "WHAT WE WILL NEVER DO"): **no existing KPI card, chart, or unique visualization was hidden, collapsed, demoted, or lost** — every consolidation was structural (fewer entry points) or additive, never a reduction of information.
 
-**C) Deferred-items registry — RE-CONFIRMED INTACT for the next session (every open item):**
-1. **D11** — full construction-materials WIP / job-costing (own dedicated session).
-2. **D12** — deferred/unearned-revenue LIABILITY (needs chart-of-accounts-with-types).
-3. **D13** — "ال"/vendor-leakage tokenization (highest risk; per-keyword vendor-safety tagging first).
-4. **20-row preamble cap** on expenses/revenues parsing (bank parser already anchor-based).
-5. **UserManagement real backend** (endpoints stubbed — debt B3).
-6. **Balance Sheet structural fix** — replace estimated/labelled-"تقديري" equity with real chart-of-accounts-driven statement.
-7. **Cash Flow Investing/Financing** — separable only after fixed-asset (D10) + owner-capital tagging (documented in `cash-flow-statement-build.md`).
-8. **Smart branch suggestion** — suggest-don't-force branch inference at upload (planned, not started; §6).
-9. **4 remaining activity profiles** — beyond the 5 done (insight-only rules).
-10. **Bilingual parity (~29 rules)** — English coverage for classification rules flagged in `2e6349a`.
-11. **NEW — Real Owners' Equity statement** (from Phase 2/3 scoping) — needs NEW data capture (owner contributions/drawings) + the chart-of-accounts-with-types foundation (shared with #6 Balance Sheet + D12). The ONLY remaining IA-roadmap item; a separate future milestone.
+**B2) D13 re-attempted (2026-06-29, commit `26708922`) — measured unsafe, reverted, engine unchanged.**
+The deferred D13 "combined resolution" (vendor/description field-separation + ال-prefix normalization) was
+re-attempted on an 867-record corpus (802 real + 65 synthetic across all 5 activity sets). **Both layers
+unsafe and now proven SEPARABLE through two independent measurements (Track 2 + this session):**
+1. **Field-separation ALONE** (hybrid: description full score + vendor name at 0.3× hint): blast radius
+   **1/867, but that 1 record is a REGRESSION, not an improvement** — a synthetic record intentionally
+   tagged `tools_high_value` (6,900 SAR) where the vendor name IS a legitimate strong signal (equipment
+   supplier → fixed asset). A uniform low-score vendor-hint cannot distinguish legitimate vendor signal
+   from leakage.
+2. **ال-prefix normalization on description text**: independently unsafe — breaks root words
+   (`ألوان`→`وان`, loses the raw-materials match) and exposes previously-protected short words to descOnly
+   keywords (`المكتب`→`مكتب` triggers rent, hijacking telecom/utility bills into rent).
 
-None of the above was touched/altered by this segment — all remain open and accurately stated.
+**NEW PREREQUISITE IDENTIFIED (not previously known): per-keyword vendor-safety tagging must come FIRST** —
+each keyword rule must be explicitly marked *safe-on-vendor-name* or *vendor-name-leakage-risk* before any
+field-separation or ال-normalization is attempted. This **supersedes** the earlier "solve as one combined
+mechanism" recommendation. D5's ال-prefixed form (`الترجمة`) remains unresolved pending the same
+prerequisite; the narrow bare-keyword patch (Track 2) stays in place and handles the non-prefixed form
+correctly. Engine is byte-identical to its last known-good state (no D13 code shipped). See
+`engine-fix-d13-combined-resolution.md` + `engine-technical-debt.md`.
+
+**C) DEFINITIVE DEFERRED-ITEMS REGISTRY — the complete, unified list (supersedes all fragmented prior mentions):**
+1. **D11 — Construction WIP / job-costing** — escalated to top priority; needs its own dedicated session (material direct-cost accumulation, %-completion, WIP→COGS on completion). Today materials route to the existing COGS raw-materials account as a stopgap.
+2. **D12 — Unearned / advance revenue (liability)** — needs a liability account model; gated on the Balance Sheet structural fix (chart-of-accounts-with-types). Activity-insight layer already surfaces it.
+3. **D13 — ال-prefix + vendor-name leakage** — sharper diagnosis above (§0-B2). Two separable unsafe mechanisms; NEW prerequisite = per-keyword vendor-safety tagging FIRST, then guarded field-separation + a root-word/descOnly-guarded ال-mechanism.
+4. **Expenses/revenues 20-row preamble cap** — parser caps preamble scan at 20 rows (the bank parser is already anchor-based and unaffected); found, not fixed; touches @DO_NOT_MODIFY files — needs sign-off.
+5. **UserManagement real backend** — list/promote/delete endpoints all stubbed; deferred to its own MAX-precision session (debt B3).
+6. **Balance Sheet structural fix** — replace the estimated/"تقديري"-labelled equity with a real chart-of-accounts + journal_entries foundation (Phase C1 planned, not executed). Unblocks #2, #11.
+7. **Cash Flow Investing/Financing sections** — the bank classifier has no fixed-asset/owner-capital/loan categories, so these are honestly labelled "تحويلات وحركات أخرى", not fabricated; separable only after fixed-asset (D10) + owner-capital tagging exists.
+8. **Smart branch suggestion** — suggest-don't-force branch inference at upload time; planned enhancement, not started.
+9. **4 remaining activity profiles** — full implementations for trading/retail, manufacturing/food, professional services, contracting (beyond today's restaurant-focused insight rules); deferred pending real data.
+10. **Bilingual parity (~29 rules)** — these classification rules are Arabic-only; English coverage flagged needs-human-review (`2e6349a`).
+11. **Real Owners' Equity statement** — gated on NEW owner-contribution/drawing data capture + the chart-of-accounts-with-types foundation (shared with #2, #6); new item from the IA consolidation.
+12. **Per-keyword vendor-safety tagging system** — NEW item from today's D13 diagnosis; the explicit prerequisite that must precede any future field-separation / ال-normalization work.
+
+None of the above was touched/altered by this session — all remain open and accurately stated. Items #2, #6, #11 share the chart-of-accounts-with-types foundation; #3, #12 are the engine-tokenization track; the rest are independent.
+
+## Session closing summary (definitive stopping point)
+Across this body of work, Fionira reached: **full security hardening**; a **complete UX flow**; **5 activity-aware
+intelligence profiles** (insight-only, engine frozen); **10 of 13 engine debt items resolved** with a full
+audit trail (D13 re-measured and honestly left open with a sharper diagnosis); a **complete, honestly-labelled
+four-statement financial suite** — Income Statement, Trial Balance, Balance Sheet (labelled "تقديري"), and a
+real bank-reconciled Cash Flow; **real multi-bank and multi-branch support**; and a **3-phase IA consolidation**
+(bank-pages merge + Visual retire → Owner Home + waterfall relocation + Owners Summary retire → Budget vs Actual).
+**All 12 remaining items are fully documented above with context for clean resumption at any future time.** This
+is a natural, complete stopping point.
 
 > Resume point for any future session. HEAD = `74b3638`. Working tree clean except the
 > long-standing untouched runtime/state files (`data/erp_registry.json`, `data/uploads.json`,
@@ -199,13 +231,16 @@ COGS raw-materials account; a *dedicated* construction direct-cost/WIP account i
 |---|---|---|---|
 | D12 | customer advance → **deferred/unearned revenue is a LIABILITY**; the Balance Sheet is estimated with no liability-account infrastructure, so there is no correct home yet (adding it as revenue would be accounting-wrong) | Phase 5 (`679f791`) | MEDIUM-HIGH |
 
-**D13 — STILL OPEN, twice-measured, sharpened diagnosis.** Track 2 showed a universal "ال" strip
-re-exposes vendor-name leakage (`المعدات`→`معدات`→fixed-asset for a *rental*; `الموقع`→`موقع`→
-subscriptions). Track B then showed the prerequisite **field-separation** step itself regresses
-*legitimate* vendor signal (`عامل سباكة`/plumber → maintenance; `معدات المخابز`/equipment vendor →
-fixed-asset are correct vendor hints that blunt separation discards). **Conclusion:** D13 needs
-**per-keyword vendor-safety tagging FIRST** (declare per pattern whether it may match the vendor name),
-then field separation, then "ال" — see §6.
+**D13 — STILL OPEN, THRICE-measured (Track 2 + Track B + 2026-06-29 `26708922`), definitive diagnosis in §0-B2.**
+Track 2 showed a universal "ال" strip re-exposes vendor-name leakage (`المعدات`→`معدات`→fixed-asset for a
+*rental*; `الموقع`→`موقع`→subscriptions). Track B showed the prerequisite **field-separation** itself
+regresses *legitimate* vendor signal. Today's re-attempt (hybrid field-separation + description-only "ال")
+proved the two mechanisms **separable and each independently unsafe**: field-separation still regresses the
+legitimate `معدات المخابز`/`tools_high_value` signal (1/867), and "ال"-normalization independently breaks
+root words (`ألوان`→`وان`) and exposes descOnly keywords (`المكتب`→rent). **Conclusion (superseding earlier
+"combined mechanism" wording):** D13 needs **per-keyword vendor-safety tagging FIRST** (declare per pattern
+whether it may match the vendor name), THEN guarded field-separation, THEN a root-word/descOnly-guarded "ال".
+Full detail + the definitive 12-item registry in **§0** (`engine-fix-d13-combined-resolution.md`).
 
 **NEW debt found during the bank-module segment (2026-06-22):**
 
@@ -243,13 +278,15 @@ BanksDashboard (fully hardened `f1e723a`→`74b3638`).
 **Separately, explicitly deferred (ready to scope when prioritized):** **UserManagement real backend
 implementation** (endpoints still stubbed — debt B3) — its own MAX-precision session per standing decision.
 
-**Still-open engine/accounting debt (tracked in §4, parallel to the module audits):**
+**Still-open engine/accounting debt** — the **definitive, complete 12-item registry is now in §0-C** (single
+source of truth; supersedes the fragmented mentions that previously lived here). Highlights:
 - **D12** (deferred/unearned-revenue LIABILITY) + **D11's** dedicated construction WIP/direct-cost
   account — both need the **chart-of-accounts-with-types / account-driven balance sheet** foundation
   (also what unblocks the real Balance Sheet). Bring the account naming + IFRS treatment to the
   financial-manager user as a product decision.
-- **D13** (the "ال"/vendor-leakage tokenization issue) — highest risk; only via **per-keyword
-  vendor-safety tagging FIRST** (Track 2 + Track B proved naive paths regress). May stay open.
+- **D13** (the "ال"/vendor-leakage tokenization issue) — highest risk; thrice-measured unsafe. Definitive
+  diagnosis in §0-B2: the NEW prerequisite is **per-keyword vendor-safety tagging FIRST**, then guarded
+  field-separation, then a root-word/descOnly-guarded "ال". May stay open.
 
 Same baseline-first, one-change-at-a-time, full-regression discipline as every track so far.
 
