@@ -12,7 +12,8 @@ export const GlobalDashboard = ({
   expensesData,
   stagedFilesCount = 0,
   cashClosing = null,
-  cashHasData = false
+  cashHasData = false,
+  budgetSummary = null
 }: any) => {
   const { language } = useUI();
   const isRTL = language === 'ar';
@@ -89,6 +90,21 @@ export const GlobalDashboard = ({
           )}
         </button>
       </div>
+      )}
+
+      {/* Budget vs Actual one-line surfacing (ADDITIVE — only shows when a budget is set) */}
+      {isRTL && budgetSummary && (
+        <button
+          onClick={() => handleNavClick('reports', 'budget_vs_actual')}
+          className={`w-full text-right flex items-center justify-between gap-3 px-5 py-3 rounded-2xl border transition-all hover:shadow-sm ${budgetSummary.favorable ? 'bg-emerald-50 border-emerald-200' : 'bg-rose-50 border-rose-200'}`}
+        >
+          <span className={`font-bold text-[14px] flex items-center gap-2 ${budgetSummary.favorable ? 'text-emerald-800' : 'text-rose-800'}`}>
+            {budgetSummary.favorable
+              ? <><CheckCircle className="w-4 h-4" /> أنت متقدّم على موازنة {budgetSummary.period} بنسبة {budgetSummary.pct.toFixed(0)}%</>
+              : <><AlertTriangle className="w-4 h-4" /> أنت دون موازنة {budgetSummary.period} بنسبة {budgetSummary.pct.toFixed(0)}%</>}
+          </span>
+          <span className="text-[12px] font-bold text-indigo-600 flex items-center gap-1 shrink-0">الموازنة مقابل الفعلي <ArrowLeft className="w-3.5 h-3.5" /></span>
+        </button>
       )}
 
       {stagedFilesCount > 0 && (

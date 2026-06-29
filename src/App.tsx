@@ -48,6 +48,7 @@ import { YearlyComparison } from './modules/YearlyComparison';
 import { AnomaliesReport } from './modules/AnomaliesReport';
 import { BankAccountsView } from './modules/BankAccountsView';
 import { computePortfolioCashFlow } from './lib/bank-cashflow-core';
+import { BudgetVsActual } from './modules/BudgetVsActual';
 import { BalanceSheet } from './modules/BalanceSheet';
 import { AlertsReport } from './modules/AlertsReport';
 import { SmartInvoice } from './modules/SmartInvoice';
@@ -1027,6 +1028,21 @@ export default function App() {
           fullOpexBreakdown: Object.entries(opexBreakdown).sort((a,b)=>a[1]-b[1]).reverse()
       };
   }, [scopedRevenues, scopedExpenses, scopedPayroll, plFilteredBanks, appMode, activeTab]);
+
+  // Budget-vs-actual summary for the Owner Home one-line surfacing (additive).
+  // Net actual from incomeStatement (same source as Income Statement); budget from
+  // settings for the current period+scope. Null when no budget is set → no line shown.
+  const budgetSummary = useMemo(() => {
+    const list = settings?.budgets || [];
+    const period = String(dateFilter?.year || new Date().getFullYear());
+    const rows = list.filter((x: any) => x.period === period && (branchScope === 'all' || x.branchId === branchScope));
+    if (rows.length === 0) return null;
+    const bNet = rows.reduce((s: number, r: any) => s + ((r.revenue || 0) - (r.cogs || 0) - (r.opex || 0)), 0);
+    if (!bNet) return null;
+    const aNet = incomeStatement?.netOperatingIncome || 0;
+    const pct = ((aNet - bNet) / Math.abs(bNet)) * 100;
+    return { favorable: aNet >= bNet, pct: Math.abs(pct), period };
+  }, [settings, dateFilter, branchScope, incomeStatement]);
 
   const chartDataRaw = useMemo(() => {
       const map: Record<string, any> = {};
@@ -2077,7 +2093,7 @@ export default function App() {
     if (appMode === 'dashboard') type = 'GLOBAL_DASHBOARD';
     else if (activeTab === 'dashboard') type = 'MODULE_DASHBOARD';
     else if (['settings', 'user_management'].includes(activeTab as string)) type = 'SETTINGS_PAGE';
-    else if (['income_statement', 'branch_comparison', 'yearly_comparison', 'balance_sheet', 'cash_flow', 'bank_reconciliation'].includes(activeTab as string)) type = 'REPORT_PAGE';
+    else if (['income_statement', 'budget_vs_actual', 'branch_comparison', 'yearly_comparison', 'balance_sheet', 'cash_flow', 'bank_reconciliation'].includes(activeTab as string)) type = 'REPORT_PAGE';
     else if (['smart_invoice', 'quotations', 'welcome', 'alerts'].includes(activeTab as string)) type = 'FORM_PAGE';
     
     let breadcrumbLevel2 = t.workspace[appMode as keyof typeof t.workspace] || appMode;
@@ -2109,6 +2125,7 @@ export default function App() {
        else if (activeTab === 'user_management') { pageTitle = isRTL ? 'إدارة المستخدمين' : 'User Management'; subtitle = isRTL ? 'إدارة صلاحيات المستخدمين والوصول إلى النظام.' : 'Manage user permissions and system access.'; }
     } else if (type === 'REPORT_PAGE') {
        if (activeTab === 'income_statement') { pageTitle = isRTL ? 'قائمة الدخل' : 'Income Statement'; subtitle = isRTL ? 'تدمج هذه القائمة بين المبيعات والمشتريات لاستخراج صافي الربح التشغيلي وفقاً للمعايير المحاسبية.' : 'This statement merges Sales and Purchases to extract net operating profit according to accounting standards.'; }
+       else if (activeTab === 'budget_vs_actual') { pageTitle = isRTL ? 'الموازنة مقابل الفعلي' : 'Budget vs Actual'; subtitle = isRTL ? 'قارن خطتك (الموازنة) بالأداء الفعلي من قائمة الدخل — انحراف لكل قسم، لكل فرع وفترة.' : 'Compare your plan against actuals from the Income Statement — variance per section, branch and period.'; }
        else if (activeTab === 'balance_sheet') { pageTitle = isRTL ? 'الميزانية العمومية' : 'Balance Sheet'; subtitle = isRTL ? 'عرض تقديري للأصول والالتزامات وحقوق الملكية بناءً على البيانات المتوفرة في النظام.' : 'Estimated view of assets, liabilities, and equity based on available system data.'; }
        else if (activeTab === 'cash_flow') { pageTitle = isRTL ? 'التدفقات النقدية' : 'Cash Flow'; subtitle = isRTL ? 'تحليل حركة السيولة النقدية الداخلة والخارجة من النشاط خلال الفترة المحددة.' : 'Analysis of cash inflows and outflows during the specified period.'; }
        else if (activeTab === 'branch_comparison') { pageTitle = isRTL ? 'مقارنة الفروع' : 'Branch Comparison'; subtitle = isRTL ? 'مقارنة الأداء المالي لكل فرع جنباً إلى جنب — من نفس حسابات قائمة الدخل.' : 'Side-by-side financial performance per branch — from the same Income Statement math.'; }
@@ -2545,6 +2562,7 @@ export default function App() {
                   stagedFilesCount={stagedFilesCount}
                   cashClosing={ownerCash.closingBalance}
                   cashHasData={ownerCash.accountCount > 0}
+                  budgetSummary={budgetSummary}
                 />
               )}
             </div>
@@ -2710,11 +2728,21 @@ export default function App() {
           )}
 
           {activeTab === 'income_statement' && (
-            <IncomeStatement 
-              incomeStatement={incomeStatement} 
+            <IncomeStatement
+              incomeStatement={incomeStatement}
               onNavigateToTab={handleNavigateToTabWithAnchor}
               tenantId={profile?.tenantId}
               allRecords={[...plFilteredRevenues, ...plFilteredExpenses, ...plFilteredPayroll]}
+            />
+          )}
+
+          {activeTab === 'budget_vs_actual' && (
+            <BudgetVsActual
+              incomeStatement={incomeStatement}
+              branchScope={branchScope}
+              branchList={branchList}
+              dateFilter={dateFilter}
+              tenantId={profile?.tenantId}
             />
           )}
 

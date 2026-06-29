@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Bell, Settings as SettingsIcon, LogOut, Grid, ChevronRight, Home, Briefcase, FileText, ShieldAlert, Users, Layers, Activity, BookOpen, ChevronDown, ChevronLeft, PieChart, Calendar, Box, Upload, Scale, Coins, AlertTriangle, CheckCircle } from 'lucide-react';
+import { Search, Bell, Settings as SettingsIcon, LogOut, Grid, ChevronRight, Home, Briefcase, FileText, ShieldAlert, Users, Layers, Activity, BookOpen, ChevronDown, ChevronLeft, PieChart, Calendar, Box, Upload, Scale, Coins, AlertTriangle, CheckCircle, Target } from 'lucide-react';
 import { AppConfig } from '../config/appConfig';
 import { useUI } from '../contexts/UIContext';
 import { getTranslation, Language } from '../i18n/ui-text';
@@ -163,6 +163,7 @@ export function NewAppShell({
                title: isRTL ? 'القوائم المالية' : 'Financials',
                items: [
                  { id: 'income_statement', label: isRTL ? 'قائمة الدخل' : 'Income Statement', icon: FileText, desc: isRTL ? 'الأرباح والخسائر' : 'Profit and loss' },
+                 { id: 'budget_vs_actual', label: isRTL ? 'الموازنة مقابل الفعلي' : 'Budget vs Actual', icon: Target, desc: isRTL ? 'خطتك مقابل أدائك الفعلي' : 'Your plan vs actual performance' },
                  { id: 'balance_sheet', label: isRTL ? 'الميزانية العمومية' : 'Balance Sheet', icon: Scale, desc: isRTL ? 'المركز المالي الشامل' : 'Financial position' },
                  { id: 'cash_flow', label: isRTL ? 'التدفقات النقدية' : 'Cash Flow', icon: Coins, desc: isRTL ? 'حركة السيولة' : 'Cash liquidity' },
                ]

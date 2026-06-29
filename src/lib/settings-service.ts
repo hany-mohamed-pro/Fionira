@@ -39,11 +39,27 @@ export interface Branch {
 export const makeBranchId = (name: string): string =>
   'br_' + (name || 'branch').trim().toLowerCase().replace(/\s+/g, '_').replace(/[^\wء-ي]/g, '').slice(0, 24) + '_' + Math.random().toString(36).slice(2, 7);
 
+/**
+ * A section-level budget plan (IA Phase 3 MVP). One row per (branch, period).
+ * `period` is a year string (e.g. "2025") — annual section-level is the MVP;
+ * monthly/per-category are the documented next layers. Stored in AppSettings
+ * (config store, NOT the financial registry) — kept separate from actuals.
+ * Net budget is derived: revenue − cogs − opex (never stored, never drifts).
+ */
+export interface BudgetEntry {
+  branchId: string;   // 'default' or a branch id
+  period: string;     // year, e.g. "2025"
+  revenue: number;
+  cogs: number;
+  opex: number;
+}
+
 export interface AppSettings {
   companyName: string;
   logo?: string;
   activity: ActivityKey | string; // stable enum key (legacy free-text tolerated, treated as unset)
   branches?: Branch[]; // tenant branches; empty/undefined = single implicit "الفرع الرئيسي"
+  budgets?: BudgetEntry[]; // section-level annual budget plan (IA Phase 3); empty = no budget set
   taxId: string;
   address: string;
   website: string;
@@ -67,6 +83,7 @@ const DEFAULT_SETTINGS: AppSettings = {
   companyName: '',
   activity: '', // unset by default = today's exact classification behavior
   branches: [], // no branches → single implicit "الفرع الرئيسي" (zero migration)
+  budgets: [], // no budget set by default
   taxId: '',
   address: '',
   website: '',
