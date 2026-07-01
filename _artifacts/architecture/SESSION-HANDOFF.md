@@ -44,22 +44,37 @@ correctly. Engine is byte-identical to its last known-good state (no D13 code sh
 3. **D13 — ال-prefix + vendor-name leakage** — sharper diagnosis above (§0-B2). Two separable unsafe mechanisms; NEW prerequisite = per-keyword vendor-safety tagging FIRST, then guarded field-separation + a root-word/descOnly-guarded ال-mechanism.
 4. **Expenses/revenues 20-row preamble cap** — parser caps preamble scan at 20 rows (the bank parser is already anchor-based and unaffected); found, not fixed; touches @DO_NOT_MODIFY files — needs sign-off.
 5. **UserManagement real backend** — list/promote/delete endpoints all stubbed; deferred to its own MAX-precision session (debt B3).
-6. **Balance Sheet structural fix** — replace the estimated/"تقديري"-labelled equity with a real chart-of-accounts + journal_entries foundation (Phase C1 planned, not executed). Unblocks #2, #11.
+6. 🟡 **Balance Sheet structural fix — Phase A DONE (2026-06-30); Phase B/C pending.** A real chart-of-accounts **type layer** (`chart-of-accounts.ts`) + **`computeBalanceSheetCore`** now build a REAL balance sheet from the actual stored journal entries (same source as Trial Balance), grouped Assets/Liabilities/Equity with **real retained earnings (Σ revenue − Σ expense from the entries)** — **balanced by construction, no plug** (live-proven: Assets 680,927.37 = Liab 566,780.61 + Equity 114,146.76). Shown side-by-side with the legacy "تقديري" sheet (kept until adopted). READ-ONLY — `erp-engine.ts` / `categorization-engine.ts` untouched. See `chart-of-accounts-foundation.md`. **Pending (Phase B/C):** see the Phase B requirements block below.
 7. **Cash Flow Investing/Financing sections** — the bank classifier has no fixed-asset/owner-capital/loan categories, so these are honestly labelled "تحويلات وحركات أخرى", not fabricated; separable only after fixed-asset (D10) + owner-capital tagging exists.
 8. **Smart branch suggestion** — suggest-don't-force branch inference at upload time; planned enhancement, not started.
 9. **4 remaining activity profiles** — full implementations for trading/retail, manufacturing/food, professional services, contracting (beyond today's restaurant-focused insight rules); deferred pending real data.
 10. **Bilingual parity (~29 rules)** — these classification rules are Arabic-only; English coverage flagged needs-human-review (`2e6349a`).
-11. **Real Owners' Equity statement** — gated on NEW owner-contribution/drawing data capture + the chart-of-accounts-with-types foundation (shared with #2, #6); new item from the IA consolidation.
+11. 🟡 **Real Owners' Equity — PARTIALLY RESOLVED in Phase A (2026-06-30).** Equity is now **real, not a plug**: retained earnings are derived from the actual journal entries (Σ revenue − Σ expense), and the balance sheet ties out by construction. **Remaining (Phase B):** capture of actual owner **contributions / drawings** (a data-entry path) to complete the equity section; the accounts/typing are already ready for them.
 12. **Per-keyword vendor-safety tagging system** — NEW item from today's D13 diagnosis; the explicit prerequisite that must precede any future field-separation / ال-normalization work.
+13. **Payroll-VAT basis delta (54.78 known-delta)** — NEW item from Phase A. `computePnLCore` counts two VAT-bearing **payroll-category** expenses at gross (Total, VAT-inclusive), while the journal-entry/balance-sheet basis counts them at Net + VAT-input as an asset (the more accounting-correct treatment). This produces a precise, root-caused Δ=54.78 between journal-derived net income and `computePnLCore`. Independent improvement — align `computePnLCore` in a separate session; do NOT touch it now.
 
-None of the above was touched/altered by this session — all remain open and accurately stated. Items #2, #6, #11 share the chart-of-accounts-with-types foundation; #3, #12 are the engine-tokenization track; the rest are independent.
+Items #2, #6, #11, #13 relate to the chart-of-accounts foundation (Phase A done); #3, #12 are the engine-tokenization track; the rest are independent.
+
+### Chart-of-Accounts Foundation — Phase A EXECUTED (2026-06-30); Phase B/C pending
+**Phase A (read-only) — DONE:** `chart-of-accounts.ts` (account-type classifier, 160 accounts, zero unclassified) + `balance-sheet-core.ts` (`computeBalanceSheetCore`, same aggregation as Trial Balance, real retained earnings, no plug) + `RealBalanceSheet.tsx` (real balance sheet from the **stored** journal entries — same source as Trial Balance/General Ledger — shown side-by-side with the legacy estimated sheet). **Live-proven balanced** (680,927.37 = 566,780.61 + 114,146.76); reconciles to `computePnLCore` with revenue exact and a documented Δ=54.78 (item #13). `erp-engine.ts` / `categorization-engine.ts` untouched. See `chart-of-accounts-foundation.md`.
+
+**Value-of-the-gate note (process evidence):** a real classifier bug — "تكلفة المبيعات" (COGS) was caught by the revenue rule via the substring "مبيعات" and mis-typed as revenue — was **discovered by the halala-level reconciliation gate** (the balance identity alone had masked it, since moving COGS to negative-revenue leaves net income unchanged). Fixed. This is concrete evidence that the strict reconciliation gate earns its keep.
+
+**Phase B requirements (in priority order, each its own confirmed step):**
+- **(أ) [PRIORITY] Stored-JE ↔ current-records sync (stale JEs).** The stored journal entries can lag the current records (they did during Phase A). This affects **Trial Balance, General Ledger, AND the new Balance Sheet equally** (shared source) — hence top priority. Likely: regenerate journal entries on activation (server / `erp-engine`).
+- **(ب) Formal WIP asset line** — post a real WIP journal entry on defer/complete so D11's WIP appears as a balance-sheet **asset** (today it's an App-level P&L deferral only).
+- **(ج) D12 — unearned/advance revenue** — credit `إيراد مقدم (التزام)` on advances (erp-engine), recognized on delivery; the type layer already classifies it as a liability.
+- **(د) Owner contributions / drawings capture** — a data-entry path to complete item #11's equity section.
+- **(هـ) Cash Flow investing/financing (item #7)** — enrich bank-entry contra-accounting so the contra-account type drives the investing/financing split.
+
+**Phase C (later):** opening balances (migration) + AR/AP aging.
 
 ## Session closing summary (definitive stopping point)
 Across this body of work, Fionira reached: **full security hardening**; a **complete UX flow**; **5 activity-aware
 intelligence profiles** (insight-only, engine frozen); **11 of 13 engine debt items resolved** with a full
 audit trail (D11 now resolved via WIP/job-costing; D13 re-measured and honestly left open with a sharper
 diagnosis); a **complete, honestly-labelled
-four-statement financial suite** — Income Statement, Trial Balance, Balance Sheet (labelled "تقديري"), and a
+four-statement financial suite** — Income Statement, Trial Balance, Balance Sheet (**now a REAL one from journal entries, balanced no-plug (Phase A 2026-06-30)**, with the legacy "تقديري" kept side-by-side for comparison), and a
 real bank-reconciled Cash Flow; **real multi-bank and multi-branch support**; and a **3-phase IA consolidation**
 (bank-pages merge + Visual retire → Owner Home + waterfall relocation + Owners Summary retire → Budget vs Actual).
 **All 12 remaining items are fully documented above with context for clean resumption at any future time.** This
@@ -174,7 +189,7 @@ Everything above `12a0529` was already in history at session start (security/UX/
 
 | Statement | Verdict | Evidence / status |
 |---|---|---|
-| **Balance Sheet** | ❌ **Actively misleading** | Fully ESTIMATED via fixed ratios from the Income Statement's net profit (`cash = netIncome×0.4`, `AR = revenues×0.15` …); **equity is a forced plug** so it always balances vacuously. Now **labeled "تقديري"** in the UI (`f60038f`: banner + per-card/section badges + reworded disclaimer). A *real* fix requires the Postgres `journal_entries` schema + a chart-of-accounts-with-types (Phase C1 `01e6e19`) — **architecturally blocked**, not a `BalanceSheet.tsx` change. Audit: `balance-sheet-audit.md`. |
+| **Balance Sheet** | 🟡 **Real one delivered (Phase A); legacy estimate kept for comparison** | **NEW (2026-06-30):** a REAL balance sheet now builds from the actual stored journal entries (`chart-of-accounts.ts` type layer + `computeBalanceSheetCore`, same source as Trial Balance) — Assets/Liabilities/Equity with **real retained earnings, balanced by construction (no plug)**; live-proven 680,927.37 = 566,780.61 + 114,146.76. The legacy ESTIMATED sheet (fixed ratios, plug equity) is kept side-by-side, still labelled "تقديري", until the real one is fully adopted. Phase B pending: stored-JE↔records sync (stale), WIP asset line, D12, owner contributions/drawings. See `chart-of-accounts-foundation.md` + §0-C item 6/11. Original audit: `balance-sheet-audit.md`. |
 | **Trial Balance** | ✅ **Sound** | Real journal-entry aggregation; balance **guaranteed by double-entry construction** (each entry adds its amount to one debit + one credit), **not** a forced plug; tenant-scoped; correctly excludes superseded `_v{n}` versions (`isActive !== false`); has a genuine imbalance warning. No fix needed. Audit: `trial-balance-audit.md`. |
 | **Income Statement** | ✅ **Sound source** | Aggregates **real revenue/expense records** (not estimates). D2/D7 wastage/shrinkage now correctly flow into **COGS** (`892c4df`, after `5a165ed` found them landing in OPEX via a stale hard-coded list). **Net profit has been reliable throughout** — the D2/D7 gap only affected the COGS/OPEX *split presentation*, never the bottom line. Audits: `income-statement-audit.md`, `income-statement-d2-d7-cogs-fix.md`. |
 

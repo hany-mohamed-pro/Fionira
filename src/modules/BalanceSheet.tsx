@@ -2,6 +2,7 @@ import React from 'react';
 import { Card } from '../shared/Card';
 import { Scale, ArrowUpCircle, ArrowDownCircle, Wallet } from 'lucide-react';
 import { formatCurrency } from '../lib/formatters';
+import { RealBalanceSheet } from './RealBalanceSheet';
 
 interface BalanceSheetProps {
   data: {
@@ -30,6 +31,13 @@ export const BalanceSheet: React.FC<BalanceSheetProps> = ({ data, onNavigateToTa
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
+      {/* Phase A: the REAL balance sheet (from actual journal entries), shown first. */}
+      <RealBalanceSheet />
+
+      {/* ── Legacy estimated balance sheet, kept side-by-side until the real one is adopted ── */}
+      <div className="pt-4 border-t-4 border-dashed border-slate-200">
+        <p className="text-sm font-black text-slate-500 mb-4">للمقارنة فقط — النسخة التقديرية القديمة (ستُزال بعد اعتماد الحقيقية):</p>
+      </div>
       {/* Honest-labeling banner: these figures are estimated from the income statement, NOT real account balances. */}
       <div className="p-5 bg-rose-50 border-2 border-rose-200 rounded-xl text-rose-800">
         <p className="font-black text-base mb-1">⚠️ هذه ليست ميزانية محاسبية فعلية — أرقام تقديرية توضيحية فقط</p>
