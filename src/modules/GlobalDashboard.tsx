@@ -123,8 +123,8 @@ export const GlobalDashboard = ({
           </button>
         </div>
       )}
-      {/* SECTION B - KPI ROW */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-[20px] md:gap-[24px]">
+      {/* SECTION B - KPI ROW (net profit lives in the Owner Home band above) */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-[20px] md:gap-[24px]">
         <div className="bg-white rounded-[18px] border border-slate-200 p-5 shadow-[0_2px_10px_rgb(0,0,0,0.02)] flex flex-col justify-between h-[155px] group hover:border-[#22C55E]/30 hover:shadow-md transition-all">
           <div className="flex justify-between items-start">
             <div className="w-10 h-10 rounded-[12px] bg-[#22C55E]/10 flex items-center justify-center shrink-0">
@@ -160,33 +160,6 @@ export const GlobalDashboard = ({
                <span className="text-[12px] text-[#1E3A8A] font-bold flex items-center">
                  <span className="w-1.5 h-1.5 rounded-full bg-[#1E3A8A] mr-1.5 ml-1.5 inline-block"></span>
                  {isRTL ? 'هذا الشهر' : 'This Month'}
-               </span>
-            </div>
-          </div>
-        </div>
-        
-        <div className="bg-white rounded-[18px] border border-slate-200 p-5 shadow-[0_2px_10px_rgb(0,0,0,0.02)] flex flex-col justify-between h-[155px] group hover:border-[#3B82F6]/30 hover:shadow-md transition-all">
-          <div className="flex justify-between items-start">
-            <div className="w-10 h-10 rounded-[12px] bg-[#3B82F6]/10 flex items-center justify-center shrink-0">
-               <span className="font-black text-[16px] text-[#3B82F6]">$</span>
-            </div>
-            {(totalRevenue > 0) && (
-              <div className="bg-[#10B981]/10 text-[#10B981] text-[11px] font-bold px-2 py-0.5 rounded-md">
-                {Math.round((netProfit / totalRevenue) * 100)}%
-              </div>
-            )}
-          </div>
-          <div>
-            <p className="text-[14px] font-bold text-slate-500 mb-1">{isRTL ? 'صافي الربح' : 'Net Profit'}</p>
-            <div className="flex items-baseline gap-1 mb-2">
-               <h3 className={`text-[28px] leading-none font-black tracking-tight ${netProfit < 0 ? 'text-rose-600' : 'text-slate-800'}`}>
-                 {formatCurrency(netProfit || 0)}
-               </h3>
-            </div>
-            <div className="flex items-center justify-between pt-2 border-t border-slate-100">
-               <span className="text-[12px] text-[#3B82F6] font-bold flex items-center">
-                 <span className="w-1.5 h-1.5 rounded-full bg-[#3B82F6] mr-1.5 ml-1.5 inline-block"></span>
-                 {isRTL ? 'هامش الربح' : 'Profit Margin'}
                </span>
             </div>
           </div>
@@ -330,24 +303,6 @@ export const GlobalDashboard = ({
             <p className="text-[40px] font-black leading-none mb-3">{vendorsCount}</p>
             <p className="text-[13px] font-medium text-white/70">
                {vendorsCount > 0 ? (isRTL ? 'الموردون المسجلون' : 'Registered vendors') : (isRTL ? 'لا توجد بيانات كافية' : 'Insufficient data')}
-            </p>
-          </div>
-        </div>
-
-        {/* Blue Card: المعاملات */}
-        <div className="bg-[#3B82F6] rounded-[16px] p-6 text-white flex flex-col justify-between relative overflow-hidden group h-[220px] shadow-[0_2px_10px_rgb(59,130,246,0.2)] hover:shadow-[0_4px_15px_rgb(59,130,246,0.3)] transition-all">
-          <div className="absolute inset-0 bg-gradient-to-tr from-white/0 to-white/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-          <div className="flex justify-between items-start relative z-10 w-full">
-            <div></div>
-            <div className="w-12 h-12 rounded-[14px] bg-white/20 flex items-center justify-center backdrop-blur-sm transition-transform group-hover:scale-110">
-              <Activity className="w-[22px] h-[22px] text-white" />
-            </div>
-          </div>
-          <div className="text-start relative z-10 mt-auto">
-            <h4 className="text-[15px] font-bold text-white mb-2">{isRTL ? 'إجمالي المعاملات' : 'Total Transactions'}</h4>
-            <p className="text-[40px] font-black leading-none mb-3">{totalTransactions}</p>
-            <p className="text-[13px] font-medium text-white/70">
-               {totalTransactions > 0 ? (isRTL ? 'في جميع الأقسام' : 'Across all modules') : (isRTL ? 'لا توجد مقارنة متاحة' : 'No comparison available')}
             </p>
           </div>
         </div>
