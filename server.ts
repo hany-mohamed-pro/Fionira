@@ -476,6 +476,49 @@ function persistRegistry() {
     }
 }
 
+// ── B-أ-2: incremental journal-entry sync on upload ──────────────────────────
+// Regenerates the journal entries for the file(s) whose records were just added,
+// mirroring scripts/je_backfill.ts: group by module, exclude orphan records (no
+// valid module), and delete-then-regenerate keyed by sourceFileId so the same
+// file uploaded twice never duplicates JEs. Pure read of generateJournalEntries
+// (erp-engine) — does NOT touch categorization-engine or erp-engine.
+const JE_VALID_MODS = ['expenses', 'revenues', 'payroll', 'banks', 'inventory'];
+async function syncJournalEntriesForFile(
+    records: any[],
+    fallbackModule: string,
+    tenantId: string,
+    extraRemoveFileIds: string[] = []
+): Promise<void> {
+    if (isConnected()) return; // dev-only: no journal-entry table in Postgres yet
+    const { generateJournalEntries } = await import('./src/backend/core/erp-engine.ts');
+
+    // (1) idempotent removal: drop existing JEs for the files this batch touches
+    //     (∪ any archived-file keys passed by the replace path).
+    const removeIds = new Set<string>([
+        ...records.map((r: any) => r.fileId).filter(Boolean),
+        ...extraRemoveFileIds,
+    ]);
+    devMemoryDb.journalEntries = devMemoryDb.journalEntries.filter(
+        (je: any) => !removeIds.has(je.sourceFileId)
+    );
+
+    // (2) regenerate per module (orphan records with no valid module are skipped,
+    //     keeping JEs aligned with computePnLCore exactly as the backfill does).
+    const byMod = new Map<string, any[]>();
+    for (const r of records) {
+        const m = r.moduleType || fallbackModule;
+        if (!JE_VALID_MODS.includes(m)) continue;
+        if (!byMod.has(m)) byMod.set(m, []);
+        byMod.get(m)!.push(r);
+    }
+    for (const [mod, recs] of byMod) {
+        const gen = generateJournalEntries(recs, mod as any);
+        gen.forEach((je: any) => { je.tenantId = tenantId; je.isActive = true; });
+        devMemoryDb.journalEntries.push(...gen);
+    }
+    persistRegistry();
+}
+
 app.post('/api/erp/dev/reset', (req, res) => {
   const isDevAuth = process.env.VITE_ENABLE_DEV_AUTH === 'true';
   const isNonProd = process.env.ENV_MODE !== 'production' && process.env.NODE_ENV !== 'production';
@@ -2139,13 +2182,14 @@ app.post('/api/erp/dev/sync', express.json({limit: '50mb'}), async (req, res) =>
        devMemoryDb.records.push(...parsedRecords);
        devMemoryDb.uploadedFiles.push(newActiveFile);
        devMemoryDb.candidateReplacements.splice(stagedIndex, 1);
-       
+
        try {
            fs.writeFileSync(getUploadsFile(), JSON.stringify(devMemoryDb.uploadedFiles, null, 2), 'utf-8');
-           persistRegistry();
+           // B-أ-2: generate this file's journal entries on activation (persists too).
+           await syncJournalEntriesForFile(parsedRecords, staged.moduleType, tenantId);
        } catch (err) {}
     }
-    
+
     // Attempt audit log
     await addAuditLog({
       action: 'activate_new_source',
@@ -2356,7 +2400,9 @@ app.post('/api/erp/dev/sync', express.json({limit: '50mb'}), async (req, res) =>
 
        try {
            fs.writeFileSync(getUploadsFile(), JSON.stringify(devMemoryDb.uploadedFiles, null, 2), 'utf-8');
-           persistRegistry();
+           // B-أ-2: regenerate JEs for the new file AND drop the archived target's
+           // JEs (the replacement has a different fileHash than targetFile).
+           await syncJournalEntriesForFile(parsedRecords, staged.moduleType, tenantId, [targetFile.id, targetFile.fileHash]);
        } catch (err) {}
     }
 
