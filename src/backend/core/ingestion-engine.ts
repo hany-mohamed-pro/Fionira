@@ -12,6 +12,25 @@ export interface MasterData {
   items: { id: string; name: string; type: 'item' }[];
 }
 
+// Central guard: a row is an empty/partial artifact (not a real record) only when it
+// has NEITHER identity (entity/invoice/description/date) NOR any money (every amount
+// field null-or-zero). Such rows slip past the processors' hasNumbers check via a
+// stray digit and would otherwise surface as fake "غير محدد / 0 / غير متوفرة" errors.
+// Rows with a real entity but a zero amount (intentional zero) are KEPT. Rows with no
+// identity but real money are KEPT (flagged later as MISSING_VENDOR).
+const nilOrZero = (v: any) => v === null || v === undefined || v === 0;
+
+export function isEmptyPartialRow(r: any): boolean {
+  const hasIdentity =
+    (r.Entity_Name && r.Entity_Name !== 'غير محدد' && r.Entity_Name !== 'UNKNOWN_ENTITY') ||
+    !!r.Invoice_Number ||
+    (r.Item_Description && String(r.Item_Description).trim() !== '') ||
+    !!r.Invoice_Date;
+  const hasMoney = ![r.Total_Amount, r.Taxable_Amount, r.NonTaxable_Amount, r.VAT_Amount, r.Net_Amount]
+    .every(nilOrZero);
+  return !hasIdentity && !hasMoney;
+}
+
 export interface IngestionSession {
   sessionId: string;
   files: string[];
@@ -136,13 +155,20 @@ export const processUploadBatch = async (
     });
 
     const currentFileId = file.fileHash || file.name;
-    const finalRecords = result.records.map((r: any) => ({ ...r, sessionId, fileId: currentFileId, _sourceFile: currentFileId }));
-    
-    // We NO LONGER RUN operational engine here, it's replaced by the domain intelligence orchestrator 
+    const finalRecordsAll = result.records.map((r: any) => ({ ...r, sessionId, fileId: currentFileId, _sourceFile: currentFileId }));
+
+    // Central partial-row guard (Fix A): keep real records; divert empty/partial
+    // artifacts to skippedRows (traceable, not deleted, not shown as fake errors).
+    const finalRecords = finalRecordsAll.filter((r: any) => !isEmptyPartialRow(r));
+    const partialSkipped = finalRecordsAll
+      .filter((r: any) => isEmptyPartialRow(r))
+      .map((r: any) => ({ rowIndex: r._originalRowIndex, reason: 'Structural: صف فارغ بلا هوية ولا مبالغ', sessionId, fileId: currentFileId, _sourceFile: currentFileId, rawData: r.rawData || r }));
+
+    // We NO LONGER RUN operational engine here, it's replaced by the domain intelligence orchestrator
     // inside pre-validation-engine.ts module.
-    
+
     allRecords = [...allRecords, ...finalRecords];
-    const skippedArr = result.skipped || [];
+    const skippedArr = [...(result.skipped || []), ...partialSkipped];
     
     const normalSkipped: any[] = [];
     const integrityRejected: any[] = [];
