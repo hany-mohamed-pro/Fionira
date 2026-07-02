@@ -1292,7 +1292,7 @@ app.post('/api/erp/dev/sync', express.json({limit: '50mb'}), async (req, res) =>
           Total_Amount: Number(row.total_amount),
           VAT_Amount: Number(row.vat_amount),
           Taxable_Amount: Number(row.taxable_amount),
-          Nontaxable_Amount: Number(row.nontaxable_amount),
+          NonTaxable_Amount: Number(row.nontaxable_amount),
           Net_Amount: Number(row.net_amount),
           Category: row.category,
           ...(row.raw_data || {})
@@ -1481,7 +1481,7 @@ app.post('/api/erp/dev/sync', express.json({limit: '50mb'}), async (req, res) =>
        Total_Amount: Number(row.total_amount),
        VAT_Amount: Number(row.vat_amount),
        Taxable_Amount: Number(row.taxable_amount),
-       Nontaxable_Amount: Number(row.nontaxable_amount),
+       NonTaxable_Amount: Number(row.nontaxable_amount),
        Net_Amount: Number(row.net_amount),
        Category: row.category,
        ...(row.raw_data || {})
@@ -1908,7 +1908,7 @@ app.post('/api/erp/dev/sync', express.json({limit: '50mb'}), async (req, res) =>
           Total_Amount: Number(row.total_amount),
           VAT_Amount: Number(row.vat_amount),
           Taxable_Amount: Number(row.taxable_amount),
-          Nontaxable_Amount: Number(row.nontaxable_amount),
+          NonTaxable_Amount: Number(row.nontaxable_amount),
           Net_Amount: Number(row.net_amount),
           Category: row.category,
           ...(row.raw_data || {})
@@ -2165,7 +2165,7 @@ app.post('/api/erp/dev/sync', express.json({limit: '50mb'}), async (req, res) =>
           const vatAmt = r.VAT_Amount || r.vat_amount || 0;
           const totalAmt = r.Total_Amount || r.total_amount || 0;
           const taxAmt = r.Taxable_Amount || r.taxable_amount || 0;
-          const nontaxAmt = r.Nontaxable_Amount || r.nontaxable_amount || 0;
+          const nontaxAmt = r.NonTaxable_Amount || r.nontaxable_amount || 0;
 
           await query(`
              INSERT INTO records (id, tenant_id, file_id, module_type, invoice_number, invoice_date, entity_name, total_amount, vat_amount, taxable_amount, nontaxable_amount, net_amount, category, raw_data)
@@ -2371,7 +2371,7 @@ app.post('/api/erp/dev/sync', express.json({limit: '50mb'}), async (req, res) =>
           const vatAmt = r.VAT_Amount || r.vat_amount || 0;
           const totalAmt = r.Total_Amount || r.total_amount || 0;
           const taxAmt = r.Taxable_Amount || r.taxable_amount || 0;
-          const nontaxAmt = r.Nontaxable_Amount || r.nontaxable_amount || 0;
+          const nontaxAmt = r.NonTaxable_Amount || r.nontaxable_amount || 0;
 
           await query(`
              INSERT INTO records (id, tenant_id, file_id, module_type, invoice_number, invoice_date, entity_name, total_amount, vat_amount, taxable_amount, nontaxable_amount, net_amount, category, raw_data)
@@ -2671,7 +2671,7 @@ app.post('/api/erp/dev/sync', express.json({limit: '50mb'}), async (req, res) =>
              Total_Amount: Number(row.total_amount),
              VAT_Amount: Number(row.vat_amount),
              Taxable_Amount: Number(row.taxable_amount),
-             Nontaxable_Amount: Number(row.nontaxable_amount),
+             NonTaxable_Amount: Number(row.nontaxable_amount),
              Net_Amount: Number(row.net_amount),
              Category: row.category,
              ...(row.raw_data || {})
@@ -2846,7 +2846,7 @@ app.post('/api/erp/dev/sync', express.json({limit: '50mb'}), async (req, res) =>
           Total_Amount: Number(row.total_amount),
           VAT_Amount: Number(row.vat_amount),
           Taxable_Amount: Number(row.taxable_amount),
-          Nontaxable_Amount: Number(row.nontaxable_amount),
+          NonTaxable_Amount: Number(row.nontaxable_amount),
           Net_Amount: Number(row.net_amount),
           Category: row.category,
           ...(row.raw_data || {})
@@ -3214,7 +3214,7 @@ app.post('/api/erp/dev/sync', express.json({limit: '50mb'}), async (req, res) =>
           const vatAmt = r.VAT_Amount || r.vat_amount || 0;
           const totalAmt = r.Total_Amount || r.total_amount || 0;
           const taxAmt = r.Taxable_Amount || r.taxable_amount || 0;
-          const nontaxAmt = r.Nontaxable_Amount || r.nontaxable_amount || 0;
+          const nontaxAmt = r.NonTaxable_Amount || r.nontaxable_amount || 0;
           await client.query(`
             INSERT INTO records (id, tenant_id, file_id, module_type, invoice_number, invoice_date, entity_name, total_amount, vat_amount, taxable_amount, nontaxable_amount, net_amount, category, raw_data, created_at)
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
@@ -3575,7 +3575,7 @@ app.post('/api/erp/dev/sync', express.json({limit: '50mb'}), async (req, res) =>
              const vatAmt = fixedRecord.VAT_Amount || fixedRecord.vat_amount || 0;
              const totalAmt = fixedRecord.Total_Amount || fixedRecord.total_amount || 0;
              const taxAmt = fixedRecord.Taxable_Amount || fixedRecord.taxable_amount || 0;
-             const nontaxAmt = fixedRecord.Nontaxable_Amount || fixedRecord.nontaxable_amount || 0;
+             const nontaxAmt = fixedRecord.NonTaxable_Amount || fixedRecord.nontaxable_amount || 0;
              await client.query(`
                INSERT INTO records (id, tenant_id, file_id, module_type, invoice_number, invoice_date, entity_name, total_amount, vat_amount, taxable_amount, nontaxable_amount, net_amount, category, raw_data, created_at)
                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
@@ -3870,7 +3870,7 @@ app.post('/api/erp/dev/sync', express.json({limit: '50mb'}), async (req, res) =>
           Total_Amount: Number(row.total_amount),
           VAT_Amount: Number(row.vat_amount),
           Taxable_Amount: Number(row.taxable_amount),
-          Nontaxable_Amount: Number(row.nontaxable_amount),
+          NonTaxable_Amount: Number(row.nontaxable_amount),
           Net_Amount: Number(row.net_amount),
           Category: row.category,
           ...(row.raw_data || {})

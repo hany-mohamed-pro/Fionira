@@ -200,7 +200,7 @@ export async function runStartupMigration(memoryDb: any) {
         const vatAmt = r.VAT_Amount || r.vat_amount || 0;
         const totalAmt = r.Total_Amount || r.total_amount || 0;
         const taxAmt = r.Taxable_Amount || r.taxable_amount || 0;
-        const nontaxAmt = r.Nontaxable_Amount || r.nontaxable_amount || 0;
+        const nontaxAmt = r.NonTaxable_Amount || r.nontaxable_amount || 0;
 
         await pool.query(`
           INSERT INTO records (id, tenant_id, file_id, module_type, invoice_number, invoice_date, entity_name, total_amount, vat_amount, taxable_amount, nontaxable_amount, net_amount, category, raw_data, created_at)
