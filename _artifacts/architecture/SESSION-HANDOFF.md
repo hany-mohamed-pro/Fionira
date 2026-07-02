@@ -54,6 +54,12 @@ correctly. Engine is byte-identical to its last known-good state (no D13 code sh
 13. **Payroll-VAT basis delta (54.78 known-delta)** — NEW item from Phase A. `computePnLCore` counts two VAT-bearing **payroll-category** expenses at gross (Total, VAT-inclusive), while the journal-entry/balance-sheet basis counts them at Net + VAT-input as an asset (the more accounting-correct treatment). This produces a precise, root-caused Δ=54.78 between journal-derived net income and `computePnLCore`. Independent improvement — align `computePnLCore` in a separate session; do NOT touch it now.
 14. ✅ **Alerts-page Fix A — empty/partial rows RESOLVED (2026-07-01, commit `554c80cf`).** Central `isEmptyPartialRow` guard in `ingestion-engine.ts` (finalRecords stage, all five modules, processors/engines untouched): a parsed row is diverted to `skippedRows` (traceable, not deleted) only when it has NEITHER identity (entity/invoice/description/date) NOR any money (all amount fields null-or-zero). Intentional zero-with-identity records are kept; no-identity-but-real-money rows are kept and flagged `MISSING_VENDOR`. Live-proven: 4 excluded / 1134 kept on current data; crafted upload diverted 1 partial, produced 1 valid; balance gate 0.00. Stops the fake «غير محدد / 0 / غير متوفرة» records at the source. Design: `alerts-fixes-group1.md`.
 15. **One-time cleanup of the 4 pre-existing fake rows** — the 4 empty/partial records already persisted in `erp_registry.json` (from uploads before Fix A) will NOT disappear automatically; they need a one-time cleanup (a backfill or re-upload). Fix A's guard prevents any recurrence on future uploads. Low-risk follow-up (e.g., extend `je_backfill.ts` or a small prune pass gated by `isEmptyPartialRow`).
+16. **إعادة ترتيب الأولويات بموجب الرؤية الموسعة (2026-07-02)** — owner-approved strategic identity expansion (§1 + CLAUDE.md "Product Identity"): Fionira is now a Financial Intelligence, Governance & Analytics platform for Saudi companies of ALL sizes. Priority consequences recorded here:
+    - **الصلاحيات متعددة المستويات (B3 / UserManagement real backend)** ترتقي من «مؤجل» إلى **أولوية استراتيجية** — شرط دخول الشركات المتوسطة (فصل واجبات حقيقي بأشخاص متعددين).
+    - **قطع Postgres** يرتقي من «حاجز إنتاج» إلى **شرط دخول** — أحجام بيانات الشركات الأكبر تتجاوز سقف مستوى JSON الحالي بنيوياً.
+    - **نمذجة الأبعاد الرسمية (Star Schema)** فوق القيود والأبعاد القائمة (branch/activity/period/entity/account — البُنى موجودة فعلاً في السجلات والقيود) — **بند معماري جديد** يُصمَّم في جلسة مستقلة خاصة به قبل أي تنفيذ.
+    - **قابلية التصدير للأدوات العامة (Power BI / Excel export as certified source)** — **بند ميزة جديد** يُسجَّل هنا (يتغذى من نموذج الأبعاد أعلاه متى بُني).
+    - **لا تغيير في ترتيب العمل الجاري الحالي:** إصلاح ب المعلّق (commit بانتظار الاعتماد البصري)، ثم المسار المتفق عليه — الرؤية بوصلة لا خطة؛ لا يُفتح نطاق جديد قبل إغلاق المفتوح.
 
 Items #2, #6, #11, #13 relate to the chart-of-accounts foundation (Phase A done); #3, #12 are the engine-tokenization track; #14/#15 are the alerts-page track (Fix B below still open); the rest are independent.
 
@@ -104,10 +110,32 @@ is a natural, complete stopping point.
 
 ## 1. What this project is
 
-Fionira is an **Arabic-first financial intelligence + governance platform for Saudi SMEs**. It is built
-to act as the **expert *for* a non-specialist user** — the owner does not need to know accounting; the
-system classifies, validates, and governs the financials and surfaces plain-language decisions. It is
-**not** a traditional ERP and does not push accounting mechanics onto the user.
+> **التعريف السابق (Saudi SMEs فقط) تم توسيعه بقرار استراتيجي من المالك بتاريخ 2026-07-02.**
+> The full permanent definition also lives in `CLAUDE.md` § "Product Identity — PERMANENT STRATEGIC DEFINITION" so every future session reads it.
+
+**Fionira = منصة ذكاء مالي وحوكمة وتحليل (Financial Intelligence, Governance & Analytics Platform)**
+تعمل كطبقة فوق بيانات الشركات **بكل أحجامها (صغيرة، متوسطة، كبيرة) داخل السعودية** — تستقبل البيانات
+من ملفات Excel (ومستقبلاً من مصادر أخرى)، وتقدم:
+
+1. **التحقق الذكي** واكتشاف الأخطاء ومعالجتها قبل أن تصل للتقارير.
+2. **التصنيف الذكي الموحّد للكيانات** عبر صيغ التسمية واللغات (المبدأ الدائم القائم في CLAUDE.md).
+3. **الحوكمة الكاملة:** لا بيانات تؤثر على التقارير قبل الاعتماد، مع سجل تدقيق كامل.
+4. **مستودع بيانات مالي ممنهج الأبعاد (Dimensional Financial Warehouse):** القيود المزدوجة + أبعاد الفرع/النشاط/الفترة/الكيان/الحساب تُبنى تلقائياً من البيانات المعتمدة — نموذج نجمي يتشكل بلا محلل بيانات.
+5. **ذكاء تحليلي مالي متخصص (Domain-Specific Financial BI):** كل التقارير واللوحات المالية الممكنة، جاهزة بلا إعداد، تفهم دلالة البيانات المالية — مع قابلية تصدير للأدوات العامة (Power BI/Excel) كمصدر موثوق مُعتمد.
+6. **التوسع قسماً بقسم** ليغطي كل أقسام الشركات: مصروفات، إيرادات، رواتب، بنوك، مخازن، مشتريات، تكاليف، وغيرها — بنفس منهجية الإثبات الحي المتبعة.
+7. **دعم كامل للأنشطة المتعددة والفروع المتعددة والبنوك المتعددة** كأبعاد أولى في كل طبقة.
+8. **الامتثال الكامل** للمعايير الدولية (IFRS) والأنظمة المحاسبية والضريبية السعودية (SOCPA، ZATCA، الزكاة).
+
+**مبدأ التمايز الجوهري:** Fionira ليس منافساً لأدوات BI العامة — هو الطبقة الدلالية المالية
+(Semantic Financial Layer) التي تفهم البيانات وتحوكمها قبل أي عرض، وتصبح المصدر الموثوق الذي
+تتغذى منه أي أداة أخرى.
+
+**مبدأ التنفيذ الملزم:** الرؤية بوصلة لا خطة تنفيذ واحدة — البناء يبقى قسماً بقسم، نشاطاً بنشاط،
+بإثبات حي لكل خطوة، بنفس الانضباط القائم. لا يُفتح نطاق جديد قبل إغلاق ما هو مفتوح.
+
+The founding operating principle is unchanged: the system acts as the **expert *for* the user** —
+users do not need to know accounting; the system classifies, validates, and governs the financials
+and surfaces plain-language decisions. It does not push accounting mechanics onto the user.
 
 ## 2. Complete chronological commit ledger (root → HEAD, 56 commits)
 

@@ -17,6 +17,45 @@ If `git push` fails due to the remote having newer commits, run
 
 Never force-push (`git push --force`) without explicit confirmation from the user.
 
+## Product Identity — PERMANENT STRATEGIC DEFINITION
+
+**Approved by the owner, 2026-07-02. This definition supersedes the earlier
+"Saudi SMEs only" framing and governs all architectural decisions in every
+future session.**
+
+Fionira = منصة ذكاء مالي وحوكمة وتحليل (Financial Intelligence, Governance
+& Analytics Platform) تعمل كطبقة فوق بيانات الشركات بكل أحجامها (صغيرة،
+متوسطة، كبيرة) داخل السعودية — تستقبل البيانات من ملفات Excel (ومستقبلاً
+من مصادر أخرى)، وتقدم:
+
+1. التحقق الذكي واكتشاف الأخطاء ومعالجتها قبل أن تصل للتقارير.
+2. التصنيف الذكي الموحّد للكيانات عبر صيغ التسمية واللغات (المبدأ الدائم
+   المقنَّن أدناه في قسم Classification Engine).
+3. الحوكمة الكاملة: لا بيانات تؤثر على التقارير قبل الاعتماد، مع سجل
+   تدقيق كامل.
+4. مستودع بيانات مالي ممنهج الأبعاد (Dimensional Financial Warehouse):
+   القيود المزدوجة + أبعاد الفرع/النشاط/الفترة/الكيان/الحساب تُبنى
+   تلقائياً من البيانات المعتمدة — نموذج نجمي يتشكل بلا محلل بيانات.
+5. ذكاء تحليلي مالي متخصص (Domain-Specific Financial BI): كل التقارير
+   واللوحات المالية الممكنة، جاهزة بلا إعداد، تفهم دلالة البيانات
+   المالية — مع قابلية تصدير للأدوات العامة (Power BI/Excel) كمصدر
+   موثوق مُعتمد.
+6. التوسع قسماً بقسم ليغطي كل أقسام الشركات: مصروفات، إيرادات، رواتب،
+   بنوك، مخازن، مشتريات، تكاليف، وغيرها — بنفس منهجية الإثبات الحي
+   المتبعة.
+7. دعم كامل للأنشطة المتعددة والفروع المتعددة والبنوك المتعددة كأبعاد
+   أولى في كل طبقة.
+8. الامتثال الكامل للمعايير الدولية (IFRS) والأنظمة المحاسبية والضريبية
+   السعودية (SOCPA، ZATCA، الزكاة).
+
+**مبدأ التمايز الجوهري:** Fionira ليس منافساً لأدوات BI العامة — هو
+الطبقة الدلالية المالية (Semantic Financial Layer) التي تفهم البيانات
+وتحوكمها قبل أي عرض، وتصبح المصدر الموثوق الذي تتغذى منه أي أداة أخرى.
+
+**مبدأ التنفيذ الملزم:** الرؤية بوصلة لا خطة تنفيذ واحدة — البناء يبقى
+قسماً بقسم، نشاطاً بنشاط، بإثبات حي لكل خطوة، بنفس الانضباط القائم.
+لا يُفتح نطاق جديد قبل إغلاق ما هو مفتوح.
+
 ## Classification Engine — Core Design Principle (PERMANENT RULE)
 
 The classification engine's primary job is entity resolution across naming
