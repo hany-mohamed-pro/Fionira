@@ -146,7 +146,7 @@ export function NewAppShell({
                title: isRTL ? 'الفواتير وعروض الأسعار' : 'Core Actions',
                items: [
                  { id: 'dashboard', label: isRTL ? 'لوحة الفواتير' : 'Invoices Dashboard', icon: Activity, desc: isRTL ? 'ملخص تحصيل الفواتير' : 'Invoice collection summary' },
-                 { id: 'smart_invoice', label: isRTL ? 'فاتورة إلكترونية' : 'Smart Invoice', icon: FileText, desc: isRTL ? 'إنشاء فواتير ضريبية' : 'Create electronic invoices' },
+                 { id: 'smart_invoice', label: isRTL ? 'الفاتورة الذكية' : 'Smart Invoice', icon: FileText, desc: isRTL ? 'إنشاء وإدارة الفواتير' : 'Create and manage invoices' },
                  { id: 'quotations', label: isRTL ? 'عروض الأسعار' : 'Quotations', icon: FileText, desc: isRTL ? 'إصدار عروض أسعار' : 'Issue valid quotations' },
                ]
             }
