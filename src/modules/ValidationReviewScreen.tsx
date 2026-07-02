@@ -4,7 +4,7 @@ import { ShieldAlert, AlertTriangle, CheckCircle, Info, ChevronDown, ChevronRigh
 import { db } from '../firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { routeToDomainIntelligence } from '../backend/core/financial-intelligence/domain-orchestrator';
-import { handleFirestoreError, OperationType } from '../lib/firestore-errors';
+import { useAuth } from '../contexts/AuthProvider';
 
 interface ValidationReviewScreenProps {
   session: ValidationSession;
@@ -24,6 +24,7 @@ export const ValidationReviewScreen: React.FC<ValidationReviewScreenProps> = ({
   onCancelStaged
 }) => {
   const isSprintMode = localStorage.getItem('sprint_mode') === 'AG-RAPID-S1' || window.location.pathname.startsWith('/rapid-s1');
+  const { user } = useAuth();
   const [currentSession, setCurrentSession] = useState<ValidationSession>(session);
   const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
   const [agreedToWarnings, setAgreedToWarnings] = useState(false);
@@ -400,95 +401,65 @@ export const ValidationReviewScreen: React.FC<ValidationReviewScreenProps> = ({
     });
   };
 
+  // Route a single record's escalation through the server (Fix B) — replaces the
+  // dev-broken client-side Firestore write. Returns true ONLY on a confirmed save,
+  // so the caller can flip status to ESCALATED after success (never before).
+  const escalateRecordToServer = async (rec: SessionRecord): Promise<boolean> => {
+    if (isSprintMode) {
+      console.log("[SANDBOX] Bypassed server escalation write:", { id: rec.id, issues: rec.issues.map(e => e.message) });
+      return true;
+    }
+    try {
+      const token = user ? await user.getIdToken() : null;
+      if (!token) { console.error("Escalation aborted: no auth token"); return false; }
+      const res = await fetch('/api/erp/governance/escalate-record', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({
+          recordId: rec.id,
+          sessionId: currentSession.sessionId,
+          record: rec.normalizedData,
+          issues: rec.issues.map(e => e.message),
+          severity: rec.issues.some(i => i.severity === 'CRITICAL') ? 'CRITICAL' : 'HIGH',
+          moduleType: appMode,
+        }),
+      });
+      const json = await res.json().catch(() => ({}));
+      return res.ok && json.success === true;
+    } catch (e) {
+      console.error("Governance escalation failed", e);
+      return false;
+    }
+  };
+
   const handleSingleEscalate = async (recordId: string) => {
     const record = currentSession.records.find(r => r.id === recordId);
     if (!record) return;
 
-    try {
-      if (isSprintMode) {
-        console.log("[SANDBOX] Bypassed Firestore single escalation write:", {
-          id: record.id,
-          record: record.normalizedData,
-          issues: record.issues.map(e => e.message),
-          severity: record.issues.some(i => i.severity === 'CRITICAL') ? 'CRITICAL' : 'HIGH'
-        });
-      } else {
-        await addDoc(collection(db, 'governance_queue'), {
-            id: record.id,
-            record: record.normalizedData,
-            issues: record.issues.map(e => e.message),
-            severity: record.issues.some(i => i.severity === 'CRITICAL') ? 'CRITICAL' : 'HIGH',
-            source: "cfo_console",
-            moduleType: appMode,
-            timestamp: serverTimestamp(),
-            status: "PENDING_APPROVAL"
-        });
-      }
+    const ok = await escalateRecordToServer(record);
+    if (!ok) { console.error("Governance escalation not saved for record", recordId); return; }
 
-      const newRecords = currentSession.records.map(r => {
-        if (r.id === recordId) {
-           return { ...r, status: 'ESCALATED' as any };
-        }
-        return r;
-      });
-      updateSessionSummary(newRecords);
-    } catch (e) {
-      console.error("Governance escalation failed", e);
-      if (!isSprintMode) {
-        handleFirestoreError(e, OperationType.WRITE, 'governance_queue');
-      }
-    }
+    // Only after a confirmed save: flip status to ESCALATED.
+    updateSessionSummary(
+      currentSession.records.map(r => r.id === recordId ? { ...r, status: 'ESCALATED' as any } : r)
+    );
   };
 
   const handleFullEscalate = async () => {
     const rejectedRecords = currentSession.records.filter(r => r.issues.some(i => i.severity === 'CRITICAL'));
-    
-    try {
-      if (isSprintMode) {
-        console.log("[SANDBOX] Bypassed Firestore full escalation write:", {
-          sessionId: currentSession.sessionId,
-          criticalCount: currentSession.summary.criticalIssues,
-          rejectedRecords: rejectedRecords.map(r => ({ id: r.id, issues: r.issues.map(e => e.message) }))
-        });
-      } else {
-        await addDoc(collection(db, 'audit_cases'), {
-          sessionId: currentSession.sessionId,
-          reason: "تصعيد لجهة الحوكمة والرقابة",
-          timestamp: serverTimestamp(),
-          criticalCount: currentSession.summary.criticalIssues,
-          source: "cfo_console",
-          moduleType: appMode,
-          status: "OPEN"
-        });
-        
-        for (const rec of rejectedRecords) {
-           await addDoc(collection(db, 'governance_queue'), {
-               id: rec.id,
-               record: rec.normalizedData,
-               issues: rec.issues.map(e => e.message),
-               severity: 'CRITICAL',
-               source: "cfo_console",
-               moduleType: appMode,
-               timestamp: serverTimestamp(),
-               status: "PENDING_APPROVAL"
-           });
-        }
-      }
+    if (rejectedRecords.length === 0) return;
 
-      const newRecords = currentSession.records.map(r => {
-        if (r.issues.some(i => i.severity === 'CRITICAL')) {
-           return { ...r, status: 'ESCALATED' as any };
-        }
-        return r;
-      });
-      updateSessionSummary(newRecords);
-
-    } catch (e) {
-      console.error("Governance escalation failed", e);
-      if (!isSprintMode) {
-        handleFirestoreError(e, OperationType.WRITE, 'governance_queue');
-      }
+    const results = await Promise.all(rejectedRecords.map(escalateRecordToServer));
+    const savedIds = new Set(rejectedRecords.filter((_, i) => results[i]).map(r => r.id));
+    if (savedIds.size === 0) { console.error("Governance full escalation failed — nothing saved"); return; }
+    if (savedIds.size < rejectedRecords.length) {
+      console.warn("Some records failed to escalate; only the saved ones are marked ESCALATED.");
     }
+
+    // Flip only the records whose escalation was actually saved.
+    updateSessionSummary(
+      currentSession.records.map(r => savedIds.has(r.id) ? { ...r, status: 'ESCALATED' as any } : r)
+    );
   };
 
   const handleFinalSubmit = () => {

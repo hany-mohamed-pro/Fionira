@@ -1614,6 +1614,48 @@ app.post('/api/erp/dev/sync', express.json({limit: '50mb'}), async (req, res) =>
     return { success: true, request: newRequest };
   }));
 
+  // Record-level governance escalation (Fix B) — replaces the dev-broken client-side
+  // Firestore write. Stores into the existing devMemoryDb.governanceRequests store
+  // (same collection as file-level review requests, discriminated by type). Does NOT
+  // touch categorization-engine.ts or erp-engine.ts.
+  app.post('/api/erp/governance/escalate-record', authenticate, wrap(async (req: any, res) => {
+    const tenantId = req.userProfile?.tenantId || req.user.uid;
+    const { recordId, sessionId, record, issues, severity, moduleType } = req.body;
+    if (!recordId || !record) {
+      res.status(400).json({ success: false, error: 'INVALID_REQUEST', message: 'recordId و record مطلوبان' });
+      return;
+    }
+
+    // Idempotency: same record in the same session, still pending → do not re-escalate.
+    const existing = devMemoryDb.governanceRequests.find(
+      (r: any) => r.tenantId === tenantId && r.type === 'RECORD_ESCALATION'
+        && r.recordId === recordId && r.sessionId === sessionId && r.status === 'PENDING_APPROVAL'
+    );
+    if (existing) {
+      return { success: true, request: existing, deduped: true };
+    }
+
+    const newRequest = {
+      id: crypto.randomUUID(),
+      type: 'RECORD_ESCALATION',
+      tenantId,
+      recordId,
+      sessionId: sessionId || null,
+      record,
+      issues: Array.isArray(issues) ? issues : [],
+      severity: severity || 'HIGH',
+      moduleType: moduleType || 'expenses',
+      status: 'PENDING_APPROVAL',
+      source: 'cfo_console',
+      requestedBy: req.userProfile?.uid || tenantId,
+      timestamp: new Date().toISOString(),
+    };
+    devMemoryDb.governanceRequests.push(newRequest);
+    persistGovernanceRequests();
+
+    return { success: true, request: newRequest };
+  }));
+
   // --- DEDICATED REVIEW DECISION SURFACE ---
   
   app.get("/api/erp/files/governance/reviewer/requests", authenticate, wrap(async (req, res) => {
